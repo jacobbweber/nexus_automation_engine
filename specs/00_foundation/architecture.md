@@ -138,8 +138,11 @@ separation of presentation components from state/api hooks (per blueprint).
 
 ## 7. Cross-cutting platform concerns
 
-- **Async-first** Python (FastAPI/Uvicorn), `asyncio` background workers for run execution and
-  log streaming.
+- **Async where it pays:** FastAPI/Uvicorn, `asyncio` background workers for run execution and
+  log streaming, httpx for connectors. **The DB layer is synchronous** (stdlib `sqlite3`, no
+  greenlet) with DB-bound handlers declared `def` so FastAPI threadpools them — forced by an
+  Application-Control block on greenlet's native DLL on the dev/CI host (see
+  [ADR-0004](../adr/ADR-0004-synchronous-sqlalchemy.md)).
 - **State:** SQLAlchemy 2.0 over SQLite in **WAL mode** (concurrent UI reads + worker writes);
   one DB-connection helper, no scattered `sqlite3.connect`. Read-mostly UI / read-write runner
   separation by convention (harvested lesson from Ava-POC).
