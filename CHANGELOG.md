@@ -7,6 +7,13 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M1 backend platform skeleton** (`backend/`): FastAPI app factory with `/api/v1/health`,
+  config (pydantic-settings), the single WAL-mode SQLite DB helper, error-to-HTTP mapping, and
+  the `shared_kernel` (`new_id`, error types, and the ported **VariablePool** with typed
+  exact-replacement, safe expression eval, and Jinja2-lite templating). Full pytest + ruff suite.
+- CI now runs real backend lint + tests (replacing the stub jobs); ADR-0004 records the switch
+  to synchronous SQLAlchemy (greenlet is blocked by Application Control on the dev/CI host).
+
 - Self-hosted GitHub Actions runner and initial CI gate
   (`.github/workflows/ci.yml`): runner smoke test plus stubbed lint/test stages on the
   `[self-hosted, nexus]` runner.

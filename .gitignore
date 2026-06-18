@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+*.db
+*.db-wal
+*.db-shm
+.env
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+coverage/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
