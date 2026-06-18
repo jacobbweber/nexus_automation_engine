@@ -39,7 +39,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Lint placeholder
         shell: pwsh
-        run: Write-Output "STUB: \$LINT_CMD will run here once tooling is wired (ruff/eslint)."
+        run: |
+          Write-Output "STUB - LINT_CMD will run here once tooling is wired (ruff/eslint)."
 
   test:
     name: Test (stub)
@@ -50,4 +51,5 @@ jobs:
         uses: actions/checkout@v4
       - name: Test placeholder
         shell: pwsh
-        run: Write-Output "STUB: \$TEST_CMD will run here (pytest unit -> integration -> evals -> QA smoke)."
+        run: |
+          Write-Output "STUB - TEST_CMD will run here (pytest unit -> integration -> evals -> QA smoke)."
