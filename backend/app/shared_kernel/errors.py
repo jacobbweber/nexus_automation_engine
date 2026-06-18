@@ -45,3 +45,9 @@ class EntitlementError(NexusError):
     """The caller is not entitled to perform this action (RBAC). 403."""
 
     status_code = 403
+
+
+class AuthenticationError(NexusError):
+    """Authentication failed or is missing. 401."""
+
+    status_code = 401

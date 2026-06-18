@@ -7,6 +7,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M4 Identity & Access** (`backend/app/contexts/identity_access/`): users/orgs/teams/asset-groups
+  RBAC model with the global-role capability matrix and pure entitlement evaluation
+  (Org→Team→AssetGroup); PBKDF2 password hashing + JWT (no native deps); `POST /api/v1/auth/login`,
+  `GET /auth/me`, `GET /auth/users` (admin-only) with bearer/role dependencies; default users
+  seeded on startup. 51 backend tests total.
 - **M3 Execution engine** (`backend/app/contexts/execution_engine/`): the job lifecycle state
   machine (PENDING→RUNNING→SUCCESS/FAILED/CANCELLED) driven by the connector ports. Persists jobs
   + log streams (SQLite/WAL), broadcasts live logs over an in-memory broker to a
