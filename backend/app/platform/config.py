@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./nexus.db"
 
     # Auth (used from M4 onward). Dev-only default; override via NEXUS_JWT_SECRET in real use.
-    jwt_secret: str = "dev-only-not-a-secret-change-me"
+    jwt_secret: str = "dev-only-not-a-secret-change-me-in-prod"
     jwt_algorithm: str = "HS256"
     access_token_ttl_minutes: int = 60
 

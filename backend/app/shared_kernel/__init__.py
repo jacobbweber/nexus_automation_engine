@@ -7,6 +7,7 @@ Nothing vendor-specific or context-specific belongs here. Currently:
 """
 
 from app.shared_kernel.errors import (
+    AuthenticationError,
     ConflictError,
     DomainError,
     EntitlementError,
@@ -26,4 +27,5 @@ __all__ = [
     "ConflictError",
     "ValidationError",
     "EntitlementError",
+    "AuthenticationError",
 ]
