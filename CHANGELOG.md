@@ -23,3 +23,10 @@ All notable changes to this project are documented here. Format follows
 ### Changed
 - `CLAUDE.md`: added Domain-Driven Design + Vertical Slices as a standing architecture
   methodology directive (§4a) alongside SDD/TDD.
+- `CLAUDE.md §2`: replaced the gated autonomy boundary with **full autonomous delivery to 2.0**
+  (no approval gates; judgment guardrails instead) per operator mandate (ADR-0003).
+
+### Added
+- ADR-0003 (full autonomy to 2.0) and the delivery `specs/00_foundation/roadmap.md`
+  (M1–M9 to 1.0, plus the 2.0 ops-engineering theme set: change control, change templates,
+  per-job scheduling, platform-as-management-layer).
