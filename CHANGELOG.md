@@ -7,6 +7,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M5 Automation Catalog** (`backend/app/contexts/automation_catalog/`): governed building
+  blocks — templates with survey-field schemas (incl. CMDB-backed dynamic pickers), ownership,
+  and a draft→pending→approved→retired lifecycle. `GET /api/v1/catalog/templates[/{id}]`,
+  engineer-gated author/approve/retire, and **execute-from-template** that maps survey answers to
+  a connector ExecutionRequest and dispatches a governed job (RBAC-checked). Seeded building
+  blocks. 58 backend tests total.
 - **M4 Identity & Access** (`backend/app/contexts/identity_access/`): users/orgs/teams/asset-groups
   RBAC model with the global-role capability matrix and pure entitlement evaluation
   (Org→Team→AssetGroup); PBKDF2 password hashing + JWT (no native deps); `POST /api/v1/auth/login`,
