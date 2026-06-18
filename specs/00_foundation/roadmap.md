@@ -53,4 +53,5 @@ context specs before building (SDD).
 - M2 (connectors): **done** — ports + simulation adapters + registry + API.
 - M3 (execution engine): **done** — lifecycle state machine, WS log streaming, telemetry, seed.
 - M4 (identity & access): **done** — RBAC model + entitlements, JWT auth, login/me/users, seeded users.
-- M5 (automation catalog): **in progress.**
+- M5 (automation catalog): **done** — templates/surveys/approval + execute-from-template.
+- M6 (canvas backend): **in progress.**
