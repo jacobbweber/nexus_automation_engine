@@ -13,6 +13,10 @@ All notable changes to this project are documented here. Format follows
   exact-replacement, safe expression eval, and Jinja2-lite templating). Full pytest + ruff suite.
 - CI now runs real backend lint + tests (replacing the stub jobs); ADR-0004 records the switch
   to synchronous SQLAlchemy (greenlet is blocked by Application Control on the dev/CI host).
+- **M1 frontend shell** (`frontend/`): React 18 + Vite 6 + TypeScript + Tailwind v4 with the
+  Nexus design tokens (slate/charcoal dark+light), an `AppShell` nav frame mirroring the feature
+  slices, a typed API client, and a live backend-health indicator. ESLint + tsc + Vitest + build
+  all wired into CI.
 
 - Self-hosted GitHub Actions runner and initial CI gate
   (`.github/workflows/ci.yml`): runner smoke test plus stubbed lint/test stages on the
