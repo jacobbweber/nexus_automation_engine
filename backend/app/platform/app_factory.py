@@ -15,6 +15,7 @@ from app.contexts.automation_catalog.api import routes as catalog_routes
 from app.contexts.connectors.api import routes as connectors_routes
 from app.contexts.execution_engine.api import routes as execution_routes
 from app.contexts.identity_access.api import routes as identity_routes
+from app.contexts.orchestration_canvas.api import routes as canvas_routes
 from app.platform import health
 from app.platform.config import get_settings
 from app.platform.database import dispose_db, init_db
@@ -62,5 +63,6 @@ def create_app() -> FastAPI:
     app.include_router(connectors_routes.router, prefix="/api/v1")
     app.include_router(catalog_routes.router, prefix="/api/v1")
     app.include_router(execution_routes.router, prefix="/api/v1")
+    app.include_router(canvas_routes.router, prefix="/api/v1")
 
     return app

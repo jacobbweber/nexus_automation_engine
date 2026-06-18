@@ -7,6 +7,15 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M6 Canvas backend** (`backend/app/contexts/orchestration_canvas/`): the ported Foundry DAG
+  engine, re-targeted to backend orchestration. Topological parallel execution with a
+  concurrency semaphore, condition/switch routing with skip propagation, per-node
+  retries/timeouts and error branches, and human **approval gates** that pause→notify→resume.
+  15 node types incl. all backend-integration nodes (`automation_task` with connector dropdown,
+  `cmdb_lookup`, `request_validation`, `secret_lease`, `telemetry_probe`, `approval_gate`).
+  Workflow CRUD + version snapshots + run/step persistence + `WS /canvas/runs/{id}/stream`.
+  Verified end-to-end Terraform→CMDB→Ansible pattern. (Remaining source node types tracked in
+  issue #19.) 71 backend tests total.
 - **M5 Automation Catalog** (`backend/app/contexts/automation_catalog/`): governed building
   blocks — templates with survey-field schemas (incl. CMDB-backed dynamic pickers), ownership,
   and a draft→pending→approved→retired lifecycle. `GET /api/v1/catalog/templates[/{id}]`,
