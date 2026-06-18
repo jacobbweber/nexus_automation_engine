@@ -53,3 +53,25 @@ jobs:
 
       - name: Pytest
         run: .\.venv\Scripts\python.exe -m pytest -q
+
+  frontend:
+    name: Frontend (lint + types + tests + build)
+    needs: smoke
+    runs-on: [self-hosted, nexus]
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm run test
+      - name: Build
+        run: npm run build
