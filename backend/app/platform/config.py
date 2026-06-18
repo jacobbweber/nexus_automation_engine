@@ -34,6 +34,8 @@ class Settings(BaseSettings):
     # Realistic inter-log jitter for simulation adapters. Tests disable it for speed.
     sim_jitter: bool = True
     sim_jitter_max_seconds: float = 1.8
+    # Seed a lived-in job history on startup so the dashboard looks real. Tests disable it.
+    seed_demo_data: bool = True
 
 
 @lru_cache

@@ -7,6 +7,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M3 Execution engine** (`backend/app/contexts/execution_engine/`): the job lifecycle state
+  machine (PENDING→RUNNING→SUCCESS/FAILED/CANCELLED) driven by the connector ports. Persists jobs
+  + log streams (SQLite/WAL), broadcasts live logs over an in-memory broker to a
+  `WS /api/v1/jobs/{id}/stream` endpoint (with persisted-log replay), plus
+  `POST /jobs/execute`, `GET /jobs[/{id}][/logs]`, and `GET /telemetry/{job_id}`. Seeds 50+
+  realistic historical runs on startup. Service/repository/API/WS tests (42 backend tests total).
 - **M2 Connectors context** (`backend/app/contexts/connectors/`): the vendor-agnostic
   Anti-Corruption Layer. Vendor-neutral domain models + ports (`ExecutionConnector`,
   `DiscoveryPort`, `SecretLeasePort`, `ApprovalPort`, `TelemetryPort`); simulation adapters for

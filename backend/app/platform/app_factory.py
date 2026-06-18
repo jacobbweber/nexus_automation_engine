@@ -12,6 +12,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.contexts.connectors.api import routes as connectors_routes
+from app.contexts.execution_engine.api import routes as execution_routes
 from app.platform import health
 from app.platform.config import get_settings
 from app.platform.database import dispose_db, init_db
@@ -21,6 +22,10 @@ from app.platform.errors import register_error_handlers
 @asynccontextmanager
 async def _lifespan(_app: FastAPI):
     init_db()
+    if get_settings().seed_demo_data:
+        from app.contexts.execution_engine.application.seed import seed_history
+
+        seed_history()
     yield
     dispose_db()
 
@@ -46,5 +51,6 @@ def create_app() -> FastAPI:
     # Platform routes + context routers under /api/v1.
     app.include_router(health.router, prefix="/api/v1")
     app.include_router(connectors_routes.router, prefix="/api/v1")
+    app.include_router(execution_routes.router, prefix="/api/v1")
 
     return app
