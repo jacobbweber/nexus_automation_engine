@@ -1,0 +1,53 @@
+name: CI
+
+# The real enforcement of the TDD gate (CLAUDE.md §8). Runs on the self-hosted
+# runner labelled `nexus`. Stages follow the test pyramid; stub stages are
+# clearly marked and will be fleshed out as the codebase grows.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Runner Smoke Test
+    runs-on: [self-hosted, nexus]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Report runner context
+        shell: pwsh
+        run: |
+          Write-Output "Runner: $env:RUNNER_NAME on $env:RUNNER_OS ($env:RUNNER_ARCH)"
+          Write-Output "Repo:   $env:GITHUB_REPOSITORY @ $env:GITHUB_SHA"
+          Write-Output "Self-hosted runner picked up the job. ✅"
+
+  lint:
+    name: Lint (stub)
+    needs: smoke
+    runs-on: [self-hosted, nexus]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Lint placeholder
+        shell: pwsh
+        run: Write-Output "STUB: \$LINT_CMD will run here once tooling is wired (ruff/eslint)."
+
+  test:
+    name: Test (stub)
+    needs: smoke
+    runs-on: [self-hosted, nexus]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Test placeholder
+        shell: pwsh
+        run: Write-Output "STUB: \$TEST_CMD will run here (pytest unit -> integration -> evals -> QA smoke)."
