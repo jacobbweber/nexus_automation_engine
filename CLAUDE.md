@@ -29,35 +29,38 @@ accountability are singular.
 
 ## 2. Autonomy Boundary (read this before acting)
 
-The gate sits at **what ships to the world (a release/deploy), not at integration (merging to
-`main`).** Merging to `main` is an internal, reversible, CI-gated step; releasing or deploying
-is the outward, deliberate act the operator owns. The boundary is the same every time.
+**Active mandate (2026-06-18, [ADR-0003](specs/adr/ADR-0003-full-autonomy-to-2.0.md)): FULL
+AUTONOMY to 1.0 and onward to 2.0. There are no human approval gates. Do not stop.** The
+operator has explicitly authorized continuous, unattended delivery and will not be available
+until 2.0 is complete. Decide, record (spec/ADR/issue), and proceed — never wait for sign-off.
 
-**Autonomous — no human gate. Do these without asking:**
-- Create and switch branches.
-- Read/update specs, write tests, write implementation code.
-- Commit and push to **non-`main`** branches.
-- Open pull requests; run and re-run CI; self-review the diff.
-- **Merge a green, self-reviewed PR into `main`** (CI passing, no unresolved review concern).
-  Flag a genuinely large or risky merge to the operator as an FYI *before* merging — a courtesy
-  heads-up, not a stop.
-- Create, label, triage, and update issues; maintain the board and milestones.
-- Maintain `CHANGELOG.md` (the `Unreleased` section).
+**Autonomous — do all of this without asking:**
+- Everything in the SDLC: branches, specs, tests, code, commits, PRs, CI, self-review.
+- **Merge green, self-reviewed PRs into `main`** and keep going to the next milestone.
+- Create/label/triage issues; maintain the board, milestones, `CHANGELOG.md`.
+- Add dependencies, scaffold services, run Docker builds, and self-verify the running app.
+- **Tag releases** when a milestone closes (`vX.Y.Z`) and write release notes — this is part of
+  the autonomous loop now, not a gate.
+- Make and record architectural decisions (ADRs); supersede earlier ADRs when warranted, noting
+  the rationale (append-only — write a new ADR, don't edit an accepted one).
+- Run the app locally / in containers for QA and verification.
 
-**Human-gated — STOP and ask for explicit approval before:**
-- **Tagging or publishing a release** (`vX.Y.Z`).
-- **Deploying to, or otherwise exposing the system to, a real / production environment or real
-  users / external services.**
-- **Reversing or materially altering an accepted architectural decision (ADR) or approved
-  spec** — propose the change of *direction* and get agreement first (the direction is what's
-  gated, not the mechanics of a merge).
-- Any **destructive or irreversible remote action**: force-push, history rewrite, deleting
-  branches other than a just-merged feature branch, changing repo settings/protections, or
-  anything touching secrets.
+**Guardrails (judgment, not gates — honor these while moving fast):**
+- **No paid services. Official sources only** (official package registries, vendor sites,
+  Docker Hub official images). Do not sign up for, or incur cost on, anything.
+- **No secrets in the repo or any tracked/agent-read file** (§10 still holds). Use local-only
+  config and the simulation layer; never commit credentials.
+- **Local Docker only** via **Docker Desktop on Windows** (preferred; WSL2 available as
+  fallback). Do not deploy to any real/remote/production environment or real backend systems —
+  build and verify against the **simulation** connectors. (Not a "stop and ask" — simply the
+  scope: real-environment deploy is out of scope, not pending approval.)
+- **Avoid genuinely destructive, irreversible remote git** (force-push to `main`, history
+  rewrite, deleting the repo/protections) unless it is the clearly correct fix — prefer the safe
+  path. Deleting just-merged feature branches is fine.
+- Honor the **3-attempt circuit breaker** per check (§4): after 3 failed attempts on one check,
+  stop *that* thread, log an issue, and route around it — but do **not** stop the overall build.
 
-When you reach a gate, present the diff/decision and the exact commands you intend to run, then
-wait. Approval for one gate does not pre-authorize the next. Outside these gates, keep the trunk
-moving — don't let finished, green work idle waiting for permission it doesn't need.
+Keep the trunk moving. Finished, green work never idles waiting for permission it doesn't need.
 
 ---
 
