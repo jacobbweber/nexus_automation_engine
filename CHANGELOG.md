@@ -6,7 +6,14 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- **M2 Connectors context** (`backend/app/contexts/connectors/`): the vendor-agnostic
+  Anti-Corruption Layer. Vendor-neutral domain models + ports (`ExecutionConnector`,
+  `DiscoveryPort`, `SecretLeasePort`, `ApprovalPort`, `TelemetryPort`); simulation adapters for
+  Ansible / Terraform / script (streaming ANSI logs, check/diff mode, failure paths) and
+  ServiceNow (CMDB discovery + request approval) / CyberArk (secret lease) / Dynatrace
+  (telemetry); a connector registry; and `GET /api/v1/connectors[/{kind}]` + CMDB discovery
+  endpoint that power the canvas node connector dropdown. Contract + behavioral tests (31 total).
 
 ## [0.1.0] - 2026-06-18
 

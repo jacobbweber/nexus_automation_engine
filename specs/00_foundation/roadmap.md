@@ -49,4 +49,6 @@ context specs before building (SDD).
 
 ## Status log
 - Foundation specs + CI runner: **done** (merged).
-- M1: **in progress.**
+- M1 (platform & slice skeleton): **done** — released **v0.1.0**.
+- M2 (connectors): **done** — ports + simulation adapters + registry + API.
+- M3 (execution engine): **in progress.**

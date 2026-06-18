@@ -31,6 +31,9 @@ class Settings(BaseSettings):
 
     # When true, connectors run in simulation mode (the only supported mode pre-1.0).
     simulation_mode: bool = True
+    # Realistic inter-log jitter for simulation adapters. Tests disable it for speed.
+    sim_jitter: bool = True
+    sim_jitter_max_seconds: float = 1.8
 
 
 @lru_cache
