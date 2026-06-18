@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.contexts.connectors.api import routes as connectors_routes
 from app.platform import health
 from app.platform.config import get_settings
 from app.platform.database import dispose_db, init_db
@@ -42,7 +43,8 @@ def create_app() -> FastAPI:
 
     register_error_handlers(app)
 
-    # Platform routes. Context routers are added under /api/v1 in later milestones.
+    # Platform routes + context routers under /api/v1.
     app.include_router(health.router, prefix="/api/v1")
+    app.include_router(connectors_routes.router, prefix="/api/v1")
 
     return app
