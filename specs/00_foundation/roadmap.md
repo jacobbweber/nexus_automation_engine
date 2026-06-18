@@ -51,4 +51,5 @@ context specs before building (SDD).
 - Foundation specs + CI runner: **done** (merged).
 - M1 (platform & slice skeleton): **done** — released **v0.1.0**.
 - M2 (connectors): **done** — ports + simulation adapters + registry + API.
-- M3 (execution engine): **in progress.**
+- M3 (execution engine): **done** — lifecycle state machine, WS log streaming, telemetry, seed.
+- M4 (identity & access): **in progress.**

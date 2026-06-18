@@ -17,6 +17,7 @@ def _temp_database() -> Iterator[None]:
     os.environ["NEXUS_DATABASE_URL"] = f"sqlite:///{db_path.as_posix()}"
     os.environ["NEXUS_ENVIRONMENT"] = "test"
     os.environ["NEXUS_SIM_JITTER"] = "false"  # no timing delays in tests
+    os.environ["NEXUS_SEED_DEMO_DATA"] = "false"  # tests control their own data
 
     # Ensure settings/engine pick up the test env even if imported earlier.
     from app.platform.config import get_settings
