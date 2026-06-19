@@ -1,32 +1,15 @@
 @import "tailwindcss";
+@import "./shared/theme/tokens.css";
 
-/* Nexus design tokens — high-contrast neutral slate/charcoal, dark + light.
-   Components reference these via CSS variables so theming stays centralized
-   (see specs/00_foundation/architecture.md §6 "simple surface, deep spine"). */
+/* Nexus design tokens live in shared/theme/tokens.css (the layered resolution cascade —
+   ADR-0007). Components reference the semantic contract via CSS variables; this file only
+   wires Tailwind's @theme to the contract and sets base document styles. */
 @theme {
-  --color-accent: #5b9dd9;
-  --color-accent-strong: #3b82c4;
-  --color-ok: #5fa97f;
-  --color-warn: #d8a657;
-  --color-danger: #d06b5c;
-}
-
-:root {
-  --bg: #f5f6f8;
-  --surface: #ffffff;
-  --surface-2: #eceef1;
-  --border: #d6dae0;
-  --text: #1b1f24;
-  --text-muted: #5b636e;
-}
-
-.dark {
-  --bg: #0f1318;
-  --surface: #171c23;
-  --surface-2: #1f262f;
-  --border: #2b333d;
-  --text: #e6eaef;
-  --text-muted: #9aa4b1;
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-hover);
+  --color-ok: var(--success);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
 }
 
 html,
@@ -39,6 +22,10 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--selection);
 }
