@@ -140,8 +140,8 @@ mode × area × theme × density × accessibility combination valid by construct
 one contract, many resolvers stacked by precedence; accessibility always wins on top.
 
 **Area-context override** — a bounded retint applied when a Nexus surface (Dashboard/Catalog/
-Canvas/Library/Console/Incidents/Governance/Admin) is active: it may change only accent/tint/
-persona hue, never layout, and never collide with protected status colors.
+Canvas/Library/Console/Incidents/Governance/Admin) is active: it may change only accent and tint,
+never layout, and never collide with protected status colors.
 
 **Protected status semantics** — `--run-*` and `--success/warn/danger/info` are validated for
 mutual distinguishability + colorblind safety and are always paired with an icon/shape in
@@ -151,9 +151,9 @@ components. Operational legibility outranks any theme.
 allow-listed semantic key set for light+dark, validated server-side before delivery. It can never
 contain selectors, layout, spacing scale, or font files.
 
-**Theme Studio** — the deterministic-first pipeline (form + live preview + validator) for authoring
-themes, with an *optional* local-model assist behind an adapter (off by default, no paid services).
-Result safety never depends on the model — the deterministic validator is the gate.
+**Theme Studio** — the fully deterministic pipeline (form + color pickers + live preview +
+validator) for authoring themes. There is **no AI/LLM** in it or anywhere in the system (ADR-0008); the deterministic
+validator is the sole gate, so a theme is safe by construction.
 
 **Density** — `cozy | comfortable | compact`, a multiplier over the spacing/type scale (clamped so
 interactive targets stay ≥44px). Lets the same locked layout serve a relaxed novice view and a

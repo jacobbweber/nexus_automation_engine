@@ -57,8 +57,8 @@ deterministic, so *every combination is valid by construction*:
 - **semantic** — the *contract*: `--bg`, `--surface`, `--text`, `--accent`, status tokens…
   Components consume **only** these.
 - **mode** — remaps semantic tokens to the dark/light ramp stop.
-- **area** — overrides *accent family + ambient tint + persona/assistant hue only* for the active
-  surface (Dashboard/Catalog/Canvas/Library/Console/Incidents/Governance/Admin).
+- **area** — overrides *accent family + ambient tint only* for the active surface
+  (Dashboard/Catalog/Canvas/Library/Console/Incidents/Governance/Admin).
 - **theme** — a built-in or user/studio theme remaps the same semantic keys (validated; cannot
   touch layout or status distinguishability).
 - **density** — `cozy | comfortable | compact` scales spacing/typography multipliers.
@@ -73,6 +73,7 @@ compact + reduced-motion" needs zero special-casing.
 - [`01_design_system.md`](01_design_system.md) — design tokens (exact values), component spec,
   accessibility, protected status colors.
 - [`02_theming.md`](02_theming.md) — mode engine, area-context overrides, the 10 built-in themes,
-  the Theme Studio pipeline (schema, validation, optional local-model assist, Docker volumes).
+  the Theme Studio pipeline (schema, deterministic validation, Docker volumes). **No LLM/AI is
+  used anywhere in the system** (see [ADR-0008](../adr/ADR-0008-no-in-product-ai.md)).
 - [`03_feature_depth.md`](03_feature_depth.md) — deep feature expansion for every Nexus surface.
 - [`04_roadmap.md`](04_roadmap.md) — the ordered implementation roadmap (the GitHub issue sequence).

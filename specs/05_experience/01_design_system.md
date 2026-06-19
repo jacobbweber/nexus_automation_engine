@@ -79,7 +79,7 @@ accent:    --accent --accent-hover --accent-active --accent-contrast --accent-so
 status:    --run-running --run-ok --run-warn --run-failed --run-skipped  (+ each *-soft)
 generic:   --success --warn --danger --info  (+ *-soft)
 system:    --focus --selection --link
-area:      --area-accent --area-tint --area-persona
+area:      --area-accent --area-tint
 ```
 
 ### 7.1 Protected status semantics (Nexus-specific, non-negotiable)
@@ -108,7 +108,7 @@ Each: anatomy · sizes · states · a11y. Representative set; all share the cont
 - **Navigation rail** — 72px (icon) / 232px (expanded), per-area icon+label+accent dot; active area
   retints the whole shell; roving-tabindex keyboard nav; remembers collapse state.
 - **Command palette (⌘K)** — fuzzy across areas/actions/automations/workflows/settings; "run this"
-  verbs; recents + suggested; optional assistant fallback row (see `03_feature_depth.md`).
+  verbs; recents + suggested.
 - **Sheet / Modal / Drawer** — radius 2xl, focus-trapped, ESC + backdrop close, `inert` background,
   return-focus on close, mobile drag handle.
 - **Run/Status badge** — the protected-status primitive: color + icon + label; sizes inline/chip.

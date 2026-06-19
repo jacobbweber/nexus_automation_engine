@@ -15,10 +15,9 @@ How dark/light, per-area retinting, and full themes resolve over the one token c
 
 ## 2. Area-context overrides (bounded retint)
 
-Each Nexus surface declares an **accent identity**, an **ambient tint** (used at 4–8% alpha), and a
-**persona/assistant hue**. Switching areas retints chrome (active nav, focus rings, primary
-buttons, progress, assistant glow) — never the layout. Accents are chosen to never collide with
-protected status colors.
+Each Nexus surface declares an **accent identity** and an **ambient tint** (used at 4–8% alpha).
+Switching areas retints chrome (active nav, focus rings, primary buttons, progress) — never the
+layout. Accents are chosen to never collide with protected status colors.
 
 | Area | Accent identity | Feeling |
 |---|---|---|
@@ -32,7 +31,7 @@ protected status colors.
 | **Admin** | graphite + signal-cyan | system & access |
 
 Override surface is intentionally tiny: `--area-accent`, `--area-accent-hover`,
-`--area-accent-contrast`, `--area-tint`, `--area-persona`. Everything else inherits the theme.
+`--area-accent-contrast`, `--area-tint`. Everything else inherits the theme.
 
 ## 3. The 10 built-in themes
 
@@ -98,21 +97,19 @@ layout, no spacing scale, no font *files* (fonts chosen by name from a vetted lo
 
 ## 5. Theme Studio pipeline
 
-Nexus ships a **deterministic Theme Studio** (form + live preview + validator) as the core. An
-**optional local-model assist** sits behind an adapter (mirroring the connector port pattern; local
-only, off by default, no paid services) for operators who'd rather describe a theme in words. The
-*safety* of the result never depends on the model — the deterministic validator is the gate.
+Nexus ships a **deterministic Theme Studio** — a form + color pickers + live preview + validator.
+There is **no AI/LLM** anywhere in this pipeline (or the system); the deterministic validator is
+the sole gate, so a theme is *safe by construction*.
 
 ```
-(optional) describe in words ─┐
-form / color pickers ─────────┴─▶ candidate nexus-theme JSON
+form / color pickers ─▶ candidate nexus-theme JSON
         ▼
- VALIDATE (deterministic gate — never AI):
+ VALIDATE (deterministic gate):
    • JSON-schema conformance
    • key allow-list (reject any layout/spacing/selector/CSS attempt)
    • completeness (all required semantic keys for both modes)
    • CONTRAST engine: WCAG/APCA on every text-on-surface & accent-on-surface pair; auto-nudge
-     lightness to pass or bounce back with the failing pairs
+     lightness to pass or flag the failing pairs
    • PROTECTED STATUS check: running/ok/warn/failed/skipped mutually distinguishable +
      colorblind-safe + area-accents not colliding with status
    • forced-colors + reduced-motion compatibility
@@ -124,8 +121,8 @@ form / color pickers ─────────┴─▶ candidate nexus-theme 
    user's library; previous theme kept as a revertible snapshot
 ```
 
-If the optional model hallucinates, the worst case is a validator bounce-back loop — never a broken
-layout or an inaccessible/illegible-status theme.
+The worst case for an invalid hand-authored theme is a validator rejection with the failing pairs
+listed — never a broken layout or an inaccessible/illegible-status theme.
 
 ## 6. Docker volume strategy
 

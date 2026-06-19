@@ -1,6 +1,9 @@
 # ADR-0007 — Token-driven experience & theming architecture
 
-**Status:** Accepted (2026-06-19)
+**Status:** Accepted (2026-06-19) — the AI-assist provisions (optional local-model theme assist and
+the optional Assistant) are **superseded by [ADR-0008](ADR-0008-no-in-product-ai.md)** (no in-product
+AI/LLM). The token contract, layered resolvers, themes-as-data with server-side deterministic
+validation, protected status semantics, and accessibility-as-top-layer all stand.
 
 ## Context
 
