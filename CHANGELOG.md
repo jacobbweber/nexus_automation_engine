@@ -29,6 +29,8 @@ All notable changes to this project are documented here. Format follows
   (fresh / stale / never-reviewed + oldest). 119 backend tests.
 
 ### Security
+- **Gate now covers canvas `automation_task` nodes** (single-target ops) in addition to catalog +
+  direct-job paths; added an advisory `npm audit` step to CI.
 - **Audit S2 — login throttling**: repeated failed logins are rate-limited (5 failures / 5 min
   per username → 429; cleared on success).
 - **Central gate extended**: the `/api/v1/jobs/execute` direct path now also runs the CMDB

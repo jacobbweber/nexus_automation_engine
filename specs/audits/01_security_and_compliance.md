@@ -98,5 +98,6 @@ spine. Gaps above are about *enforcement coverage*, not absence of controls.
       pool for downstream use).
 - [x] Extend the execution gate to **direct `/jobs/execute`** (CMDB-consistency gate on the
       target; catalog path keeps full metadata validation).
-- [ ] (follow-ups) S2 login throttling; extend the gate to canvas `automation_task` nodes;
-      S3 npm audit in CI; WebSocket token auth.
+- [x] Extend the gate to canvas `automation_task` nodes (single-target ops).
+- [x] S3 `npm audit` advisory step in CI.
+- [ ] (remaining) WebSocket token auth.
