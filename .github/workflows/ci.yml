@@ -76,6 +76,9 @@ jobs:
           node --version
           npm --version
           npm ci
+      - name: Audit dependencies (advisory)
+        continue-on-error: true
+        run: npm audit --audit-level=high
       - name: Lint
         run: npm run lint
       - name: Typecheck

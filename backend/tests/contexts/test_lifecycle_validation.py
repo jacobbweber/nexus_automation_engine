@@ -124,6 +124,41 @@ def test_build_validation_flags_incomplete():
     assert not result.ok and result.stage == "build"
 
 
+async def test_canvas_automation_task_node_is_gated():
+    import os
+
+    from app.contexts.orchestration_canvas.application.engine import execute_graph
+    from app.contexts.orchestration_canvas.domain.models import Edge, Node, NodeType
+    from app.platform.config import get_settings
+    from app.shared_kernel.errors import NexusError
+    from app.shared_kernel.variable_pool import VariablePool
+
+    os.environ["NEXUS_ENFORCE_LIFECYCLE_VALIDATION"] = "true"
+    get_settings.cache_clear()
+    try:
+        nodes = [
+            Node(id="start", type=NodeType.START),
+            Node(
+                id="task",
+                type=NodeType.AUTOMATION_TASK,
+                data={
+                    "connector": "vmware",
+                    "action": "delete_datastore",
+                    "params": {"target": "ds-vvol-01"},
+                },
+            ),  # cluster member -> blocked
+            Node(id="end", type=NodeType.END),
+        ]
+        edges = [Edge(source="start", target="task"), Edge(source="task", target="end")]
+        pool = VariablePool()
+        pool.set("start", {})
+        with pytest.raises(NexusError):
+            await execute_graph(nodes, edges, pool, "r", persist=False)
+    finally:
+        os.environ["NEXUS_ENFORCE_LIFECYCLE_VALIDATION"] = "false"
+        get_settings.cache_clear()
+
+
 # --- API ------------------------------------------------------------------------------------
 
 

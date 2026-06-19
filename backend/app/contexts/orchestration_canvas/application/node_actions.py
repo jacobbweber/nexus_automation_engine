@@ -206,10 +206,25 @@ async def _automation_task(
     data: dict[str, Any], pool: VariablePool, run_id: str, ws: WsCallback | None
 ) -> dict[str, Any]:
     kind = ConnectorKind(str(data.get("connector", "")))
+    params = _task_params(data, pool)
+    # Origin-story validation (3.0): gate in-graph tasks that target a single named CI.
+    from app.platform.config import get_settings
+
+    if get_settings().enforce_lifecycle_validation:
+        target = params.get("target")
+        if isinstance(target, str) and target and not target.startswith("{{"):
+            from app.contexts.lifecycle_validation.application.service import ValidationService
+            from app.contexts.lifecycle_validation.domain.models import AutomationMeta
+
+            meta = AutomationMeta(
+                name=str(data.get("name", kind.value)), action=str(data.get("action", ""))
+            )
+            await ValidationService().enforce_cmdb_only(meta, target)
+
     request = ExecutionRequest(
         kind=kind,
         action=str(data.get("action", "")),
-        params=_task_params(data, pool),
+        params=params,
         check_mode=bool(data.get("check_mode", False)),
         diff_mode=bool(data.get("diff_mode", False)),
         run_id=run_id,
