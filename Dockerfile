@@ -25,8 +25,10 @@ RUN pip install ./backend
 # Built SPA served by the API at "/".
 COPY --from=frontend /app/frontend/dist /app/static
 
-# Writable state dir for the SQLite database (works with random OpenShift UIDs).
-RUN mkdir -p /data && chgrp -R 0 /data /app && chmod -R g=u /data /app
+# Writable state dirs for the SQLite database + the themes volume. Pre-creating /data/themes in
+# the image means the named volume mounted there inherits these group-writable perms, so the
+# non-root UID (and random OpenShift UIDs) can persist user/Studio themes.
+RUN mkdir -p /data /data/themes && chgrp -R 0 /data /app && chmod -R g=u /data /app
 USER 1001
 
 EXPOSE 8000
