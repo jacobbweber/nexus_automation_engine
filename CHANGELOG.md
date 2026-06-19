@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M20 — token foundation** (experience architecture, ADR-0007): introduced the layered
+  resolution cascade (`shared/theme/tokens.css` — `primitives → semantic → mode → area → theme →
+  density → a11y`), the full **semantic token contract** (incl. protected `--run-*` status tokens),
+  the Signal warm-neutral default palette with `data-mode` dark support, density + a11y
+  (reduced-motion / dyslexia) layers, and a **TS constants mirror** (`shared/theme/tokens.ts`) for
+  canvas/SVG. Existing components keep working via compatibility aliases. Closes A1–A3 (#62–#64).
 - **M19 — run-inputs prompt**: launching a workflow whose Start node declares inputs now opens a
   prompt to supply those ad-hoc values (pre-filled with declared defaults) instead of always
   running with an empty payload; input-less workflows still run in one click.

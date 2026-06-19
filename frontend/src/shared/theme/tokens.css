@@ -1,0 +1,157 @@
+/* Nexus token foundation — the resolution cascade (ADR-0007, specs/05_experience/01_design_system).
+ *
+ * Layer order is deterministic: later layers win. Components consume ONLY semantic tokens
+ * (--bg, --surface, --accent, --run-*, …); primitives are never referenced directly.
+ *
+ *   primitives  raw ramps + scales
+ *   semantic    the contract (light defaults)
+ *   mode        dark/light remap
+ *   area        per-surface accent/tint retint (filled by the area layer; see AppShell)
+ *   theme       built-in / user themes (filled in B-epic)
+ *   density     spacing/type multipliers
+ *   a11y        reduced-motion / contrast / forced-colors / dyslexia / text-scale — always wins
+ */
+@layer primitives, semantic, mode, area, theme, density, a11y;
+
+/* ----------------------------------------------------------------------------- primitives */
+@layer primitives {
+  :root {
+    /* warm-neutral ramp (Signal default) */
+    --n-50:#fbf7f2; --n-100:#f4ece1; --n-150:#ece2d4; --n-200:#e0d3c1; --n-300:#c8b6a0;
+    --n-400:#a8927a; --n-500:#7d6a57; --n-600:#5b4f43; --n-650:#47403a; --n-700:#352f2a;
+    --n-800:#262220; --n-850:#201d1a; --n-900:#1a1714; --n-950:#141210;
+    /* signal-blue accent ramp */
+    --a-300:#9cc6ec; --a-400:#6ba6db; --a-500:#3f82c4; --a-600:#326aa3; --a-700:#274f7a;
+    /* status ramps (protected semantics) */
+    --ok-500:#4c8a5e; --ok-300:#8fc7a1;
+    --warn-500:#b07a1e; --warn-300:#e0bd6f;
+    --danger-500:#b23a33; --danger-300:#e08a82;
+    --info-500:#3e6e8e; --info-300:#8fbdd6;
+    --run-running-500:#3f82c4; --run-ok-500:#4c8a5e; --run-warn-500:#b07a1e;
+    --run-failed-500:#b23a33; --run-skipped-500:#8a7f72;
+
+    /* scales (multiplied by density) */
+    --space-unit: 4px;
+    --radius-xs:6px; --radius-sm:10px; --radius-md:14px; --radius-lg:20px;
+    --radius-xl:28px; --radius-2xl:36px; --radius-pill:9999px;
+    --shadow-1: 0 1px 2px rgba(40,33,28,.05), 0 1px 3px rgba(40,33,28,.07);
+    --shadow-2: 0 2px 6px rgba(40,33,28,.06), 0 4px 12px rgba(40,33,28,.08);
+    --shadow-3: 0 8px 24px rgba(40,33,28,.10), 0 2px 6px rgba(40,33,28,.06);
+    --dur-1:120ms; --dur-2:180ms; --dur-3:240ms; --dur-4:360ms; --dur-5:520ms;
+    --ease-out: cubic-bezier(.2,.8,.2,1);
+    --ease-spring: cubic-bezier(.34,1.56,.64,1);
+    --font-ui: "Inter var", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-read: "Source Serif 4", Georgia, serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+}
+
+/* ------------------------------------------------------------------------------- semantic */
+/* The contract. Light defaults; mode layer remaps for dark. */
+@layer semantic {
+  :root {
+    --bg: var(--n-50);
+    --surface: #ffffff;
+    --surface-2: var(--n-100);
+    --surface-3: var(--n-150);
+    --overlay: rgba(26,23,20,.45);
+    --text: var(--n-900);
+    --text-muted: var(--n-500);
+    --text-subtle: var(--n-400);
+    --text-onAccent: #ffffff;
+    --border: var(--n-200);
+    --border-strong: var(--n-300);
+    --divider: var(--n-150);
+
+    --accent: var(--a-500);
+    --accent-hover: var(--a-600);
+    --accent-active: var(--a-700);
+    --accent-contrast: #ffffff;
+    --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+
+    --success: var(--ok-500); --success-soft: color-mix(in srgb, var(--success) 14%, transparent);
+    --warn: var(--warn-500);  --warn-soft: color-mix(in srgb, var(--warn) 16%, transparent);
+    --danger: var(--danger-500); --danger-soft: color-mix(in srgb, var(--danger) 14%, transparent);
+    --info: var(--info-500);  --info-soft: color-mix(in srgb, var(--info) 14%, transparent);
+
+    --run-running: var(--run-running-500);
+    --run-ok: var(--run-ok-500);
+    --run-warn: var(--run-warn-500);
+    --run-failed: var(--run-failed-500);
+    --run-skipped: var(--run-skipped-500);
+
+    --focus: var(--accent);
+    --selection: color-mix(in srgb, var(--accent) 24%, transparent);
+    --link: var(--accent-hover);
+
+    /* area overrides default to the accent until an area sets them (see AppShell) */
+    --area-accent: var(--accent);
+    --area-accent-hover: var(--accent-hover);
+    --area-accent-contrast: var(--accent-contrast);
+    --area-tint: color-mix(in srgb, var(--area-accent) 6%, transparent);
+
+    /* resolved scale aliases (density layer rescales --space-unit) */
+    --space-1: calc(var(--space-unit) * 1);
+    --space-2: calc(var(--space-unit) * 2);
+    --space-3: calc(var(--space-unit) * 3);
+    --space-4: calc(var(--space-unit) * 4);
+    --space-5: calc(var(--space-unit) * 6);
+    --space-6: calc(var(--space-unit) * 8);
+    --space-7: calc(var(--space-unit) * 12);
+    --space-8: calc(var(--space-unit) * 16);
+    --shadow-focus: 0 0 0 2px var(--bg), 0 0 0 4px var(--focus);
+
+    /* ---- backward-compat aliases (pre-A1 component code) ---- */
+    --color-accent: var(--accent);
+    --color-accent-strong: var(--accent-hover);
+    --color-ok: var(--success);
+    --color-warn: var(--warn);
+    --color-danger: var(--danger);
+  }
+}
+
+/* ----------------------------------------------------------------------------------- mode */
+@layer mode {
+  /* explicit dark; also keep the legacy `.dark` selector working until the A4 mode engine */
+  :where([data-mode="dark"]), :where(.dark) {
+    --bg: var(--n-950);
+    --surface: var(--n-850);
+    --surface-2: var(--n-800);
+    --surface-3: var(--n-700);
+    --overlay: rgba(0,0,0,.55);
+    --text: var(--n-50);
+    --text-muted: var(--n-300);
+    --text-subtle: var(--n-400);
+    --border: var(--n-700);
+    --border-strong: var(--n-600);
+    --divider: var(--n-800);
+    --accent: var(--a-400);
+    --accent-hover: var(--a-300);
+    --accent-active: var(--a-300);
+    --success: var(--ok-300); --warn: var(--warn-300);
+    --danger: var(--danger-300); --info: var(--info-300);
+    --run-running: var(--a-400); --run-ok: var(--ok-300); --run-warn: var(--warn-300);
+    --run-failed: var(--danger-300); --run-skipped: var(--n-400);
+    --ring-hi: rgba(255,255,255,.06);
+  }
+  /* default to the OS preference when no explicit mode is set (A4 will make this user-driven) */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-mode="light"]):not([data-mode="dark"]) {
+      color-scheme: dark;
+    }
+  }
+}
+
+/* -------------------------------------------------------------------------------- density */
+@layer density {
+  :where([data-density="comfortable"]) { --space-unit: 3.4px; }
+  :where([data-density="compact"])     { --space-unit: 2.9px; }
+}
+
+/* ----------------------------------------------------------------------------------- a11y */
+@layer a11y {
+  :where([data-dyslexia="on"]) { --font-ui: "Atkinson Hyperlegible", system-ui, sans-serif; }
+  @media (prefers-reduced-motion: reduce) {
+    :root { --dur-1:0ms; --dur-2:0ms; --dur-3:0ms; --dur-4:0ms; --dur-5:0ms; }
+  }
+}
