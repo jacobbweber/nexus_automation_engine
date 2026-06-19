@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M14 Catalog-at-scale UX** (`frontend/`): a faceted Service Catalog (domain/vendor facets with
+  counts + type-ahead search, grouped cards with risk pills and atomic/orchestrated badges) and an
+  **automation detail drawer** with tabs — Overview (rendered Markdown docs + prerequisites +
+  tags), Parameters, and an **animated Logic-Flow SVG** of the automation's phases. Reusable
+  `Markdown` + `LogicFlow` components.
+
 - **3.0 operator-experience vision** (`specs/00_foundation/vision_operator_experience.md`): a
   fresh from-the-operator rethink — service catalog at scale, understand-before-you-run,
   governed Lego composition, incident kanban, and a believable large catalog.
@@ -15,6 +21,11 @@ All notable changes to this project are documented here. Format follows
   prerequisites, version, atomic/orchestrated**); faceted list filtering (`domain`/`vendor`/
   `search`) + `/catalog/facets`; and a **27-item multi-vendor seed catalog** (VCF, Pure,
   Cohesity, ServiceNow-via-Ansible, Ansible, Terraform, scripts) where every item runs. 95 tests.
+
+### Changed
+- **CI hardening**: `runs-on: self-hosted` (drop the custom label so a vanished runner label can't
+  hang CI), plus `PYTHONDONTWRITEBYTECODE` + `pytest -p no:cacheprovider` so the runner workspace
+  stays clean for `actions/checkout`.
 
 ## [2.0.0] - 2026-06-18
 
