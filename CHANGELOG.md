@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M19 — run-inputs prompt**: launching a workflow whose Start node declares inputs now opens a
+  prompt to supply those ad-hoc values (pre-filled with declared defaults) instead of always
+  running with an empty payload; input-less workflows still run in one click.
 - **M19 — workflow library, ownership metadata & usage reporting**: workflows now carry
   **owner / team / tags** (preserved across graph edits), and a new
   `GET /canvas/workflows/report` joins each workflow with its run telemetry (run count, success /
