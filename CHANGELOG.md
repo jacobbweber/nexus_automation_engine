@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M21 — area-context overrides** (B8, #69): each Nexus surface (Dashboard/Catalog/Canvas/Library/
+  Console/Incidents/Governance/Admin) retints the chrome (active nav pill, primary buttons, focus
+  rings, logo) via an `@layer area` over the token contract — light + dark variants, all WCAG-AA
+  with their contrast text. Accents are hue-separated from the protected status colors (≥30°) so an
+  accent can never be mistaken for run status; the active area is driven from the route and also
+  feeds the mode engine's per-area override. Gated by an `area.test.ts` (AA + hue-distance).
 - **M20 — contrast/a11y CI gate** (A7, #68): a reusable WCAG **contrast utility**
   (`shared/theme/contrast.ts` — luminance, ratio, AA/AAA helpers; reused later by the theme
   validator) plus a test that gates the **Signal default palette** (light + dark) at WCAG AA in CI.

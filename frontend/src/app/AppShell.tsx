@@ -1,23 +1,43 @@
 import { AlertTriangle, Boxes, LayoutDashboard, Library, LogOut, ShieldCheck, Settings, Terminal, Workflow } from "lucide-react";
-import type { ReactNode } from "react";
-import { NavLink } from "react-router-dom";
+import { useEffect, type ReactNode } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/app/auth";
+import { useMode } from "@/shared/theme/mode";
 import { ModeToggle } from "@/shared/theme/ModeToggle";
 import { DisplayControls } from "@/shared/theme/DisplayControls";
 
 const NAV = [
-  { to: "/", label: "Dashboard", icon: <LayoutDashboard size={18} />, end: true },
-  { to: "/catalog", label: "Catalog", icon: <Boxes size={18} /> },
-  { to: "/canvas", label: "Canvas", icon: <Workflow size={18} /> },
-  { to: "/library", label: "Library", icon: <Library size={18} /> },
-  { to: "/console", label: "Console", icon: <Terminal size={18} /> },
-  { to: "/incidents", label: "Incidents", icon: <AlertTriangle size={18} /> },
-  { to: "/governance", label: "Governance", icon: <ShieldCheck size={18} /> },
-  { to: "/admin", label: "Admin", icon: <Settings size={18} /> },
+  { to: "/", area: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} />, end: true },
+  { to: "/catalog", area: "catalog", label: "Catalog", icon: <Boxes size={18} /> },
+  { to: "/canvas", area: "canvas", label: "Canvas", icon: <Workflow size={18} /> },
+  { to: "/library", area: "library", label: "Library", icon: <Library size={18} /> },
+  { to: "/console", area: "console", label: "Console", icon: <Terminal size={18} /> },
+  { to: "/incidents", area: "incidents", label: "Incidents", icon: <AlertTriangle size={18} /> },
+  { to: "/governance", area: "governance", label: "Governance", icon: <ShieldCheck size={18} /> },
+  { to: "/admin", area: "admin", label: "Admin", icon: <Settings size={18} /> },
 ];
+
+/** Resolve the active area from the current path (longest matching nav prefix). */
+function areaForPath(pathname: string): string {
+  const match = NAV.filter((n) => n.to !== "/" && pathname.startsWith(n.to)).sort(
+    (a, b) => b.to.length - a.to.length,
+  )[0];
+  return match?.area ?? "dashboard";
+}
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
+  const { pathname } = useLocation();
+  const { setActiveArea } = useMode();
+  const area = areaForPath(pathname);
+
+  // Retint the chrome for the active surface + let the mode engine apply any per-area override.
+  useEffect(() => {
+    document.documentElement.dataset.area = area;
+    setActiveArea(area);
+    return () => setActiveArea(undefined);
+  }, [area, setActiveArea]);
+
   return (
     <div style={{ display: "flex", height: "100%" }}>
       <aside
@@ -32,7 +52,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 8px 18px" }}>
-          <Workflow size={22} color="var(--color-accent)" />
+          <Workflow size={22} color="var(--area-accent)" />
           <span style={{ fontWeight: 700, letterSpacing: "0.5px" }}>NEXUS</span>
         </div>
         {NAV.map((item) => (
@@ -47,9 +67,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               padding: "10px 12px",
               borderRadius: 8,
               textDecoration: "none",
-              color: isActive ? "var(--text)" : "var(--text-muted)",
-              background: isActive ? "var(--surface-2)" : "transparent",
+              color: isActive ? "var(--area-accent-contrast)" : "var(--text-muted)",
+              background: isActive ? "var(--area-accent)" : "transparent",
               fontSize: "0.9rem",
+              transition: "background-color var(--dur-1) var(--ease-out)",
             })}
           >
             {item.icon}

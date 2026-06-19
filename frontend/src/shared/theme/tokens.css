@@ -143,6 +143,31 @@
   }
 }
 
+/* ----------------------------------------------------------------------------------- area */
+/* Per-surface retint: sets only --area-accent (+hover). --area-tint and --area-accent-contrast
+   auto-derive from the semantic layer, so they follow mode automatically. Light accents are dark
+   enough for white text (AA); dark-mode variants are lighter (dark text via --accent-contrast).
+   None use the red/amber/leaf-green status hues — they must never be mistaken for run status. */
+@layer area {
+  :where([data-area="dashboard"])  { --area-accent:#2f72b0; --area-accent-hover:#285f93; }
+  :where([data-area="catalog"])    { --area-accent:#5a4bb0; --area-accent-hover:#4c3f96; }
+  :where([data-area="canvas"])     { --area-accent:#0e7c84; --area-accent-hover:#0b656c; }
+  :where([data-area="library"])    { --area-accent:#2f6f9e; --area-accent-hover:#285d84; }
+  :where([data-area="console"])    { --area-accent:#9b4f8c; --area-accent-hover:#834276; }
+  :where([data-area="incidents"])  { --area-accent:#b0487f; --area-accent-hover:#963d6c; }
+  :where([data-area="governance"]) { --area-accent:#6f4ea8; --area-accent-hover:#5d418d; }
+  :where([data-area="admin"])      { --area-accent:#4a5568; --area-accent-hover:#3d4757; }
+
+  :where([data-mode="dark"][data-area="dashboard"])  { --area-accent:#6ba6db; --area-accent-hover:#9cc6ec; }
+  :where([data-mode="dark"][data-area="catalog"])    { --area-accent:#9b8fe0; --area-accent-hover:#b6ade9; }
+  :where([data-mode="dark"][data-area="canvas"])     { --area-accent:#4bb3bb; --area-accent-hover:#74c7cd; }
+  :where([data-mode="dark"][data-area="library"])    { --area-accent:#7fb4dc; --area-accent-hover:#a3cae8; }
+  :where([data-mode="dark"][data-area="console"])    { --area-accent:#d68fc6; --area-accent-hover:#e2acd6; }
+  :where([data-mode="dark"][data-area="incidents"])  { --area-accent:#df8ac0; --area-accent-hover:#e8a8d2; }
+  :where([data-mode="dark"][data-area="governance"]) { --area-accent:#b29be0; --area-accent-hover:#c6b6e9; }
+  :where([data-mode="dark"][data-area="admin"])      { --area-accent:#93a0b5; --area-accent-hover:#aeb9c9; }
+}
+
 /* -------------------------------------------------------------------------------- density */
 @layer density {
   :where([data-density="comfortable"]) { --space-unit: 3.4px; }
