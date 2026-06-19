@@ -123,3 +123,38 @@ adapter** that satisfies the same port as the real ones.
 **ServiceNow** — system of record: CMDB inventory discovery + request (RITM) approval validation.
 **CyberArk** — secret vault: runtime credential leasing.
 **Dynatrace** — observability: correlate job runs with platform events/metrics.
+
+## Experience & theming (see `specs/05_experience/`)
+
+**Design token** — a named visual value (color, spacing, radius, type, shadow, motion). Tokens are
+*primitive* (raw ramps/scales, never used directly) or *semantic*. Shipped as both CSS custom
+properties and a generated TS-constants module so canvas/SVG/chart rendering can't drift from CSS.
+
+**Semantic token contract** — the fixed set of semantic keys (`--bg`, `--surface`, `--accent`,
+`--run-*`, …) that components are allowed to consume. The contract is the stable interface; every
+resolver (mode/area/theme) only ever remaps these keys.
+
+**Resolution cascade** — the ordered CSS `@layer` stack
+(`reset → primitives → semantic → mode → area → theme → density → a11y`) that makes every
+mode × area × theme × density × accessibility combination valid by construction. Mental model:
+one contract, many resolvers stacked by precedence; accessibility always wins on top.
+
+**Area-context override** — a bounded retint applied when a Nexus surface (Dashboard/Catalog/
+Canvas/Library/Console/Incidents/Governance/Admin) is active: it may change only accent/tint/
+persona hue, never layout, and never collide with protected status colors.
+
+**Protected status semantics** — `--run-*` and `--success/warn/danger/info` are validated for
+mutual distinguishability + colorblind safety and are always paired with an icon/shape in
+components. Operational legibility outranks any theme.
+
+**Theme (`nexus-theme/v1`)** — a theme expressed as data: a JSON document that remaps an
+allow-listed semantic key set for light+dark, validated server-side before delivery. It can never
+contain selectors, layout, spacing scale, or font files.
+
+**Theme Studio** — the deterministic-first pipeline (form + live preview + validator) for authoring
+themes, with an *optional* local-model assist behind an adapter (off by default, no paid services).
+Result safety never depends on the model — the deterministic validator is the gate.
+
+**Density** — `cozy | comfortable | compact`, a multiplier over the spacing/type scale (clamped so
+interactive targets stay ≥44px). Lets the same locked layout serve a relaxed novice view and a
+dense expert/enterprise view.
