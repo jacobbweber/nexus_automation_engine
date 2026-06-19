@@ -26,6 +26,7 @@ from app.platform import health
 from app.platform.config import get_settings
 from app.platform.database import dispose_db, init_db
 from app.platform.errors import register_error_handlers
+from app.platform.security_middleware import register_security_middleware
 
 
 @asynccontextmanager
@@ -92,6 +93,7 @@ def create_app() -> FastAPI:
     )
 
     register_error_handlers(app)
+    register_security_middleware(app)
 
     # Platform routes + context routers under /api/v1.
     app.include_router(health.router, prefix="/api/v1")
