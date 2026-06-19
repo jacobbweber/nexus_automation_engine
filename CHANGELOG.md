@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M20 — display & accessibility preferences** (A5, #66): a `PrefsProvider` drives the density
+  (cozy/comfortable/compact), dyslexia-font, and text-scale (90–140%) layers via root
+  data-attributes + root font-size; persisted; surfaced as a "Display & accessibility" disclosure
+  in the app shell (reused later by the full Accessibility center). Pure logic unit-tested.
 - **M20 — mode engine** (A4, #65): a `ModeProvider` applies the resolved light/dark to
   `<html data-mode>` with **System / Light / Dark**, **auto-sundown** (manual schedule, overnight
   wrap), **per-area override**, and `localStorage` persistence; OS-preference is followed in System

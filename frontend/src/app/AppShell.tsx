@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/app/auth";
 import { ModeToggle } from "@/shared/theme/ModeToggle";
+import { DisplayControls } from "@/shared/theme/DisplayControls";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: <LayoutDashboard size={18} />, end: true },
@@ -59,6 +60,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div style={{ padding: "8px 4px" }}>
             <ModeToggle />
           </div>
+          <details style={{ padding: "0 4px 6px" }}>
+            <summary style={{ cursor: "pointer", fontSize: "0.74rem", color: "var(--text-muted)", padding: "4px 2px" }}>
+              Display &amp; accessibility
+            </summary>
+            <DisplayControls />
+          </details>
           <div style={{ padding: "8px" }}>
             {user?.username} · <span style={{ color: "var(--color-accent)" }}>{user?.global_role}</span>
           </div>
