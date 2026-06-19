@@ -43,6 +43,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 export const api = {
   get: <T>(p: string) => request<T>("GET", p),
   post: <T>(p: string, body?: unknown) => request<T>("POST", p, body),
+  put: <T>(p: string, body?: unknown) => request<T>("PUT", p, body),
   del: <T>(p: string) => request<T>("DELETE", p),
 };
 
@@ -205,6 +206,66 @@ export const Canvas = {
       approved,
       response,
     }),
+};
+
+export interface ChangeTemplate {
+  id: string;
+  name: string;
+  short_description: string;
+  assignment_group: string;
+  category: string;
+  risk: string;
+  impact: string;
+  cab_required: boolean;
+}
+export interface ChangeRecord {
+  number: string;
+  template_id: string | null;
+  state: string;
+  short_description: string;
+  risk: string;
+  assignment_group: string;
+  cab_required: boolean;
+  initiated_by: string;
+  resource_type: string;
+  resource_id: string;
+  created_at: string;
+  closed_at: string | null;
+  close_code: string | null;
+}
+
+export const ChangeApi = {
+  templates: () => api.get<ChangeTemplate[]>("/change/templates"),
+  createTemplate: (t: Partial<ChangeTemplate> & { name: string }) =>
+    api.post<ChangeTemplate>("/change/templates", t),
+  records: () => api.get<ChangeRecord[]>("/change/records"),
+  setPolicy: (p: {
+    resource_type: string;
+    resource_id: string;
+    auto_change_control?: boolean;
+    change_template_id?: string | null;
+    require_approved_change?: boolean;
+  }) => api.put<unknown>("/change/policies", p),
+};
+
+export interface Schedule {
+  id: string;
+  name: string;
+  workflow_id: string;
+  kind: string;
+  interval_seconds: number;
+  daily_time: string;
+  enabled: boolean;
+  next_run_at: string;
+  last_run_at: string | null;
+}
+
+export const Schedules = {
+  list: () => api.get<Schedule[]>("/schedules"),
+  create: (s: { name: string; workflow_id: string; kind?: string; interval_seconds?: number }) =>
+    api.post<Schedule>("/schedules", s),
+  remove: (id: string) => api.del<void>(`/schedules/${id}`),
+  runNow: (id: string) => api.post<{ run_id: string }>(`/schedules/${id}/run-now`),
 };
 
 export const getHealth = () => api.get<Health>("/health");

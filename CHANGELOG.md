@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M12 Governance UI** (`frontend/src/features/governance/`): a Governance surface for change
+  templates (create), change records (audit table), and schedules (create/run/delete), with a new
+  nav entry. API client extended for change management + scheduling.
 - **M11 Scheduling** (`backend/app/contexts/scheduling/`): schedule workflows on interval or daily
   triggers with optional **maintenance windows**; a background ticker dispatches due schedules
   through the canvas. `/api/v1/schedules` CRUD + run-now (engineer-gated). Pure trigger/window
