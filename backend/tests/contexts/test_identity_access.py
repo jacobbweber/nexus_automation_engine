@@ -118,6 +118,19 @@ def test_me_requires_token(client):
     assert client.get("/api/v1/auth/me").status_code == 401
 
 
+def test_login_throttle_after_repeated_failures(client):
+    from app.contexts.identity_access.application import service as svc
+
+    svc._FAILURES.clear()
+    try:
+        for _ in range(svc._MAX_FAILURES):
+            assert _login(client, "operator", "wrong").status_code == 401
+        # Next attempt is throttled, even though it's still a bad password.
+        assert _login(client, "operator", "wrong").status_code == 429
+    finally:
+        svc._FAILURES.clear()
+
+
 def test_users_endpoint_admin_only(client):
     admin_token = _login(client, "admin", "admin123").json()["access_token"]
     op_token = _login(client, "operator", "operator123").json()["access_token"]
