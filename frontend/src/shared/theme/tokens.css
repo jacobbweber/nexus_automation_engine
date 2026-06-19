@@ -155,3 +155,15 @@
     :root { --dur-1:0ms; --dur-2:0ms; --dur-3:0ms; --dur-4:0ms; --dur-5:0ms; }
   }
 }
+
+/* Mode cross-fade — applied briefly by the mode engine on dark/light swap. The a11y layer
+   zeroes durations under reduced-motion, so this becomes an instant swap automatically. */
+.mode-anim,
+.mode-anim * {
+  transition: background-color var(--dur-3) var(--ease-out),
+              color var(--dur-3) var(--ease-out),
+              border-color var(--dur-3) var(--ease-out) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mode-anim, .mode-anim * { transition: none !important; }
+}
