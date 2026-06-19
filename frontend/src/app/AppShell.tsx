@@ -20,6 +20,7 @@ import { DisplayControls } from "@/shared/theme/DisplayControls";
 import { ThemePicker } from "@/shared/theme/ThemePicker";
 import { CommandPalette } from "@/features/command-palette/CommandPalette";
 import { NotificationsBell } from "@/features/notifications/NotificationsBell";
+import { ConnectionBanner } from "@/shared/ui/ConnectionBanner";
 
 const NAV = [
   { to: "/", area: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} />, end: true },
@@ -186,7 +187,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
         </div>
       </aside>
-      <main style={{ flex: 1, overflow: "auto" }}>{children}</main>
+      <main style={{ flex: 1, overflow: "auto" }}>
+        <ConnectionBanner />
+        {children}
+      </main>
       <CommandPalette />
     </div>
   );

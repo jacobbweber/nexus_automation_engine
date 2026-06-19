@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M21 — empty states + offline/degraded banner** (C19, #80): a reusable calm `EmptyState`
+  (icon + title + helper + action; adopted in the Library) and a non-blocking `ConnectionBanner`
+  that watches the browser online state + pings API health and surfaces a clear "backend
+  unreachable, retrying" notice that self-clears on recovery. **Completes the M21 shell (C16–C19)
+  and the M21 theme/shell milestone.**
 - **M21 — notifications feed** (C18, #79): a non-blocking bell in the shell that aggregates
   **open incidents, pending approvals, and recently finished runs** (derived from existing
   endpoints — no new backend), with an unread badge, mark-all-seen on open, and click-through to
