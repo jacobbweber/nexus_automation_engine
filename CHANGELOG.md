@@ -5,7 +5,16 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- **3.0 operator-experience vision** (`specs/00_foundation/vision_operator_experience.md`): a
+  fresh from-the-operator rethink — service catalog at scale, understand-before-you-run,
+  governed Lego composition, incident kanban, and a believable large catalog.
+- **M13 Connector ecosystem + rich catalog**: new simulation connectors **VMware (VCF 9)**,
+  **Pure Storage (FlashArray)**, and **Cohesity** (each with realistic actions + streamed logs);
+  catalog templates gained operator metadata (**domain, vendor, tags, risk tier, est. duration,
+  prerequisites, version, atomic/orchestrated**); faceted list filtering (`domain`/`vendor`/
+  `search`) + `/catalog/facets`; and a **27-item multi-vendor seed catalog** (VCF, Pure,
+  Cohesity, ServiceNow-via-Ansible, Ansible, Terraform, scripts) where every item runs. 95 tests.
 
 ## [2.0.0] - 2026-06-18
 

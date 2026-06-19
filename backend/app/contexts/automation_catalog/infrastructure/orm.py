@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, String, Text
+from sqlalchemy import Boolean, DateTime, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.platform.database import Base
@@ -25,5 +25,13 @@ class TemplateRow(Base):
     default_params_json: Mapped[str] = mapped_column(Text, default="{}")
     owner: Mapped[str] = mapped_column(String, default="engineer")
     approval_state: Mapped[str] = mapped_column(String, default="draft", index=True)
+    domain: Mapped[str] = mapped_column(String, default="General", index=True)
+    vendor: Mapped[str] = mapped_column(String, default="", index=True)
+    tags_json: Mapped[str] = mapped_column(Text, default="[]")
+    risk: Mapped[str] = mapped_column(String, default="low", index=True)
+    estimated_minutes: Mapped[int] = mapped_column(Integer, default=5)
+    prerequisites: Mapped[str] = mapped_column(Text, default="")
+    version: Mapped[str] = mapped_column(String, default="1.0.0")
+    atomic: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)

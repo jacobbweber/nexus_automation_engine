@@ -126,3 +126,27 @@ async def test_dynatrace_series_returns_samples():
     series = await reg.telemetry(ConnectorKind.DYNATRACE).series(entity="web-prod-01", seconds=60)
     assert len(series.samples) > 0
     assert all(0 <= s.cpu_percent <= 100 for s in series.samples)
+
+
+async def test_vendor_connectors_stream_and_fail():
+    reg = build_simulation_registry()
+    cases = [
+        (ConnectorKind.VMWARE, "deploy_workload_domain"),
+        (ConnectorKind.PURESTORAGE, "create_volume"),
+        (ConnectorKind.COHESITY, "run_backup"),
+    ]
+    for kind, action in cases:
+        msgs = await _collect(reg.execution(kind), ExecutionRequest(kind=kind, action=action))
+        assert msgs, f"{kind} should stream output"
+        with pytest.raises(ConnectorError):
+            async for _ in reg.execution(kind).execute(
+                ExecutionRequest(kind=kind, action=action, params={"force_fail": True})
+            ):
+                pass
+
+
+def test_vendor_connectors_capabilities():
+    reg = build_simulation_registry()
+    for kind in (ConnectorKind.VMWARE, ConnectorKind.PURESTORAGE, ConnectorKind.COHESITY):
+        caps = reg.capabilities(kind)
+        assert caps.actions and caps.category.value == "execution"

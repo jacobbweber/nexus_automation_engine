@@ -17,11 +17,14 @@ from app.contexts.connectors.domain.ports import (
     TelemetryPort,
 )
 from app.contexts.connectors.infrastructure.simulation.ansible import AnsibleSimConnector
+from app.contexts.connectors.infrastructure.simulation.cohesity import CohesitySimConnector
 from app.contexts.connectors.infrastructure.simulation.cyberark import CyberArkSimConnector
 from app.contexts.connectors.infrastructure.simulation.dynatrace import DynatraceSimConnector
+from app.contexts.connectors.infrastructure.simulation.purestorage import PureStorageSimConnector
 from app.contexts.connectors.infrastructure.simulation.script import ScriptSimConnector
 from app.contexts.connectors.infrastructure.simulation.servicenow import ServiceNowSimConnector
 from app.contexts.connectors.infrastructure.simulation.terraform import TerraformSimConnector
+from app.contexts.connectors.infrastructure.simulation.vmware import VmwareSimConnector
 
 
 class ConnectorRegistry:
@@ -83,6 +86,9 @@ def build_simulation_registry() -> ConnectorRegistry:
     registry.register(ConnectorKind.SERVICENOW, ServiceNowSimConnector())
     registry.register(ConnectorKind.CYBERARK, CyberArkSimConnector())
     registry.register(ConnectorKind.DYNATRACE, DynatraceSimConnector())
+    registry.register(ConnectorKind.VMWARE, VmwareSimConnector())
+    registry.register(ConnectorKind.PURESTORAGE, PureStorageSimConnector())
+    registry.register(ConnectorKind.COHESITY, CohesitySimConnector())
     return registry
 
 

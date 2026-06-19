@@ -30,6 +30,13 @@ class SurveyField(BaseModel):
     source: str | None = None
 
 
+class RiskTier(StrEnum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
 class Template(BaseModel):
     id: str
     name: str
@@ -43,6 +50,15 @@ class Template(BaseModel):
     default_params: dict[str, object] = Field(default_factory=dict)
     owner: str = "engineer"
     approval_state: ApprovalState = ApprovalState.DRAFT
+    # Operator-facing catalog metadata (3.0) — powers faceted navigation & the detail view.
+    domain: str = "General"  # Compute | Storage | Backup | Network | ITSM | Security | General
+    vendor: str = ""  # VMware | Pure Storage | Cohesity | ServiceNow | Ansible | ...
+    tags: list[str] = Field(default_factory=list)
+    risk: RiskTier = RiskTier.LOW
+    estimated_minutes: int = 5
+    prerequisites: str = ""
+    version: str = "1.0.0"
+    atomic: bool = True  # atomic capability vs. orchestrated multi-phase workflow
     created_at: datetime
     updated_at: datetime
 
@@ -59,3 +75,10 @@ class TemplateDraft(BaseModel):
     supports_diff: bool = False
     survey: list[SurveyField] = Field(default_factory=list)
     default_params: dict[str, object] = Field(default_factory=dict)
+    domain: str = "General"
+    vendor: str = ""
+    tags: list[str] = Field(default_factory=list)
+    risk: RiskTier = RiskTier.LOW
+    estimated_minutes: int = 5
+    prerequisites: str = ""
+    atomic: bool = True

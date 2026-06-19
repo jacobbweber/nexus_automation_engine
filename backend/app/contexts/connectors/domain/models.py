@@ -29,6 +29,10 @@ class ConnectorKind(StrEnum):
     SERVICENOW = "servicenow"
     CYBERARK = "cyberark"
     DYNATRACE = "dynatrace"
+    # Vendor execution connectors (3.0 catalog expansion).
+    VMWARE = "vmware"
+    PURESTORAGE = "purestorage"
+    COHESITY = "cohesity"
 
 
 class ParamField(BaseModel):
