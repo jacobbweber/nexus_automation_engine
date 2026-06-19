@@ -40,6 +40,10 @@ def _to_template(row: TemplateRow) -> Template:
         prerequisites=row.prerequisites,
         version=row.version,
         atomic=row.atomic,
+        ci_type=row.ci_type,
+        ci_heritage=row.ci_heritage,
+        approved_date=row.approved_date,
+        last_reviewed=row.last_reviewed,
         created_at=row.created_at,
         updated_at=row.updated_at,
     )
@@ -71,6 +75,10 @@ class TemplateRepository:
             row.prerequisites = template.prerequisites
             row.version = template.version
             row.atomic = template.atomic
+            row.ci_type = template.ci_type
+            row.ci_heritage = template.ci_heritage
+            row.approved_date = template.approved_date
+            row.last_reviewed = template.last_reviewed
             row.updated_at = template.updated_at
             session.commit()
             session.refresh(row)

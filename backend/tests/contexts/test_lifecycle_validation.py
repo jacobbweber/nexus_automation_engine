@@ -1,0 +1,172 @@
+"""Tests for origin-story / CMDB lifecycle validation (M18)."""
+
+from __future__ import annotations
+
+from datetime import UTC, datetime, timedelta
+
+import pytest
+from app.contexts.lifecycle_validation.application.service import (
+    ValidationRejected,
+    ValidationService,
+)
+from app.contexts.lifecycle_validation.domain.models import (
+    AutomationMeta,
+    ValidationPolicy,
+    check_cmdb,
+    check_metadata,
+)
+from app.platform import database
+from app.platform.app_factory import create_app
+from fastapi.testclient import TestClient
+
+
+def _ensure_schema():
+    database.reset_for_tests()
+    from app.platform.config import get_settings
+
+    get_settings.cache_clear()
+    import app.contexts.automation_catalog.infrastructure.orm  # noqa: F401
+    import app.contexts.lifecycle_validation.infrastructure.orm  # noqa: F401
+
+    engine = database.get_engine()
+    database.Base.metadata.drop_all(engine)
+    database.Base.metadata.create_all(engine)
+
+
+@pytest.fixture(autouse=True)
+def _clean_db():
+    _ensure_schema()
+    yield
+    database.reset_for_tests()
+
+
+def _valid_meta(**over) -> AutomationMeta:
+    base = dict(
+        name="Patch",
+        action="run_job_template",
+        risk="low",
+        authored_by="eng",
+        approved_date=datetime.now(UTC),
+        last_updated=datetime.now(UTC),
+        last_reviewed=datetime.now(UTC),
+        ci_type="server",
+        ci_heritage="Ansible",
+    )
+    base.update(over)
+    return AutomationMeta(**base)
+
+
+# --- pure rules -----------------------------------------------------------------------------
+
+
+def test_metadata_missing_fields():
+    policy = ValidationPolicy()
+    reasons = check_metadata(AutomationMeta(name="x"), policy)
+    assert any("authored_by" in r for r in reasons)
+    assert any("ci_type" in r for r in reasons)
+
+
+def test_metadata_stale_review():
+    policy = ValidationPolicy(max_review_age_days=30)
+    meta = _valid_meta(last_reviewed=datetime.now(UTC) - timedelta(days=90))
+    reasons = check_metadata(meta, policy)
+    assert any("stale" in r for r in reasons)
+
+
+def test_cmdb_unknown_retired_mismatch_cluster():
+    policy = ValidationPolicy()
+    assert check_cmdb(_valid_meta(), None, policy)  # unknown CI
+    assert check_cmdb(_valid_meta(), {"lifecycle_state": "retired", "name": "x"}, policy)
+    assert check_cmdb(
+        _valid_meta(ci_type="server"), {"ci_type": "datastore", "name": "x"}, policy
+    )  # type mismatch
+    assert check_cmdb(
+        _valid_meta(action="delete_datastore", ci_type="datastore"),
+        {"ci_type": "datastore", "cluster_member": True, "cluster": "c1", "name": "ds"},
+        policy,
+    )  # destructive on cluster
+    assert not check_cmdb(
+        _valid_meta(), {"ci_type": "server", "lifecycle_state": "operational", "name": "ok"}, policy
+    )
+
+
+# --- service against the simulated CMDB -----------------------------------------------------
+
+
+async def test_execution_validation_passes_for_clean_target():
+    svc = ValidationService()
+    result = await svc.validate_for_execution(_valid_meta(ci_type="server"), "web-prod-01")
+    assert result.ok, result.reasons
+
+
+async def test_execution_validation_rejects_retired_ci():
+    svc = ValidationService()
+    result = await svc.validate_for_execution(_valid_meta(ci_type="server"), "legacy-app-02")
+    assert not result.ok and any("retired" in r for r in result.reasons)
+
+
+async def test_execution_validation_blocks_destructive_on_cluster_datastore():
+    svc = ValidationService()
+    meta = _valid_meta(
+        name="Delete DS", action="delete_datastore", risk="critical", ci_type="datastore"
+    )
+    result = await svc.validate_for_execution(meta, "ds-vvol-01")
+    assert not result.ok and any("cluster" in r for r in result.reasons)
+
+
+async def test_enforce_raises():
+    with pytest.raises(ValidationRejected):
+        await ValidationService().enforce_for_execution(_valid_meta(), "does-not-exist")
+
+
+def test_build_validation_flags_incomplete():
+    result = ValidationService().validate_for_build(AutomationMeta(name="bare"))
+    assert not result.ok and result.stage == "build"
+
+
+# --- API ------------------------------------------------------------------------------------
+
+
+@pytest.fixture
+def client():
+    _ensure_schema()
+    with TestClient(create_app()) as c:
+        yield c
+    database.reset_for_tests()
+
+
+def _token(client, user, pw):
+    return client.post("/api/v1/auth/login", json={"username": user, "password": pw}).json()[
+        "access_token"
+    ]
+
+
+def test_policy_get_and_admin_update(client):
+    assert client.get("/api/v1/governance/validation/policy").status_code == 200
+    op = _token(client, "operator", "operator123")
+    denied = client.put(
+        "/api/v1/governance/validation/policy",
+        headers={"Authorization": f"Bearer {op}"},
+        json={"max_review_age_days": 90},
+    )
+    assert denied.status_code == 403
+    admin = _token(client, "admin", "admin123")
+    ok = client.put(
+        "/api/v1/governance/validation/policy",
+        headers={"Authorization": f"Bearer {admin}"},
+        json={"max_review_age_days": 90},
+    )
+    assert ok.status_code == 200 and ok.json()["max_review_age_days"] == 90
+
+
+def test_check_endpoint(client):
+    resp = client.post(
+        "/api/v1/governance/validation/check",
+        json={"meta": {"name": "bare"}, "target": "web-prod-01"},
+    )
+    assert resp.status_code == 200 and resp.json()["ok"] is False
+
+
+def test_review_status_dashboard(client):
+    resp = client.get("/api/v1/governance/validation/review-status")
+    assert resp.status_code == 200 and "fresh" in resp.json()

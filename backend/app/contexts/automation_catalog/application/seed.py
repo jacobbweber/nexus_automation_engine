@@ -414,6 +414,10 @@ def seed_templates(repo: TemplateRepository | None = None) -> int:
                 prerequisites=f"Access to {vendor} target; appropriate RBAC entitlement.",
                 version="1.0.0",
                 atomic=atomic,
+                ci_type="datastore" if ("datastore" in tags or "datastore" in action) else "server",
+                ci_heritage=vendor,
+                approved_date=now,
+                last_reviewed=now,
                 created_at=now,
                 updated_at=now,
             )

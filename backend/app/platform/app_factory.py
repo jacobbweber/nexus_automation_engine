@@ -19,6 +19,7 @@ from app.contexts.connectors.api import routes as connectors_routes
 from app.contexts.execution_engine.api import routes as execution_routes
 from app.contexts.identity_access.api import routes as identity_routes
 from app.contexts.incident_management.api import routes as incident_routes
+from app.contexts.lifecycle_validation.api import routes as validation_routes
 from app.contexts.orchestration_canvas.api import routes as canvas_routes
 from app.contexts.scheduling.api import routes as scheduling_routes
 from app.platform import health
@@ -32,8 +33,10 @@ async def _lifespan(_app: FastAPI):
     init_db()
     # Default users always seeded (idempotent) so auth works out of the box.
     from app.contexts.identity_access.application.service import seed_default_users
+    from app.contexts.lifecycle_validation.application.service import seed_default_policy
 
     seed_default_users()
+    seed_default_policy()  # the single admin-editable validation gate
     if get_settings().seed_demo_data:
         from app.contexts.automation_catalog.application.seed import seed_templates
         from app.contexts.change_management.application.service import seed_change_management
@@ -92,6 +95,7 @@ def create_app() -> FastAPI:
     app.include_router(canvas_routes.router, prefix="/api/v1")
     app.include_router(scheduling_routes.router, prefix="/api/v1")
     app.include_router(incident_routes.router, prefix="/api/v1")
+    app.include_router(validation_routes.router, prefix="/api/v1")
 
     # Optionally serve the built SPA from the same origin (single-container deploy).
     if settings.static_dir and os.path.isdir(settings.static_dir):

@@ -317,4 +317,29 @@ export const Incidents = {
   remediate: (id: string) => api.post<{ workflow_id: string }>(`/incidents/${id}/remediate`),
 };
 
+export interface ValidationPolicy {
+  id: string;
+  required_fields: string[];
+  max_review_age_days: number;
+  enforce_cmdb_consistency: boolean;
+  reject_retired: boolean;
+  reject_unknown_ci: boolean;
+  block_destructive_on_cluster: boolean;
+  updated_by: string;
+  updated_at: string;
+}
+
+export interface ReviewStatus {
+  fresh: number;
+  stale: number;
+  never_reviewed: number;
+  total: number;
+  oldest: { id: string; name: string; last_reviewed: string; vendor: string }[];
+}
+
+export const Validation = {
+  policy: () => api.get<ValidationPolicy>("/governance/validation/policy"),
+  reviewStatus: () => api.get<ReviewStatus>("/governance/validation/review-status"),
+};
+
 export const getHealth = () => api.get<Health>("/health");

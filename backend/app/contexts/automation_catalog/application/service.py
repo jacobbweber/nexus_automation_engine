@@ -70,9 +70,14 @@ class CatalogService:
         return self.get(template_id)
 
     def approve(self, template_id: str) -> Template:
-        self.get(template_id)
-        self.repo.set_state(template_id, ApprovalState.APPROVED, updated_at=_now())
-        return self.get(template_id)
+        # Approval stamps origin-story metadata: approval IS a review.
+        template = self.get(template_id)
+        now = _now()
+        template.approval_state = ApprovalState.APPROVED
+        template.approved_date = now
+        template.last_reviewed = now
+        template.updated_at = now
+        return self.repo.upsert(template)
 
     def retire(self, template_id: str) -> Template:
         self.get(template_id)
@@ -96,6 +101,33 @@ class CatalogService:
         capability = Capability.EXECUTE_LIVE if live else Capability.EXECUTE_CHECK
         if not has_capability(user, capability):
             raise EntitlementError("Not entitled to execute this template in the requested mode")
+
+        # Origin-story validation (3.0): pre-launch CI/metadata lifecycle gate, governed by the
+        # single admin-editable policy. Rejects runs whose target contradicts the CMDB.
+        from app.platform.config import get_settings
+
+        if get_settings().enforce_lifecycle_validation:
+            from app.contexts.lifecycle_validation.application.service import ValidationService
+            from app.contexts.lifecycle_validation.domain.models import AutomationMeta
+
+            target = (
+                survey_answers.get("target")
+                or survey_answers.get("inventory")
+                or survey_answers.get("name")
+                or survey_answers.get("object")
+            )
+            meta = AutomationMeta(
+                name=template.name,
+                action=template.action,
+                risk=str(template.risk),
+                authored_by=template.owner,
+                approved_date=template.approved_date,
+                last_updated=template.updated_at,
+                last_reviewed=template.last_reviewed,
+                ci_type=template.ci_type,
+                ci_heritage=template.ci_heritage,
+            )
+            await ValidationService().enforce_for_execution(meta, str(target) if target else None)
 
         # Change control (2.0): apply any policy bound to this template. May raise if a
         # CAB-required change is not yet approved for a live run.
