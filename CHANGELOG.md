@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M20 — mode engine** (A4, #65): a `ModeProvider` applies the resolved light/dark to
+  `<html data-mode>` with **System / Light / Dark**, **auto-sundown** (manual schedule, overnight
+  wrap), **per-area override**, and `localStorage` persistence; OS-preference is followed in System
+  mode; the dark/light swap cross-fades (instant under reduced-motion). A segmented `ModeToggle`
+  lives in the app shell. Pure `resolveMode` logic is unit-tested.
 - **M20 — token foundation** (experience architecture, ADR-0007): introduced the layered
   resolution cascade (`shared/theme/tokens.css` — `primitives → semantic → mode → area → theme →
   density → a11y`), the full **semantic token contract** (incl. protected `--run-*` status tokens),

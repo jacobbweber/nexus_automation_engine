@@ -2,6 +2,7 @@ import { AlertTriangle, Boxes, LayoutDashboard, Library, LogOut, ShieldCheck, Se
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/app/auth";
+import { ModeToggle } from "@/shared/theme/ModeToggle";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: <LayoutDashboard size={18} />, end: true },
@@ -55,6 +56,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           </NavLink>
         ))}
         <div style={{ marginTop: "auto", fontSize: "0.78rem", color: "var(--text-muted)" }}>
+          <div style={{ padding: "8px 4px" }}>
+            <ModeToggle />
+          </div>
           <div style={{ padding: "8px" }}>
             {user?.username} · <span style={{ color: "var(--color-accent)" }}>{user?.global_role}</span>
           </div>

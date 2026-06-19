@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
 import { AuthProvider, useAuth } from "@/app/auth";
+import { ModeProvider } from "@/shared/theme/mode";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { CanvasPage } from "@/features/canvas/CanvasPage";
 import { CatalogPage } from "@/features/catalog/CatalogPage";
@@ -36,13 +37,15 @@ function Protected() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/*" element={<Protected />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <ModeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/*" element={<Protected />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ModeProvider>
   );
 }
