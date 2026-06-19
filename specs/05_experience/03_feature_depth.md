@@ -81,8 +81,11 @@ for most of this (`orchestration_canvas`, `automation_catalog`, `connectors`,
 
 - **Approvals inbox**: workflows submitted for review; approve/request-changes/reject with
   comments; review history as audit.
-- **Change calendar**: change records (CHG) + scheduled runs + maintenance windows in one view;
-  conflict detection.
+- **Change calendar**: change records (CHG) are **pulled from the ServiceNow CMDB connector
+  (simulated)** as the system of record — not stored locally — and shown alongside scheduled runs +
+  maintenance windows in one view, with conflict detection. The ServiceNow connector port gains a
+  change-record query so the calendar reads CHGs (number, window, state, assignment group, affected
+  CIs) from the (simulated) system of record.
 - **Validation policy editor**: the single admin-editable `ValidationPolicy` (required fields, max
   review age, CMDB-consistency toggles, destructive-on-cluster block).
 - **Pruning & review dashboard**: fresh/stale/never-reviewed automations + oldest, with bulk
@@ -107,13 +110,8 @@ for most of this (`orchestration_canvas`, `automation_catalog`, `connectors`,
 - **Notifications & rules**, **command-palette config**, **backup / export** (portable JSON, no
   lock-in).
 
-## Optional Assistant (local-model, off by default)
-
-A forward-looking, **optional** local-model assist layer behind an adapter (same port pattern as
-connectors; local only, no paid services). It augments — never gates — operator work:
-
-- **Explain this failure** (summarize a run's logs + likely cause), **suggest remediation**
-  (propose a remediation workflow from a failing incident), **draft a change record** from a
-  workflow, **describe → workflow scaffold** (natural language to a draft canvas graph for the
-  operator to refine), **summarize a long run**. Every output is a draft the operator reviews; the
-  deterministic engine remains the source of truth.
+> **No AI/LLM.** Nexus is a deterministic automation control plane. There is no in-product AI,
+> assistant, or model anywhere in the system (see
+> [ADR-0008](../adr/ADR-0008-no-in-product-ai.md)). Helpful surfaces like "similar past failures"
+> and "suggested remediations" are computed from **historical run/incident data and rules**, not a
+> model.

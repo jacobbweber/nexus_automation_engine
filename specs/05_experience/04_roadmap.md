@@ -5,7 +5,7 @@ the source the GitHub issues are generated from. Milestones continue the existin
 (3.0 ended at M18; M19 delivered canvas depth + the workflow library).
 
 Labels follow the repo scheme: `type:feat|chore|test|docs`, `area:design-system|theming|a11y|
-frontend|canvas|catalog|console|incidents|governance|admin|platform|ai`.
+frontend|canvas|catalog|console|incidents|governance|admin|platform`. **No AI/LLM** (ADR-0008).
 
 ## Critical path
 
@@ -24,14 +24,15 @@ frontend|canvas|catalog|console|incidents|governance|admin|platform|ai`.
 7. **A11y + contrast CI harness** — axe + contrast + 44px/focus lint in CI. `[area:a11y][type:test]` *(dep 6)*
 
 ### EPIC B — Theme system & Theme Studio *(M21)*
-8. **Area-context override layer** — accent/tint/persona retint on area switch; collision check vs status. `[area:theming]` *(dep 4,6)*
+8. **Area-context override layer** — accent/tint retint on area switch; collision check vs status. `[area:theming]` *(dep 4,6)*
 9. **`nexus-theme/v1` schema + TS types + deterministic validator** — schema, key allow-list, completeness. `[area:theming]` *(dep 2)*
 10. **Contrast/APCA + protected-status validation engine** — WCAG/APCA pass, status distinguishability, colorblind sim, auto-nudge. `[area:a11y][area:theming]` *(dep 9)*
 11. **Ship the 10 built-in themes** — author + snapshot-test each across mode×area. `[area:theming]` *(dep 8,10)*
 12. **Theme volume + server-side validation + hot-reload** — Docker volumes, `GET /api/v1/themes`, SSE `theme:changed`. `[area:platform][area:theming]` *(dep 9)*
 13. **Theme Studio: deterministic form + live kitchen-sink preview + diff** — `[area:theming]` *(dep 11)*
 14. **Theme import/export + theme library UI** (Platform/System). `[area:theming]` *(dep 12)*
-15. **Optional local-model theme assist (adapter, off by default)** — `[area:ai][area:theming]` *(dep 10,13)*
+
+*(B15 "local-model theme assist" removed — no AI/LLM in the system; see ADR-0008.)*
 
 ### EPIC C — Shell & cross-cutting primitives *(M21)*
 16. **App shell + area navigation rail** (collapsible, retinting, keyboard). `[area:frontend]` *(dep 8)*
@@ -66,12 +67,12 @@ frontend|canvas|catalog|console|incidents|governance|admin|platform|ai`.
 35. **Run compare + controls (retry/cancel/re-run/resume) + step timeline.** `[area:console]` *(dep 34)*
 
 ### EPIC I — Incidents depth *(M23)*
-36. **RCA assist: similar-past-failures + suggested remediations + failure-mode tagging.** `[area:incidents]`
+36. **RCA assist: similar-past-failures + suggested remediations + failure-mode tagging** (computed from historical run/incident data + rules, not AI). `[area:incidents]`
 37. **Trends: top failing automations + MTTR by domain + recurring-failure detection.** `[area:incidents]`
 
 ### EPIC J — Governance & Admin depth *(M23)*
 38. **Approvals inbox + review history audit.** `[area:governance]`
-39. **Change calendar (CHG + schedules + windows) + conflict detection.** `[area:governance]`
+39. **Change calendar — CHGs pulled from the ServiceNow CMDB connector (simulated) + schedules + windows + conflict detection.** Adds a change-record query to the ServiceNow connector port. `[area:governance][area:connectors]`
 40. **Validation policy editor + pruning/review dashboard.** `[area:governance]`
 41. **RBAC matrix editor + users/entitlements + capability registry.** `[area:admin]`
 
@@ -84,4 +85,5 @@ frontend|canvas|catalog|console|incidents|governance|admin|platform|ai`.
 ### EPIC L — Hardening & polish *(M23)*
 46. **Theme × area × mode × density visual-regression matrix.** `[type:test][area:theming]`
 47. **Keyboard-only + screen-reader pass per surface; AAA spot-checks.** `[area:a11y][type:test]`
-48. **Optional Assistant: explain-failure / suggest-remediation / draft-CHG / describe→scaffold (local-model adapter, off by default).** `[area:ai]` *(dep 15)*
+
+*(L48 "Optional Assistant" removed — no AI/LLM in the system; see ADR-0008.)*
