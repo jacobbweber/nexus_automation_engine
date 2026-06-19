@@ -40,6 +40,7 @@ export function CanvasPage() {
   const [zoom, setZoom] = useState(1);
   const [nodeStates, setNodeStates] = useState<Record<string, StepStatus>>({});
   const [approval, setApproval] = useState<{ run_id: string; node_id: string; message: string } | null>(null);
+  const [runForm, setRunForm] = useState<Record<string, unknown> | null>(null);
   const [caps, setCaps] = useState<Capabilities[]>([]);
   const [specs, setSpecs] = useState<NodeTypeSpec[]>([]);
   const [running, setRunning] = useState(false);
@@ -157,12 +158,31 @@ export function CanvasPage() {
     Canvas.list().then(setWorkflows);
   }
 
-  async function run() {
+  // The Start node's declared inputs (ad-hoc run parameters the operator supplies at launch).
+  function startInputs(): { name: string; type: string; default: unknown }[] {
+    const start = nodes.find((n) => n.type === "start");
+    const raw = (start?.data.inputs as { name: string; type: string; default: unknown }[]) ?? [];
+    return raw.filter((i) => i && i.name);
+  }
+
+  function runClicked() {
+    const inputs = startInputs();
+    if (inputs.length > 0) {
+      const seed: Record<string, unknown> = {};
+      for (const i of inputs) seed[i.name] = i.default ?? "";
+      setRunForm(seed);
+    } else {
+      void doRun({});
+    }
+  }
+
+  async function doRun(inputs: Record<string, unknown>) {
+    setRunForm(null);
     if (!currentId) await save();
     const id = currentId ?? (await Canvas.save({ name, graph: { nodes, edges, viewport: {} } })).id;
     setNodeStates({});
     setRunning(true);
-    const { run_id } = await Canvas.run(id, {});
+    const { run_id } = await Canvas.run(id, inputs);
     const ws = openSocket(`/canvas/runs/${run_id}/stream`);
     ws.onmessage = (ev) => {
       const d = JSON.parse(ev.data);
@@ -203,7 +223,7 @@ export function CanvasPage() {
           onLoad={load}
           onNew={newWorkflow}
           onSave={save}
-          onRun={run}
+          onRun={runClicked}
           onSubmit={submitForReview}
           running={running}
         />
@@ -268,6 +288,31 @@ export function CanvasPage() {
             <div style={{ display: "flex", gap: 10 }}>
               <Button onClick={() => resolveApproval(true)}>Approve</Button>
               <Button variant="ghost" onClick={() => resolveApproval(false)}>Reject</Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {runForm && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "grid", placeItems: "center" }}>
+          <div style={{ width: 400, padding: 24, borderRadius: 12, background: "var(--surface)", border: "1px solid var(--border)" }}>
+            <h3 style={{ marginTop: 0 }}>Run inputs</h3>
+            <p style={{ color: "var(--text-muted)", fontSize: "0.82rem", marginTop: 0 }}>
+              Supply the workflow's declared inputs for this run.
+            </p>
+            {startInputs().map((i) => (
+              <label key={i.name} style={{ display: "block", margin: "10px 0" }}>
+                <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>{i.name} <em style={{ opacity: 0.7 }}>({i.type})</em></span>
+                <input
+                  type={i.type === "number" ? "number" : "text"}
+                  value={String(runForm[i.name] ?? "")}
+                  onChange={(e) => setRunForm({ ...runForm, [i.name]: i.type === "number" ? Number(e.target.value) : e.target.value })}
+                  style={{ width: "100%", marginTop: 4, padding: "7px 9px", borderRadius: 7, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--text)", boxSizing: "border-box" }}
+                />
+              </label>
+            ))}
+            <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+              <Button onClick={() => doRun(runForm)}>▶ Run</Button>
+              <Button variant="ghost" onClick={() => setRunForm(null)}>Cancel</Button>
             </div>
           </div>
         </div>
