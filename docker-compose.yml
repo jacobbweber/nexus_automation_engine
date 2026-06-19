@@ -1,0 +1,18 @@
+# Local single-container run: builds the SPA + API into one image and serves on :8000.
+services:
+  nexus:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nexus-automation-engine:local
+    ports:
+      - "8000:8000"
+    environment:
+      NEXUS_ENVIRONMENT: local
+      NEXUS_SIMULATION_MODE: "true"
+    volumes:
+      - nexus_data:/data
+    restart: unless-stopped
+
+volumes:
+  nexus_data:
