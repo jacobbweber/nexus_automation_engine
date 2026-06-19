@@ -32,6 +32,8 @@ class JobSubmission(BaseModel):
     diff_mode: bool = False
     initiated_by: str = "operator"
     asset_group: str | None = None
+    # Optional change-management linkage (set when change control applies).
+    change_number: str | None = None
     # Optional canvas linkage (set when a job originates from a workflow run/step).
     workflow_run_id: str | None = None
     workflow_node_id: str | None = None
@@ -55,6 +57,7 @@ class Job(BaseModel):
     diff_mode: bool = False
     initiated_by: str
     asset_group: str | None = None
+    change_number: str | None = None
     workflow_run_id: str | None = None
     workflow_node_id: str | None = None
     error_message: str | None = None
