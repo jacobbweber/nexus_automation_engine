@@ -18,6 +18,7 @@ from app.contexts.change_management.api import routes as change_routes
 from app.contexts.connectors.api import routes as connectors_routes
 from app.contexts.execution_engine.api import routes as execution_routes
 from app.contexts.identity_access.api import routes as identity_routes
+from app.contexts.incident_management.api import routes as incident_routes
 from app.contexts.orchestration_canvas.api import routes as canvas_routes
 from app.contexts.scheduling.api import routes as scheduling_routes
 from app.platform import health
@@ -82,6 +83,7 @@ def create_app() -> FastAPI:
     app.include_router(execution_routes.router, prefix="/api/v1")
     app.include_router(canvas_routes.router, prefix="/api/v1")
     app.include_router(scheduling_routes.router, prefix="/api/v1")
+    app.include_router(incident_routes.router, prefix="/api/v1")
 
     # Optionally serve the built SPA from the same origin (single-container deploy).
     if settings.static_dir and os.path.isdir(settings.static_dir):

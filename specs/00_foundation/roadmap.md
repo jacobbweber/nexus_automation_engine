@@ -75,4 +75,6 @@ context specs before building (SDD).
   - M14 (catalog-at-scale UX + automation detail + animated Logic-Flow tab): **done** — faceted
     catalog, detail drawer (docs/params/logic-flow), Markdown + animated SVG components.
   - M15 (governed submission/review): **done** — submit→review lifecycle, review inbox, audit trail.
-  - M16 incident kanban · M17 command palette/analytics: **next.**
+  - M16 (incident kanban): **done** — auto-capture failures, triage board, convert-to-remediation.
+  - M17 command palette/analytics: **next.** Then the operator-requested CMDB lifecycle-validation
+    feature + the 4 formal audits (security / quality / architecture / best-practice).

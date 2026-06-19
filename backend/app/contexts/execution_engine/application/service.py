@@ -103,6 +103,15 @@ class ExecutionService:
             self.repo.set_status(
                 job_id, JobStatus.FAILED, finished_at=_now(), error_message=message
             )
+            # Auto-capture the failure as an incident (best-effort, never raises).
+            from app.contexts.incident_management.application.service import capture_failure
+
+            capture_failure(
+                title=f"Job failed: {job.name}",
+                source_type="job",
+                source_id=job_id,
+                summary=message,
+            )
             await self.broker.publish(
                 job_id, {"type": "status", "status": JobStatus.FAILED.value, "error": message}
             )

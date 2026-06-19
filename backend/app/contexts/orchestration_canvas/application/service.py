@@ -28,6 +28,18 @@ def _now() -> datetime:
     return datetime.now(UTC)
 
 
+def _capture_workflow_failure(workflow_id: str, name: str, error: str) -> None:
+    """Best-effort: open an incident when a workflow run fails."""
+    from app.contexts.incident_management.application.service import capture_failure
+
+    capture_failure(
+        title=f"Workflow failed: {name}",
+        source_type="workflow",
+        source_id=workflow_id,
+        summary=error,
+    )
+
+
 class CanvasService:
     def __init__(
         self, repository: CanvasRepository | None = None, broker: RunBroker | None = None
@@ -142,6 +154,7 @@ class CanvasService:
                 error_message=str(exc),
             )
             self.repo.save_run(run)
+            _capture_workflow_failure(workflow_id, wf.name, str(exc))
             if ws:
                 await ws({"type": "run_failed", "run_id": run_id, "error": str(exc)})
             return run
@@ -216,6 +229,7 @@ class CanvasService:
                     error_message=str(exc),
                 )
             )
+            _capture_workflow_failure(workflow_id, wf.name, str(exc))
             await _ws({"type": "run_failed", "error": str(exc)})
         finally:
             self.repo.prune_runs(workflow_id)
