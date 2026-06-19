@@ -5,22 +5,31 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [2.0.0] - 2026-06-18
+
+The **ops-engineering management layer**: Nexus 2.0 wraps execution in governed change and
+scheduling, so operations administers the *process* up front and Nexus automates the rest. Driven
+by the objective review in `specs/00_foundation/vision_2_0.md`.
+
 ### Added
-- **M12 Governance UI** (`frontend/src/features/governance/`): a Governance surface for change
-  templates (create), change records (audit table), and schedules (create/run/delete), with a new
-  nav entry. API client extended for change management + scheduling.
-- **M11 Scheduling** (`backend/app/contexts/scheduling/`): schedule workflows on interval or daily
-  triggers with optional **maintenance windows**; a background ticker dispatches due schedules
-  through the canvas. `/api/v1/schedules` CRUD + run-now (engineer-gated). Pure trigger/window
-  computation is unit-tested. 88 backend tests.
-- **2.0 vision** (`specs/00_foundation/vision_2_0.md`): the ops-engineering/DevOps objective
-  review framing Nexus as a complete management layer, with prioritized 2.0 themes.
-- **M10 Change Management** (`backend/app/contexts/change_management/`, ADR-0005): reusable change
-  templates (standard ITSM fields + CAB flag), per-resource change-control policies
-  (`auto_change_control`, `change_template_id`, `require_approved_change`), and change records
-  (CHG numbers + lifecycle). The catalog execute path opens a change per policy and stamps the
-  change number onto the job; CAB-required changes block live runs until approved. `/api/v1/change`
-  routes (engineer-gated authoring). Jobs gained an optional `change_number`. 80 backend tests.
+- **Change Management** (M10, `change_management` context, ADR-0005): reusable change templates
+  (standard ITSM fields + CAB flag), per-resource change-control policies (`auto_change_control`,
+  `change_template_id`, `require_approved_change`), and change records (CHG numbers + lifecycle).
+  The catalog execute path opens a change per policy and stamps the change number onto the job;
+  CAB-required changes block live runs until approved. `/api/v1/change` (engineer-gated). Jobs
+  gained an optional `change_number`.
+- **Scheduling** (M11, `scheduling` context): schedule workflows on interval or daily triggers
+  with optional **maintenance windows**; a background ticker dispatches due schedules through the
+  canvas. `/api/v1/schedules` CRUD + run-now.
+- **Governance UI** (M12): a frontend Governance surface for change templates, change records
+  (audit table), and schedules (create/run/delete).
+- 88 backend tests; full backend + frontend CI green.
+
+### Notes
+- Continuing on the roadmap beyond 2.0: deeper policy-as-config (theme C), platform-builder /
+  connector-SDK UX (E), and cross-functional features — drift, promotion, notifications (F).
 
 ## [1.0.0] - 2026-06-18
 

@@ -63,5 +63,8 @@ context specs before building (SDD).
   - M10 (change management): **done** — change templates, policies, records; catalog execute
     opens/stamps a change; CAB-required blocks live (ADR-0005).
   - M11 (scheduling): **done** — interval/daily schedules, maintenance windows, background ticker.
-  - M12 (governance & scheduling UI): **next** — then tag **v2.0.0**.
-  - Continuing post-2.0: policy depth (theme C), platform-builder UX (E), cross-functional (F).
+  - M12 (governance & scheduling UI): **done** — Governance surface for change + schedules.
+  - **2.0 reached.** Released **v2.0.0** (change-control + scheduling management layer).
+  - Continuing post-2.0: policy depth (theme C), platform-builder/connector-SDK UX (E),
+    cross-functional features — drift, promotion, notifications (F); plus deferred canvas node
+    types (#19) and in-container build verification (#26).
