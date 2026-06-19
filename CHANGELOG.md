@@ -6,6 +6,13 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M21 — theme schema + deterministic validator** (B9/B10, #70/#71): the `nexus-theme/v1` contract
+  (`shared/theme/theme-schema.ts`) — a theme is **data** that may only remap an allow-listed set of
+  semantic tokens for light + dark. `validateTheme()` is the sole safety gate (no AI): it checks
+  shape, the **key allow-list** (rejecting any layout/spacing/CSS-injection attempt), completeness,
+  valid hex colors, **WCAG-AA contrast** (text/bg, text/surface, muted/bg, accent-contrast/accent,
+  run-status AA-large), and **protected-status hue distinguishability**, plus a `nudgeForContrast`
+  auto-fix. Extends `contrast.ts` with hsl/hue-distance/hex helpers. Fully unit-tested.
 - **M21 — area-context overrides** (B8, #69): each Nexus surface (Dashboard/Catalog/Canvas/Library/
   Console/Incidents/Governance/Admin) retints the chrome (active nav pill, primary buttons, focus
   rings, logo) via an `@layer area` over the token contract — light + dark variants, all WCAG-AA

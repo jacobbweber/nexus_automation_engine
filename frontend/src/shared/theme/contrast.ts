@@ -43,6 +43,34 @@ export function meetsAAA(fg: string, bg: string): boolean {
   return contrastRatio(fg, bg) >= AAA_NORMAL;
 }
 
+/** HSL hue (0–360) and saturation (0–1) of a hex color. */
+export function hsl(hex: string): { h: number; s: number; l: number } {
+  const { r, g, b } = hexToRgb(hex);
+  const rn = r / 255, gn = g / 255, bn = b / 255;
+  const max = Math.max(rn, gn, bn), min = Math.min(rn, gn, bn), d = max - min;
+  const l = (max + min) / 2;
+  let h = 0;
+  if (d !== 0) {
+    if (max === rn) h = ((gn - bn) / d) % 6;
+    else if (max === gn) h = (bn - rn) / d + 2;
+    else h = (rn - gn) / d + 4;
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+  return { h, s: d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1)), l };
+}
+
+/** Shortest distance between two hues in degrees (0–180). */
+export function hueDistance(a: number, b: number): number {
+  const d = Math.abs(a - b) % 360;
+  return d > 180 ? 360 - d : d;
+}
+
+/** Validate a `#rgb` / `#rrggbb` hex string. */
+export function isHex(v: unknown): v is string {
+  return typeof v === "string" && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v.trim());
+}
+
 /** Two status colors are "distinguishable" if their contrast ratio clears a threshold — used to
  *  keep protected run statuses (running/ok/warn/failed/skipped) telling-apart-able. */
 export function distinguishable(a: string, b: string, min = 1.4): boolean {
