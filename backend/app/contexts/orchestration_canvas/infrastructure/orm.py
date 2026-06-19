@@ -20,6 +20,9 @@ class WorkflowRow(Base):
     review_state: Mapped[str] = mapped_column(String, default="draft", index=True)
     submitted_by: Mapped[str | None] = mapped_column(String, nullable=True)
     reviewed_by: Mapped[str | None] = mapped_column(String, nullable=True)
+    owner: Mapped[str] = mapped_column(String, default="", index=True)
+    team: Mapped[str] = mapped_column(String, default="", index=True)
+    tags_json: Mapped[str] = mapped_column(Text, default="[]")
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 

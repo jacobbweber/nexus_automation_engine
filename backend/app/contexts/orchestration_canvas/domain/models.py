@@ -83,8 +83,39 @@ class Workflow(BaseModel):
     review_state: ReviewState = ReviewState.DRAFT
     submitted_by: str | None = None
     reviewed_by: str | None = None
+    # Ownership/telemetry metadata — "who made this, which team owns it, how is it categorised".
+    owner: str = ""
+    team: str = ""
+    tags: list[str] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
+
+
+class WorkflowUsage(BaseModel):
+    """Run telemetry for a workflow, derived from persisted runs."""
+
+    workflow_id: str
+    run_count: int = 0
+    success_count: int = 0
+    failure_count: int = 0
+    last_run_at: datetime | None = None
+    success_rate: float = 0.0  # 0..1 over completed (success+failure) runs
+
+
+class WorkflowReport(BaseModel):
+    """A workflow library row: metadata + usage, for the reporting view."""
+
+    id: str
+    name: str
+    description: str = ""
+    owner: str = ""
+    team: str = ""
+    tags: list[str] = Field(default_factory=list)
+    review_state: ReviewState
+    node_count: int = 0
+    created_at: datetime
+    updated_at: datetime
+    usage: WorkflowUsage
 
 
 class ReviewRecord(BaseModel):

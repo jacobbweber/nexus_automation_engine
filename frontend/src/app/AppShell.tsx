@@ -1,4 +1,4 @@
-import { AlertTriangle, Boxes, LayoutDashboard, LogOut, ShieldCheck, Settings, Terminal, Workflow } from "lucide-react";
+import { AlertTriangle, Boxes, LayoutDashboard, Library, LogOut, ShieldCheck, Settings, Terminal, Workflow } from "lucide-react";
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/app/auth";
@@ -7,6 +7,7 @@ const NAV = [
   { to: "/", label: "Dashboard", icon: <LayoutDashboard size={18} />, end: true },
   { to: "/catalog", label: "Catalog", icon: <Boxes size={18} /> },
   { to: "/canvas", label: "Canvas", icon: <Workflow size={18} /> },
+  { to: "/library", label: "Library", icon: <Library size={18} /> },
   { to: "/console", label: "Console", icon: <Terminal size={18} /> },
   { to: "/incidents", label: "Incidents", icon: <AlertTriangle size={18} /> },
   { to: "/governance", label: "Governance", icon: <ShieldCheck size={18} /> },

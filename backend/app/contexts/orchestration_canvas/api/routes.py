@@ -15,6 +15,7 @@ from app.contexts.orchestration_canvas.domain.models import (
     ReviewRecord,
     Workflow,
     WorkflowGraph,
+    WorkflowReport,
     WorkflowRun,
     WorkflowVersion,
 )
@@ -34,11 +35,20 @@ class SaveWorkflowRequest(BaseModel):
     name: str
     description: str = ""
     graph: WorkflowGraph = Field(default_factory=WorkflowGraph)
+    owner: str | None = None
+    team: str | None = None
+    tags: list[str] | None = None
 
 
 @router.get("/workflows", response_model=list[Workflow])
 def list_workflows() -> list[Workflow]:
     return CanvasService().list_workflows()
+
+
+@router.get("/workflows/report", response_model=list[WorkflowReport])
+def workflow_report() -> list[WorkflowReport]:
+    """Workflow library + usage telemetry: who owns each workflow and how it's run."""
+    return CanvasService().report()
 
 
 @router.get("/workflows/{workflow_id}", response_model=Workflow)
@@ -49,7 +59,13 @@ def get_workflow(workflow_id: str) -> Workflow:
 @router.post("/workflows", response_model=Workflow)
 def save_workflow(body: SaveWorkflowRequest) -> Workflow:
     return CanvasService().save_workflow(
-        name=body.name, graph=body.graph, description=body.description, workflow_id=body.id
+        name=body.name,
+        graph=body.graph,
+        description=body.description,
+        workflow_id=body.id,
+        owner=body.owner,
+        team=body.team,
+        tags=body.tags,
     )
 
 
