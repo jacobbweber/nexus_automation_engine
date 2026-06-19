@@ -850,8 +850,7 @@ def _library() -> list[WorkflowSpec]:
             "l.meyer",
             ["dynatrace", "sre", "remediation", "self-healing"],
             PUB,
-            "Probe Dynatrace for high CPU; if over threshold, scale out and re-check, else "
-            "no-op.",
+            "Probe Dynatrace for high CPU; if over threshold, scale out and re-check, else no-op.",
             [
                 (
                     "start",
