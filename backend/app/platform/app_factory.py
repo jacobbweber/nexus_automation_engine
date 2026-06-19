@@ -27,6 +27,7 @@ from app.platform.config import get_settings
 from app.platform.database import dispose_db, init_db
 from app.platform.errors import register_error_handlers
 from app.platform.security_middleware import register_security_middleware
+from app.platform.theming import routes as theming_routes
 
 
 @asynccontextmanager
@@ -108,6 +109,7 @@ def create_app() -> FastAPI:
     app.include_router(scheduling_routes.router, prefix="/api/v1")
     app.include_router(incident_routes.router, prefix="/api/v1")
     app.include_router(validation_routes.router, prefix="/api/v1")
+    app.include_router(theming_routes.router, prefix="/api/v1")
 
     # Optionally serve the built SPA from the same origin (single-container deploy).
     if settings.static_dir and os.path.isdir(settings.static_dir):

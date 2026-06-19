@@ -413,4 +413,26 @@ export const Validation = {
   reviewStatus: () => api.get<ReviewStatus>("/governance/validation/review-status"),
 };
 
+export interface ServerThemeDoc {
+  $schema: string;
+  id: string;
+  name: string;
+  base: string;
+  tokens: { light: Record<string, string>; dark: Record<string, string> };
+  blurb?: string;
+}
+
+export const Themes = {
+  list: () => api.get<{ themes: ServerThemeDoc[]; revision: number }>("/themes"),
+  save: (doc: ServerThemeDoc) =>
+    api.post<{ status: string; id: string; warnings: string[] }>("/themes", doc),
+  remove: (id: string) => api.del<{ deleted: boolean }>(`/themes/${id}`),
+};
+
+// SSE stream of theme changes on the server volume (hot-reload). EventSource can't send headers,
+// which is fine — the stream is non-sensitive presentational data and is unauthenticated.
+export function openThemeStream(): EventSource {
+  return new EventSource("/api/v1/themes/stream");
+}
+
 export const getHealth = () => api.get<Health>("/health");

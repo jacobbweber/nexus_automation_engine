@@ -45,6 +45,8 @@ class Settings(BaseSettings):
     enforce_lifecycle_validation: bool = True
     # SSRF guard: allow the http_request canvas node to reach private/loopback/link-local hosts.
     http_allow_private: bool = False
+    # Theming: directory of user/Studio-authored theme JSON (writable, mounted as a Docker volume).
+    themes_dir: str = "./data/themes"
 
 
 @lru_cache
