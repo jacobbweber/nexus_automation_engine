@@ -5,7 +5,15 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- **2.0 vision** (`specs/00_foundation/vision_2_0.md`): the ops-engineering/DevOps objective
+  review framing Nexus as a complete management layer, with prioritized 2.0 themes.
+- **M10 Change Management** (`backend/app/contexts/change_management/`, ADR-0005): reusable change
+  templates (standard ITSM fields + CAB flag), per-resource change-control policies
+  (`auto_change_control`, `change_template_id`, `require_approved_change`), and change records
+  (CHG numbers + lifecycle). The catalog execute path opens a change per policy and stamps the
+  change number onto the job; CAB-required changes block live runs until approved. `/api/v1/change`
+  routes (engineer-gated authoring). Jobs gained an optional `change_number`. 80 backend tests.
 
 ## [1.0.0] - 2026-06-18
 

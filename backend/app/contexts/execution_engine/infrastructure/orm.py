@@ -23,6 +23,7 @@ class JobRow(Base):
     diff_mode: Mapped[bool] = mapped_column(default=False)
     initiated_by: Mapped[str] = mapped_column(String, nullable=False, index=True)
     asset_group: Mapped[str | None] = mapped_column(String, nullable=True)
+    change_number: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
     workflow_run_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
     workflow_node_id: Mapped[str | None] = mapped_column(String, nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)

@@ -85,6 +85,14 @@ class CatalogService:
         if not has_capability(user, capability):
             raise EntitlementError("Not entitled to execute this template in the requested mode")
 
+        # Change control (2.0): apply any policy bound to this template. May raise if a
+        # CAB-required change is not yet approved for a live run.
+        from app.contexts.change_management.application.service import ChangeService
+
+        change_number = ChangeService().evaluate_for_execution(
+            resource_type="template", resource_id=template_id, initiated_by=user.username, live=live
+        )
+
         params = {**template.default_params, **survey_answers}
         submission = JobSubmission(
             name=template.name,
@@ -94,5 +102,6 @@ class CatalogService:
             check_mode=check_mode,
             diff_mode=diff_mode,
             initiated_by=user.username,
+            change_number=change_number,
         )
         return await self.execution.submit_and_run(submission)
