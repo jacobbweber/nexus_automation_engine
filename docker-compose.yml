@@ -10,9 +10,13 @@ services:
     environment:
       NEXUS_ENVIRONMENT: local
       NEXUS_SIMULATION_MODE: "true"
+      # User/Studio-authored themes persist on a writable volume (server-validated on save).
+      NEXUS_THEMES_DIR: /data/themes
     volumes:
       - nexus_data:/data
+      - nexus_themes:/data/themes
     restart: unless-stopped
 
 volumes:
   nexus_data:
+  nexus_themes:

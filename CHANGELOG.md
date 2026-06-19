@@ -6,6 +6,13 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M21 — theme service: volume + server-side validation + hot-reload** (B12, #73): a backend
+  `theming` platform module persists user/Studio themes to a writable directory (mounted as the
+  `nexus_themes` Docker volume) and serves only themes that pass a **Python port of the
+  deterministic validator** (allow-list + WCAG-AA, mirroring the frontend gate). `GET /themes`
+  lists validated themes, `POST /themes` validates + saves (auth required; 422 on violation),
+  `GET /themes/stream` is an SSE feed emitting `theme:changed` on volume changes. The frontend
+  merges server themes into the picker and **hot-reloads** via the stream. No AI anywhere.
 - **M21 — 10 built-in themes** (B11, #72): Signal, Paper, Midnight Ops, Slate Pro, Focus Flow +
   Calm Clarity (ADHD/ADD), High Contrast (AAA), Terminal, Daylight, Ember — each built from the
   validated base + overrides and **gated through `validateTheme` in CI** (every theme passes the
