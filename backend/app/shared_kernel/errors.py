@@ -51,3 +51,9 @@ class AuthenticationError(NexusError):
     """Authentication failed or is missing. 401."""
 
     status_code = 401
+
+
+class RateLimitError(NexusError):
+    """Too many requests (e.g. repeated failed logins). 429."""
+
+    status_code = 429

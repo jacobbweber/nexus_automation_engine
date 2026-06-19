@@ -86,7 +86,7 @@ spine. Gaps above are about *enforcement coverage*, not absence of controls.
 - [x] S2 JWT default-secret startup guard (refuses to boot non-local/test on the dev secret).
 - [ ] S1 (remaining) WebSocket auth via query-param token; entitlement on canvas run; auth on
       catalog/connectors browse.
-- [ ] S2 login throttling
+- [x] S2 login throttling (in-memory: 5 failures / 5 min per username → 429; cleared on success).
 - [x] S2 centralized execution gate — the M18 lifecycle-validation gate enforces metadata + CMDB
       consistency on the catalog execute path (extend to direct /jobs + canvas next).
 - [x] S3 SSRF guard on the `http_request` node (blocks loopback/private/link-local/metadata;
