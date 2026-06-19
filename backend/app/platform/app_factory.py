@@ -56,8 +56,16 @@ async def _lifespan(_app: FastAPI):
     dispose_db()
 
 
+_DEFAULT_JWT_SECRET = "dev-only-not-a-secret-change-me-in-prod"
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
+    # Security audit S2: never run a non-local environment on the dev JWT secret.
+    if settings.environment not in ("local", "test") and settings.jwt_secret == _DEFAULT_JWT_SECRET:
+        raise RuntimeError(
+            "NEXUS_JWT_SECRET must be set to a strong secret outside local/test environments"
+        )
     app = FastAPI(
         title=settings.app_name,
         version=settings.version,

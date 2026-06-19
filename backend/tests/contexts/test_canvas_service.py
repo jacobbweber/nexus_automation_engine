@@ -134,7 +134,14 @@ def test_workflow_crud_api(client):
     listed = client.get("/api/v1/canvas/workflows").json()
     assert any(w["id"] == wf_id for w in listed)
 
-    run = client.post(f"/api/v1/canvas/workflows/{wf_id}/run", json={"inputs": {}})
+    tok = client.post(
+        "/api/v1/auth/login", json={"username": "operator", "password": "operator123"}
+    ).json()["access_token"]
+    run = client.post(
+        f"/api/v1/canvas/workflows/{wf_id}/run",
+        json={"inputs": {}},
+        headers={"Authorization": f"Bearer {tok}"},
+    )
     assert run.status_code == 200
     assert run.json()["run_id"].startswith("run_")
 

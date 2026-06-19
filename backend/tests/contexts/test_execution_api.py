@@ -26,28 +26,48 @@ def _clean_db():
     database.reset_for_tests()
 
 
-def test_execute_returns_pending_and_job_is_retrievable():
+def _auth(client, user="operator", pw="operator123"):
+    tok = client.post("/api/v1/auth/login", json={"username": user, "password": pw}).json()[
+        "access_token"
+    ]
+    return {"Authorization": f"Bearer {tok}"}
+
+
+def test_execute_requires_authentication():
     with TestClient(create_app()) as client:
         resp = client.post(
             "/api/v1/jobs/execute",
+            json={"name": "demo", "connector": "terraform", "action": "plan"},
+        )
+    assert resp.status_code == 401  # security audit S1
+
+
+def test_execute_returns_pending_and_records_authenticated_executor():
+    with TestClient(create_app()) as client:
+        headers = _auth(client)
+        resp = client.post(
+            "/api/v1/jobs/execute",
+            headers=headers,
             json={
                 "name": "demo",
                 "connector": "terraform",
                 "action": "plan",
                 "params": {"workspace": "prod"},
+                "initiated_by": "spoofed",  # must be ignored; server uses the token identity
             },
         )
         assert resp.status_code == 200
         job_id = resp.json()["job_id"]
         assert resp.json()["status"] == "PENDING"
-        got = client.get(f"/api/v1/jobs/{job_id}")
+        got = client.get(f"/api/v1/jobs/{job_id}", headers=headers)
         assert got.status_code == 200
         assert got.json()["name"] == "demo"
+        assert got.json()["initiated_by"] == "operator"  # not "spoofed"
 
 
 def test_get_missing_job_404():
     with TestClient(create_app()) as client:
-        assert client.get("/api/v1/jobs/nope").status_code == 404
+        assert client.get("/api/v1/jobs/nope", headers=_auth(client)).status_code == 404
 
 
 def test_list_jobs_endpoint():
@@ -56,7 +76,7 @@ def test_list_jobs_endpoint():
         JobSubmission(name="x", connector=ConnectorKind.SCRIPT, action="run"), created_at=_dt()
     )
     with TestClient(create_app()) as client:
-        resp = client.get("/api/v1/jobs")
+        resp = client.get("/api/v1/jobs", headers=_auth(client))
     assert resp.status_code == 200
     assert len(resp.json()) >= 1
 
@@ -99,7 +119,7 @@ def test_telemetry_endpoint():
     )
     repo.set_status(job.id, JobStatus.SUCCESS, started_at=_dt(), finished_at=_dt())
     with TestClient(create_app()) as client:
-        resp = client.get(f"/api/v1/telemetry/{job.id}?seconds=60")
+        resp = client.get(f"/api/v1/telemetry/{job.id}?seconds=60", headers=_auth(client))
     assert resp.status_code == 200
     assert len(resp.json()["samples"]) > 0
 
