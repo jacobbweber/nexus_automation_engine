@@ -7,6 +7,7 @@ import { CatalogPage } from "@/features/catalog/CatalogPage";
 import { ConsolePage } from "@/features/console/ConsolePage";
 import { AdminPage } from "@/features/admin/AdminPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
+import { GovernancePage } from "@/features/governance/GovernancePage";
 
 function Protected() {
   const { user, loading } = useAuth();
@@ -21,6 +22,7 @@ function Protected() {
         <Route path="/catalog" element={<CatalogPage />} />
         <Route path="/canvas" element={<CanvasPage />} />
         <Route path="/console" element={<ConsolePage />} />
+        <Route path="/governance" element={<GovernancePage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
