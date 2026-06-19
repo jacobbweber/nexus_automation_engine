@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M11 Scheduling** (`backend/app/contexts/scheduling/`): schedule workflows on interval or daily
+  triggers with optional **maintenance windows**; a background ticker dispatches due schedules
+  through the canvas. `/api/v1/schedules` CRUD + run-now (engineer-gated). Pure trigger/window
+  computation is unit-tested. 88 backend tests.
 - **2.0 vision** (`specs/00_foundation/vision_2_0.md`): the ops-engineering/DevOps objective
   review framing Nexus as a complete management layer, with prioritized 2.0 themes.
 - **M10 Change Management** (`backend/app/contexts/change_management/`, ADR-0005): reusable change

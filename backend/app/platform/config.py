@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     seed_demo_data: bool = True
     # When set to a built frontend dist directory, the API also serves the SPA (single container).
     static_dir: str | None = None
+    # Background scheduler (dispatches due schedules). Tests disable it.
+    scheduler_enabled: bool = True
+    scheduler_tick_seconds: float = 30.0
 
 
 @lru_cache
