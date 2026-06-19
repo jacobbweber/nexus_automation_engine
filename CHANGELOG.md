@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M21 — ⌘K command palette** (C17, #78): a global, keyboard-first "find-and-run anything"
+  overlay (⌘K / Ctrl-K) that fuzzy-searches areas, saved workflows (deep-linking into the canvas),
+  and quick actions, with recents and arrow/enter/esc navigation. Dependency-free fuzzy matcher
+  (unit-tested) with start + contiguous-run bonuses.
 - **M21 — collapsible, keyboard-navigable nav rail** (C16, #77): the app-shell rail collapses to
   an icon-only strip (persisted), with tooltips when collapsed, and supports arrow-key roving focus
   (Up/Down/Home/End) across nav items plus a proper `<nav aria-label>` landmark. Active-item +

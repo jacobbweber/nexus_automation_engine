@@ -18,6 +18,7 @@ import { useMode } from "@/shared/theme/mode";
 import { ModeToggle } from "@/shared/theme/ModeToggle";
 import { DisplayControls } from "@/shared/theme/DisplayControls";
 import { ThemePicker } from "@/shared/theme/ThemePicker";
+import { CommandPalette } from "@/features/command-palette/CommandPalette";
 
 const NAV = [
   { to: "/", area: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} />, end: true },
@@ -182,6 +183,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
       <main style={{ flex: 1, overflow: "auto" }}>{children}</main>
+      <CommandPalette />
     </div>
   );
 }
