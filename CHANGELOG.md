@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M21 — notifications feed** (C18, #79): a non-blocking bell in the shell that aggregates
+  **open incidents, pending approvals, and recently finished runs** (derived from existing
+  endpoints — no new backend), with an unread badge, mark-all-seen on open, and click-through to
+  the relevant area. Pure `buildNotifications` mapping is unit-tested.
 - **M21 — ⌘K command palette** (C17, #78): a global, keyboard-first "find-and-run anything"
   overlay (⌘K / Ctrl-K) that fuzzy-searches areas, saved workflows (deep-linking into the canvas),
   and quick actions, with recents and arrow/enter/esc navigation. Dependency-free fuzzy matcher

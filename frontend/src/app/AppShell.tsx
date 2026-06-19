@@ -19,6 +19,7 @@ import { ModeToggle } from "@/shared/theme/ModeToggle";
 import { DisplayControls } from "@/shared/theme/DisplayControls";
 import { ThemePicker } from "@/shared/theme/ThemePicker";
 import { CommandPalette } from "@/features/command-palette/CommandPalette";
+import { NotificationsBell } from "@/features/notifications/NotificationsBell";
 
 const NAV = [
   { to: "/", area: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} />, end: true },
@@ -135,6 +136,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
 
         <div style={{ marginTop: "auto", fontSize: "0.78rem", color: "var(--text-muted)" }}>
+          <div style={{ padding: "0 0 6px" }}>
+            <NotificationsBell collapsed={collapsed} />
+          </div>
           {!collapsed && (
             <>
               <div style={{ padding: "8px 4px" }}>
