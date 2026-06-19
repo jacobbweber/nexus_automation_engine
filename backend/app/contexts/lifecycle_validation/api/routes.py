@@ -56,7 +56,7 @@ def review_status() -> ReviewBucket:
     """Pruning & review dashboard: break automations down by review freshness."""
     policy = ValidationService().get_policy()
     cutoff = datetime.now(UTC) - timedelta(days=policy.max_review_age_days)
-    templates = CatalogService().list()  # approved building blocks
+    templates = CatalogService().list_all()  # approved building blocks
     bucket = ReviewBucket(total=len(templates))
     dated = []
     for t in templates:

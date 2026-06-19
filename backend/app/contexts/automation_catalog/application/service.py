@@ -49,7 +49,7 @@ class CatalogService:
             raise NotFoundError(f"Template {template_id} not found")
         return template
 
-    def list(
+    def list_all(
         self,
         *,
         approval_state: ApprovalState | None = None,
@@ -57,7 +57,7 @@ class CatalogService:
         vendor: str | None = None,
         search: str | None = None,
     ) -> list[Template]:
-        return self.repo.list(
+        return self.repo.list_all(
             approval_state=approval_state, domain=domain, vendor=vendor, search=search
         )
 

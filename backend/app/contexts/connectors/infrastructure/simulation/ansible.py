@@ -67,9 +67,13 @@ class AnsibleSimConnector:
         if request.action not in {"run_job_template", "run"}:
             raise ConnectorError(f"Ansible: unknown action {request.action!r}")
 
-        playbooks = request.params.get("playbooks") or ["site.yml"]
-        if isinstance(playbooks, str):
-            playbooks = [playbooks]
+        raw_playbooks = request.params.get("playbooks") or ["site.yml"]
+        if isinstance(raw_playbooks, str):
+            playbooks: list[str] = [raw_playbooks]
+        elif isinstance(raw_playbooks, list):
+            playbooks = [str(p) for p in raw_playbooks]
+        else:
+            playbooks = ["site.yml"]
         hosts = _resolve_hosts(request.params.get("inventory"))
         mode = " (CHECK MODE)" if request.check_mode else ""
 

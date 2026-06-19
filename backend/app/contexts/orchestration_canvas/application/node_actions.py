@@ -178,7 +178,7 @@ def _ssrf_guard(url: str) -> None:
         candidates = [host] if ipaddress.ip_address(host) else []
     except ValueError:
         try:
-            candidates = [info[4][0] for info in socket.getaddrinfo(host, None)]
+            candidates = [str(info[4][0]) for info in socket.getaddrinfo(host, None)]
         except OSError:
             return  # unresolvable — let the request fail naturally
     for addr in candidates:

@@ -53,6 +53,9 @@ jobs:
       - name: Ruff format check
         run: .\.venv\Scripts\python.exe -m ruff format --check .
 
+      - name: Mypy
+        run: .\.venv\Scripts\python.exe -m mypy app
+
       - name: Pytest
         run: .\.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --cov=app --cov-report=term-missing
 

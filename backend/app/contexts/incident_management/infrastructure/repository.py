@@ -53,7 +53,7 @@ class IncidentRepository:
             row = s.get(IncidentRow, incident_id)
             return _to_incident(row) if row else None
 
-    def list(self, *, status: IncidentStatus | None = None, limit: int = 200) -> list[Incident]:
+    def list_all(self, *, status: IncidentStatus | None = None, limit: int = 200) -> list[Incident]:
         stmt = select(IncidentRow).order_by(IncidentRow.opened_at.desc()).limit(limit)
         if status is not None:
             stmt = stmt.where(IncidentRow.status == str(status))

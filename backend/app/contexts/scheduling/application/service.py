@@ -58,8 +58,8 @@ class ScheduleService:
             )
         )
 
-    def list(self) -> list[Schedule]:
-        return self.repo.list()
+    def list_all(self) -> list[Schedule]:
+        return self.repo.list_all()
 
     def get(self, schedule_id: str) -> Schedule:
         sched = self.repo.get(schedule_id)

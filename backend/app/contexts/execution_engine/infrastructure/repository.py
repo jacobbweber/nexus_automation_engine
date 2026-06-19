@@ -107,7 +107,7 @@ class JobRepository:
             row = session.get(JobRow, job_id)
             return _to_job(row) if row else None
 
-    def list(
+    def list_all(
         self,
         *,
         status: JobStatus | None = None,
@@ -146,7 +146,7 @@ class JobRepository:
         with get_sessionmaker()() as session:
             result = session.execute(stmt)
             session.commit()
-            return int(result.rowcount or 0)
+            return int(result.rowcount or 0)  # type: ignore[attr-defined]
 
     def get_logs(self, job_id: str) -> list[JobLogLine]:
         stmt = select(JobLogRow).where(JobLogRow.job_id == job_id).order_by(JobLogRow.sequence)

@@ -72,9 +72,9 @@ def test_list_and_filter():
     service.submit(
         JobSubmission(name="b", connector=ConnectorKind.ANSIBLE, action="run_job_template")
     )
-    all_jobs = service.list()
+    all_jobs = service.list_all()
     assert len(all_jobs) == 2
-    ansible_only = service.list(connector=ConnectorKind.ANSIBLE)
+    ansible_only = service.list_all(connector=ConnectorKind.ANSIBLE)
     assert len(ansible_only) == 1 and ansible_only[0].connector == ConnectorKind.ANSIBLE
 
 
@@ -83,7 +83,7 @@ def test_seed_history_populates_distribution():
     created = seed_history(repo, count=55)
     assert created >= 55
     assert repo.count() >= 55
-    statuses = {j.status for j in repo.list(limit=200)}
+    statuses = {j.status for j in repo.list_all(limit=200)}
     assert JobStatus.SUCCESS in statuses
 
 

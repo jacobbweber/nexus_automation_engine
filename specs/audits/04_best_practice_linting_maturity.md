@@ -43,7 +43,9 @@ FastAPI auto-docs exist at `/docs`; endpoints lack rich descriptions/examples an
 tags in a few places. → Add summaries/examples; group tags.
 
 ## Plan / checklist
-- [ ] Add mypy (or pyright) to CI (lenient → strict). *(next)*
+- [x] Add **mypy** to CI (pydantic plugin, `check_untyped_defs`); **clean across 125 files** at
+      adoption. Fixed real type bugs (Node position float, ansible playbook narrowing, SSRF
+      str-coercion) and renamed shadowing `list()` methods to `list_all()`.
 - [x] Enable ruff `S` (flake8-bandit) rules; deliberate exceptions documented in pyproject; the
       known `eval` is `# noqa: S307`; the lone `assert` replaced with a real guard.
 - [x] Add pytest-cov (reporting in CI; **91%** at adoption). Threshold gate to follow.

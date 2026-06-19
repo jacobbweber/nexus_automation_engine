@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Changed
+- **Audit B1 — static typing**: adopted **mypy** in CI (clean across 125 files). Fixed real type
+  issues found along the way and renamed shadowing `list()` repository/service methods to
+  `list_all()`.
 - **Audit Q2 — de-dup**: extracted the duplicated live-broadcast broker into a shared-kernel
   `AsyncBroker`; the execution and canvas brokers are now thin singletons over it.
 - **Audit B2 — hardened gate**: enabled ruff **`S` (flake8-bandit) security rules** (with

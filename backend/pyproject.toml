@@ -23,6 +23,7 @@ dev = [
     "pytest-cov>=5.0",
     "anyio>=4.6",
     "ruff>=0.7",
+    "mypy>=1.13",
 ]
 
 [tool.setuptools.packages.find]
@@ -37,6 +38,15 @@ build-backend = "setuptools.build_meta"
 asyncio_mode = "auto"
 testpaths = ["tests"]
 filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
+# Lenient adoption baseline (audit B1); tighten over time.
+check_untyped_defs = true
+warn_redundant_casts = true
+exclude = ["^tests/"]
 
 [tool.ruff]
 line-length = 100
