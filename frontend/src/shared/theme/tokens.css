@@ -156,6 +156,14 @@
   }
 }
 
+/* Visible keyboard focus on every interactive element — one rule, whole app (A6/A7). Mouse
+   clicks don't trigger :focus-visible, so this is keyboard-only as intended. */
+:where(button, a, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--radius-sm);
+}
+
 /* Mode cross-fade — applied briefly by the mode engine on dark/light swap. The a11y layer
    zeroes durations under reduced-motion, so this becomes an instant swap automatically. */
 .mode-anim,
@@ -167,3 +175,8 @@
 @media (prefers-reduced-motion: reduce) {
   .mode-anim, .mode-anim * { transition: none !important; }
 }
+
+/* Spinner for in-flight status (running). Stops under reduced-motion (icon still conveys state). */
+@keyframes nx-spin { to { transform: rotate(360deg); } }
+.nx-spin { animation: nx-spin 1s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .nx-spin { animation: none; } }

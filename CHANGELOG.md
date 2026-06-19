@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M20 — component refactor + protected status badge** (A6, #67): the shared primitives
+  (Page/Card/Button/StatusBadge) now consume the semantic token contract (radii/spacing/elevation
+  vars; `Button` retints per area + gains soft/danger/quiet variants and 44px targets). A global
+  `:focus-visible` ring covers every interactive element. `StatusBadge` is now the **protected
+  Run/Status primitive** — each status is conveyed by an **icon (shape) plus color**, never
+  color-alone, resolving through the `--run-*`/status tokens. Spinner stops under reduced-motion.
 - **M20 — display & accessibility preferences** (A5, #66): a `PrefsProvider` drives the density
   (cozy/comfortable/compact), dyslexia-font, and text-scale (90–140%) layers via root
   data-attributes + root font-size; persisted; surfaced as a "Display & accessibility" disclosure

@@ -1,3 +1,15 @@
+import {
+  Ban,
+  BadgeCheck,
+  CheckCircle2,
+  Circle,
+  Clock,
+  Loader2,
+  MinusCircle,
+  Pencil,
+  XCircle,
+  type LucideIcon,
+} from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 
 export function Page({ title, subtitle, actions, children }: {
@@ -7,8 +19,8 @@ export function Page({ title, subtitle, actions, children }: {
   children: ReactNode;
 }) {
   return (
-    <div style={{ padding: 28 }}>
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 20 }}>
+    <div style={{ padding: "var(--space-6)" }}>
+      <div style={{ display: "flex", alignItems: "center", marginBottom: "var(--space-5)" }}>
         <div>
           <h1 style={{ fontSize: "1.35rem", fontWeight: 700, margin: 0 }}>{title}</h1>
           {subtitle && (
@@ -29,9 +41,10 @@ export function Card({ children, style }: { children: ReactNode; style?: CSSProp
     <div
       style={{
         border: "1px solid var(--border)",
-        borderRadius: 12,
+        borderRadius: "var(--radius-lg)",
         background: "var(--surface)",
-        padding: 18,
+        boxShadow: "var(--shadow-1)",
+        padding: "var(--space-5)",
         ...style,
       }}
     >
@@ -40,61 +53,103 @@ export function Card({ children, style }: { children: ReactNode; style?: CSSProp
   );
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  SUCCESS: "var(--color-ok)",
-  completed: "var(--color-ok)",
-  RUNNING: "var(--color-accent)",
-  running: "var(--color-accent)",
-  PENDING: "var(--color-warn)",
-  FAILED: "var(--color-danger)",
-  failed: "var(--color-danger)",
-  CANCELLED: "var(--text-muted)",
-  approved: "var(--color-ok)",
-  draft: "var(--text-muted)",
+// --- Protected Run/Status badge -------------------------------------------------------------
+// Status is conveyed by an ICON (shape) as well as color, so it is never color-only — the
+// accessibility guarantee for protected operational status (ADR-0007, design-system §7.1).
+// Colors resolve through the --run-* / status contract, so they honor mode/area/theme.
+
+interface StatusStyle {
+  color: string;
+  icon: LucideIcon;
+  spin?: boolean;
+}
+const STATUS: Record<string, StatusStyle> = {
+  running: { color: "var(--run-running)", icon: Loader2, spin: true },
+  completed: { color: "var(--run-ok)", icon: CheckCircle2 },
+  success: { color: "var(--run-ok)", icon: CheckCircle2 },
+  failed: { color: "var(--run-failed)", icon: XCircle },
+  pending: { color: "var(--run-warn)", icon: Clock },
+  skipped: { color: "var(--run-skipped)", icon: MinusCircle },
+  cancelled: { color: "var(--text-muted)", icon: Ban },
+  // review / change lifecycle states
+  draft: { color: "var(--text-muted)", icon: Circle },
+  submitted: { color: "var(--warn)", icon: Clock },
+  in_review: { color: "var(--warn)", icon: Clock },
+  changes_requested: { color: "var(--warn)", icon: Pencil },
+  approved: { color: "var(--success)", icon: CheckCircle2 },
+  published: { color: "var(--success)", icon: BadgeCheck },
+  rejected: { color: "var(--danger)", icon: XCircle },
+  scheduled: { color: "var(--info)", icon: Clock },
+  implement: { color: "var(--info)", icon: Clock },
 };
 
-export function StatusBadge({ status }: { status: string }) {
-  const color = STATUS_COLORS[status] ?? "var(--text-muted)";
+export function StatusBadge({ status, size = "sm" }: { status: string; size?: "sm" | "md" }) {
+  const key = String(status).toLowerCase();
+  const s = STATUS[key] ?? { color: "var(--text-muted)", icon: Circle };
+  const Icon = s.icon;
+  const px = size === "md" ? 15 : 13;
   return (
     <span
       style={{
         display: "inline-flex",
         alignItems: "center",
         gap: 6,
-        fontSize: "0.75rem",
-        color,
+        fontSize: size === "md" ? "0.82rem" : "0.75rem",
+        color: s.color,
         fontWeight: 600,
       }}
     >
-      <span style={{ width: 8, height: 8, borderRadius: "50%", background: color }} />
-      {status}
+      <Icon size={px} className={s.spin ? "nx-spin" : undefined} aria-hidden />
+      <span style={{ textTransform: "capitalize" }}>{key.replace(/_/g, " ")}</span>
     </span>
   );
 }
 
-export function Button({ children, onClick, variant = "primary", disabled, type }: {
+// --- Button ---------------------------------------------------------------------------------
+
+type ButtonVariant = "primary" | "ghost" | "soft" | "danger" | "quiet";
+
+const VARIANT: Record<ButtonVariant, CSSProperties> = {
+  primary: {
+    background: "var(--area-accent, var(--accent))",
+    color: "var(--area-accent-contrast, var(--accent-contrast))",
+    border: "1px solid transparent",
+  },
+  soft: { background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid transparent" },
+  ghost: { background: "transparent", color: "var(--text)", border: "1px solid var(--border)" },
+  quiet: { background: "transparent", color: "var(--text-muted)", border: "1px solid transparent" },
+  danger: { background: "var(--danger)", color: "#fff", border: "1px solid transparent" },
+};
+
+export function Button({ children, onClick, variant = "primary", disabled, type, size = "md", title }: {
   children: ReactNode;
   onClick?: () => void;
-  variant?: "primary" | "ghost";
+  variant?: ButtonVariant;
   disabled?: boolean;
   type?: "button" | "submit";
+  size?: "sm" | "md";
+  title?: string;
 }) {
-  const primary = variant === "primary";
   return (
     <button
       type={type ?? "button"}
       onClick={onClick}
       disabled={disabled}
+      title={title}
       style={{
-        padding: "8px 14px",
-        borderRadius: 8,
-        border: primary ? "none" : "1px solid var(--border)",
-        background: primary ? "var(--color-accent)" : "transparent",
-        color: primary ? "#fff" : "var(--text)",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+        minHeight: size === "sm" ? 36 : 44,
+        padding: size === "sm" ? "6px 12px" : "9px 16px",
+        borderRadius: "var(--radius-md)",
         fontWeight: 600,
         fontSize: "0.85rem",
         cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.6 : 1,
+        opacity: disabled ? 0.55 : 1,
+        transition: "background-color var(--dur-1) var(--ease-out)",
+        ...VARIANT[variant],
       }}
     >
       {children}
