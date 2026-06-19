@@ -133,9 +133,28 @@ def resolve_approval(body: ApprovalResolution) -> dict[str, bool]:
     return {"resolved": ok}
 
 
+def _ws_authenticated(websocket: WebSocket) -> bool:
+    import jwt as _jwt
+
+    from app.contexts.identity_access.application.security import decode_token
+
+    token = websocket.query_params.get("token", "")
+    if not token:
+        return False
+    try:
+        decode_token(token)
+        return True
+    except _jwt.PyJWTError:
+        return False
+
+
 @router.websocket("/runs/{run_id}/stream")
 async def stream_run(websocket: WebSocket, run_id: str) -> None:
     await websocket.accept()
+    if not _ws_authenticated(websocket):
+        await websocket.send_json({"type": "error", "detail": "unauthorized"})
+        await websocket.close(code=1008)
+        return
     broker = get_run_broker()
     queue = broker.subscribe(run_id)
     try:

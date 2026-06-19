@@ -119,7 +119,8 @@ def test_ws_replays_completed_job_logs():
     repo.set_status(job.id, JobStatus.SUCCESS, started_at=_dt(), finished_at=_dt())
 
     with TestClient(create_app()) as client:
-        with client.websocket_connect(f"/api/v1/jobs/{job.id}/stream") as ws:
+        tok = _auth(client)["Authorization"].split(" ", 1)[1]
+        with client.websocket_connect(f"/api/v1/jobs/{job.id}/stream?token={tok}") as ws:
             messages = []
             while True:
                 msg = ws.receive_json()
@@ -129,6 +130,18 @@ def test_ws_replays_completed_job_logs():
     log_msgs = [m for m in messages if m["type"] == "log"]
     assert any("Plan:" in m["message"] for m in log_msgs)
     assert messages[-1]["status"] == "SUCCESS"
+
+
+def test_ws_requires_token():
+    repo = JobRepository()
+    job = repo.create(
+        JobSubmission(name="x", connector=ConnectorKind.TERRAFORM, action="plan"), created_at=_dt()
+    )
+    repo.set_status(job.id, JobStatus.SUCCESS, started_at=_dt(), finished_at=_dt())
+    with TestClient(create_app()) as client:
+        with client.websocket_connect(f"/api/v1/jobs/{job.id}/stream") as ws:
+            msg = ws.receive_json()
+    assert msg["type"] == "error"  # unauthorized without a token
 
 
 def test_telemetry_endpoint():
