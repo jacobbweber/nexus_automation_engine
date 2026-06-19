@@ -61,8 +61,10 @@ class RunResponse(BaseModel):
 
 
 @router.post("/workflows/{workflow_id}/run", response_model=RunResponse)
-async def run_workflow(workflow_id: str, body: RunRequest) -> RunResponse:
-    # async so asyncio.create_task in start_run has a running event loop.
+async def run_workflow(
+    workflow_id: str, body: RunRequest, _user: UserContext = Depends(get_current_user)
+) -> RunResponse:
+    # async so asyncio.create_task in start_run has a running event loop. Auth: security audit S1.
     run_id = CanvasService().start_run(workflow_id, body.inputs)
     return RunResponse(run_id=run_id)
 

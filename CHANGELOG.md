@@ -5,6 +5,13 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Security
+- **Audit S1/S2 fixes**: job execution, queries, telemetry, and canvas run now **require
+  authentication**; live-vs-check execution is **entitlement-checked**; the auditable
+  `initiated_by` is **derived from the token** (client-supplied executor is ignored — anti-spoof);
+  and the app **refuses to boot** a non-local/test environment on the default JWT secret. Tests
+  cover unauth rejection + anti-spoof. (Remaining S-items tracked in the audit doc.)
+
 ### Added
 - **Four formal audit reports** (`specs/audits/`): security & compliance, code quality,
   architecture/scalability/performance, and best-practice/linting/maturity — each with rated

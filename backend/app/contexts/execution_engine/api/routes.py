@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import contextlib
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
 from app.contexts.connectors.domain.models import ConnectorKind, TelemetrySeries
@@ -17,7 +17,10 @@ from app.contexts.execution_engine.domain.models import (
     JobStatus,
     JobSubmission,
 )
-from app.shared_kernel.errors import NotFoundError
+from app.contexts.identity_access.api.deps import get_current_user
+from app.contexts.identity_access.domain.entitlements import has_capability
+from app.contexts.identity_access.domain.models import Capability, UserContext
+from app.shared_kernel.errors import EntitlementError, NotFoundError
 
 router = APIRouter(tags=["jobs"])
 
@@ -28,9 +31,17 @@ class ExecuteResponse(BaseModel):
 
 
 @router.post("/jobs/execute", response_model=ExecuteResponse)
-async def execute_job(submission: JobSubmission) -> ExecuteResponse:
-    service = ExecutionService()
-    job = await service.submit_and_run(submission)
+async def execute_job(
+    submission: JobSubmission, user: UserContext = Depends(get_current_user)
+) -> ExecuteResponse:
+    # Entitlement: live execution vs. check-mode. (Security audit S1.)
+    live = not submission.check_mode
+    capability = Capability.EXECUTE_LIVE if live else Capability.EXECUTE_CHECK
+    if not has_capability(user, capability):
+        raise EntitlementError("Not entitled to execute jobs in the requested mode")
+    # The auditable executor is the authenticated user, never client-supplied.
+    submission.initiated_by = user.username
+    job = await ExecutionService().submit_and_run(submission)
     return ExecuteResponse(job_id=job.id, status=job.status)
 
 
@@ -40,12 +51,13 @@ def list_jobs(
     connector: ConnectorKind | None = None,
     limit: int = 100,
     offset: int = 0,
+    _user: UserContext = Depends(get_current_user),
 ) -> list[Job]:
     return ExecutionService().list(status=status, connector=connector, limit=limit, offset=offset)
 
 
 @router.get("/jobs/{job_id}", response_model=Job)
-def get_job(job_id: str) -> Job:
+def get_job(job_id: str, _user: UserContext = Depends(get_current_user)) -> Job:
     job = ExecutionService().get(job_id)
     if job is None:
         raise NotFoundError(f"Job {job_id} not found")
@@ -53,7 +65,7 @@ def get_job(job_id: str) -> Job:
 
 
 @router.get("/jobs/{job_id}/logs", response_model=list[JobLogLine])
-def get_job_logs(job_id: str) -> list[JobLogLine]:
+def get_job_logs(job_id: str, _user: UserContext = Depends(get_current_user)) -> list[JobLogLine]:
     service = ExecutionService()
     if service.get(job_id) is None:
         raise NotFoundError(f"Job {job_id} not found")
@@ -61,7 +73,9 @@ def get_job_logs(job_id: str) -> list[JobLogLine]:
 
 
 @router.get("/telemetry/{job_id}", response_model=TelemetrySeries)
-async def get_job_telemetry(job_id: str, seconds: int | None = None) -> TelemetrySeries:
+async def get_job_telemetry(
+    job_id: str, seconds: int | None = None, _user: UserContext = Depends(get_current_user)
+) -> TelemetrySeries:
     return await ExecutionService().telemetry(job_id, seconds)
 
 

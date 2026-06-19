@@ -79,11 +79,15 @@ spine. Gaps above are about *enforcement coverage*, not absence of controls.
 8. **Secret-never-persisted regression test + docs (S4).**
 
 ## Checklist
-- [ ] S1 route auth coverage + entitlement on execution
-- [ ] S1 server-derived `initiated_by`
-- [ ] S2 JWT default-secret startup guard
+- [x] S1 route auth coverage on job execution + queries + telemetry; entitlement on execute
+      (`get_current_user` + `has_capability`); canvas run requires auth.
+- [x] S1 server-derived `initiated_by` (token identity overrides client input; test asserts
+      anti-spoof).
+- [x] S2 JWT default-secret startup guard (refuses to boot non-local/test on the dev secret).
+- [ ] S1 (remaining) WebSocket auth via query-param token; entitlement on canvas run; auth on
+      catalog/connectors browse.
 - [ ] S2 login throttling
-- [ ] S2 centralized execution gate
+- [ ] S2 centralized execution gate (folds into the CMDB-validation feature)
 - [ ] S3 SSRF allowlist
 - [ ] S3 security-headers/body-limit middleware
 - [ ] S3 npm audit triage + CI
