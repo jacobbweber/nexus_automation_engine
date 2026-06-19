@@ -7,6 +7,8 @@ import json
 from sqlalchemy import delete, func, select
 
 from app.contexts.orchestration_canvas.domain.models import (
+    ReviewRecord,
+    ReviewState,
     RunStatus,
     StepStatus,
     Workflow,
@@ -16,6 +18,7 @@ from app.contexts.orchestration_canvas.domain.models import (
     WorkflowVersion,
 )
 from app.contexts.orchestration_canvas.infrastructure.orm import (
+    WorkflowReviewRow,
     WorkflowRow,
     WorkflowRunRow,
     WorkflowStepRow,
@@ -30,6 +33,9 @@ def _to_workflow(row: WorkflowRow) -> Workflow:
         name=row.name,
         description=row.description,
         graph=WorkflowGraph(**json.loads(row.graph_json or "{}")),
+        review_state=ReviewState(row.review_state),
+        submitted_by=row.submitted_by,
+        reviewed_by=row.reviewed_by,
         created_at=row.created_at,
         updated_at=row.updated_at,
     )
@@ -39,10 +45,13 @@ class CanvasRepository:
     # --- workflows ---------------------------------------------------------------------------
 
     def save_workflow(self, workflow: Workflow) -> Workflow:
+        # Graph edits do NOT change review state; that flows through set_review_state().
         with get_sessionmaker()() as session:
             row = session.get(WorkflowRow, workflow.id)
             if row is None:
-                row = WorkflowRow(id=workflow.id, created_at=workflow.created_at)
+                row = WorkflowRow(
+                    id=workflow.id, created_at=workflow.created_at, review_state="draft"
+                )
                 session.add(row)
             row.name = workflow.name
             row.description = workflow.description
@@ -51,6 +60,65 @@ class CanvasRepository:
             session.commit()
             session.refresh(row)
             return _to_workflow(row)
+
+    def set_review_state(
+        self,
+        workflow_id: str,
+        state: ReviewState,
+        *,
+        submitted_by: str | None = None,
+        reviewed_by: str | None = None,
+    ) -> None:
+        with get_sessionmaker()() as session:
+            row = session.get(WorkflowRow, workflow_id)
+            if row is None:
+                return
+            row.review_state = str(state)
+            if submitted_by is not None:
+                row.submitted_by = submitted_by
+            if reviewed_by is not None:
+                row.reviewed_by = reviewed_by
+            session.commit()
+
+    def save_review(self, review: ReviewRecord) -> None:
+        with get_sessionmaker()() as session:
+            session.add(
+                WorkflowReviewRow(
+                    id=review.id,
+                    workflow_id=review.workflow_id,
+                    decision=review.decision,
+                    actor=review.actor,
+                    comment=review.comment,
+                    created_at=review.created_at,
+                )
+            )
+            session.commit()
+
+    def list_reviews(self, workflow_id: str) -> list[ReviewRecord]:
+        stmt = (
+            select(WorkflowReviewRow)
+            .where(WorkflowReviewRow.workflow_id == workflow_id)
+            .order_by(WorkflowReviewRow.created_at)
+        )
+        with get_sessionmaker()() as session:
+            return [
+                ReviewRecord(
+                    id=r.id,
+                    workflow_id=r.workflow_id,
+                    decision=r.decision,
+                    actor=r.actor,
+                    comment=r.comment,
+                    created_at=r.created_at,
+                )
+                for r in session.execute(stmt).scalars().all()
+            ]
+
+    def list_pending_reviews(self) -> list[Workflow]:
+        stmt = select(WorkflowRow).where(
+            WorkflowRow.review_state.in_(["submitted", "in_review", "changes_requested"])
+        )
+        with get_sessionmaker()() as session:
+            return [_to_workflow(r) for r in session.execute(stmt).scalars().all()]
 
     def get_workflow(self, workflow_id: str) -> Workflow | None:
         with get_sessionmaker()() as session:

@@ -65,13 +65,35 @@ class WorkflowGraph(BaseModel):
     viewport: dict[str, float] = Field(default_factory=dict)
 
 
+class ReviewState(StrEnum):
+    DRAFT = "draft"
+    SUBMITTED = "submitted"
+    IN_REVIEW = "in_review"
+    CHANGES_REQUESTED = "changes_requested"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    PUBLISHED = "published"
+
+
 class Workflow(BaseModel):
     id: str
     name: str
     description: str = ""
     graph: WorkflowGraph = Field(default_factory=WorkflowGraph)
+    review_state: ReviewState = ReviewState.DRAFT
+    submitted_by: str | None = None
+    reviewed_by: str | None = None
     created_at: datetime
     updated_at: datetime
+
+
+class ReviewRecord(BaseModel):
+    id: str
+    workflow_id: str
+    decision: str  # submit | approve | request_changes | reject | publish
+    actor: str
+    comment: str = ""
+    created_at: datetime
 
 
 class WorkflowStep(BaseModel):

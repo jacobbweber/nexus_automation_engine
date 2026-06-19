@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M15 Governed workflow submission & review**: operators **submit** a composed workflow for
+  review; engineers/admins **approve / request changes / reject** with comments via a Governance
+  **review inbox**. Workflows carry a `review_state` (draft→submitted→…→approved/published) and a
+  full review audit trail; graph edits preserve review state. Canvas gains a "Submit for review"
+  action. `/api/v1/canvas/workflows/{id}/submit|review`, `/canvas/reviews/pending`. 100 tests.
 - **M14 Catalog-at-scale UX** (`frontend/`): a faceted Service Catalog (domain/vendor facets with
   counts + type-ahead search, grouped cards with risk pills and atomic/orchestrated badges) and an
   **automation detail drawer** with tabs — Overview (rendered Markdown docs + prerequisites +

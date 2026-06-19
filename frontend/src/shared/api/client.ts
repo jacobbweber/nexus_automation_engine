@@ -157,6 +157,9 @@ export interface Workflow {
   name: string;
   description: string;
   graph: WorkflowGraph;
+  review_state: string;
+  submitted_by: string | null;
+  reviewed_by: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -227,6 +230,10 @@ export const Canvas = {
       approved,
       response,
     }),
+  submitForReview: (id: string) => api.post<Workflow>(`/canvas/workflows/${id}/submit`),
+  review: (id: string, decision: string, comment = "") =>
+    api.post<Workflow>(`/canvas/workflows/${id}/review`, { decision, comment }),
+  pendingReviews: () => api.get<Workflow[]>("/canvas/reviews/pending"),
 };
 
 export interface ChangeTemplate {

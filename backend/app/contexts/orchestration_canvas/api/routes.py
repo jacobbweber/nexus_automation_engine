@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import contextlib
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
+from app.contexts.identity_access.api.deps import get_current_user, require_role
+from app.contexts.identity_access.domain.models import GlobalRole, UserContext
 from app.contexts.orchestration_canvas.application.broker import get_run_broker
 from app.contexts.orchestration_canvas.application.service import CanvasService
 from app.contexts.orchestration_canvas.domain.models import (
+    ReviewRecord,
     Workflow,
     WorkflowGraph,
     WorkflowRun,
@@ -82,6 +85,37 @@ def list_versions(workflow_id: str) -> list[WorkflowVersion]:
 @router.post("/workflows/{workflow_id}/versions", response_model=WorkflowVersion)
 def snapshot_version(workflow_id: str, description: str = "") -> WorkflowVersion:
     return CanvasService().snapshot_version(workflow_id, description)
+
+
+@router.post("/workflows/{workflow_id}/submit", response_model=Workflow)
+def submit_for_review(workflow_id: str, user: UserContext = Depends(get_current_user)) -> Workflow:
+    return CanvasService().submit_for_review(workflow_id, submitted_by=user.username)
+
+
+class ReviewDecision(BaseModel):
+    decision: str  # approve | request_changes | reject | publish
+    comment: str = ""
+
+
+@router.post("/workflows/{workflow_id}/review", response_model=Workflow)
+def review_workflow(
+    workflow_id: str,
+    body: ReviewDecision,
+    reviewer: UserContext = Depends(require_role(GlobalRole.ENGINEER)),
+) -> Workflow:
+    return CanvasService().review(workflow_id, body.decision, reviewer.username, body.comment)
+
+
+@router.get("/reviews/pending", response_model=list[Workflow])
+def pending_reviews(
+    _reviewer: UserContext = Depends(require_role(GlobalRole.ENGINEER)),
+) -> list[Workflow]:
+    return CanvasService().pending_reviews()
+
+
+@router.get("/workflows/{workflow_id}/reviews", response_model=list[ReviewRecord])
+def workflow_reviews(workflow_id: str) -> list[ReviewRecord]:
+    return CanvasService().reviews(workflow_id)
 
 
 class ApprovalResolution(BaseModel):

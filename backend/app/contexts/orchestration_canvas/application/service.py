@@ -10,6 +10,8 @@ from app.contexts.orchestration_canvas.application.broker import RunBroker, get_
 from app.contexts.orchestration_canvas.application.engine import execute_graph
 from app.contexts.orchestration_canvas.application.node_actions import resolve_approval
 from app.contexts.orchestration_canvas.domain.models import (
+    ReviewRecord,
+    ReviewState,
     RunStatus,
     Workflow,
     WorkflowGraph,
@@ -17,7 +19,7 @@ from app.contexts.orchestration_canvas.domain.models import (
     WorkflowVersion,
 )
 from app.contexts.orchestration_canvas.infrastructure.repository import CanvasRepository
-from app.shared_kernel.errors import NotFoundError
+from app.shared_kernel.errors import NotFoundError, ValidationError
 from app.shared_kernel.ids import new_id
 from app.shared_kernel.variable_pool import VariablePool
 
@@ -223,3 +225,50 @@ class CanvasService:
         self, run_id: str, node_id: str, approved: bool, response: str = ""
     ) -> bool:
         return resolve_approval(run_id, node_id, approved, response)
+
+    # --- governed submission / review (M15) --------------------------------------------------
+
+    _DECISIONS = {
+        "approve": ReviewState.APPROVED,
+        "request_changes": ReviewState.CHANGES_REQUESTED,
+        "reject": ReviewState.REJECTED,
+        "publish": ReviewState.PUBLISHED,
+    }
+
+    def submit_for_review(self, workflow_id: str, submitted_by: str) -> Workflow:
+        self.get_workflow(workflow_id)
+        self.repo.set_review_state(workflow_id, ReviewState.SUBMITTED, submitted_by=submitted_by)
+        self.repo.save_review(
+            ReviewRecord(
+                id=new_id("rev"),
+                workflow_id=workflow_id,
+                decision="submit",
+                actor=submitted_by,
+                comment="",
+                created_at=_now(),
+            )
+        )
+        return self.get_workflow(workflow_id)
+
+    def review(self, workflow_id: str, decision: str, reviewer: str, comment: str = "") -> Workflow:
+        if decision not in self._DECISIONS:
+            raise ValidationError(f"Unknown review decision: {decision}")
+        self.get_workflow(workflow_id)
+        self.repo.set_review_state(workflow_id, self._DECISIONS[decision], reviewed_by=reviewer)
+        self.repo.save_review(
+            ReviewRecord(
+                id=new_id("rev"),
+                workflow_id=workflow_id,
+                decision=decision,
+                actor=reviewer,
+                comment=comment,
+                created_at=_now(),
+            )
+        )
+        return self.get_workflow(workflow_id)
+
+    def pending_reviews(self) -> list[Workflow]:
+        return self.repo.list_pending_reviews()
+
+    def reviews(self, workflow_id: str) -> list[ReviewRecord]:
+        return self.repo.list_reviews(workflow_id)
