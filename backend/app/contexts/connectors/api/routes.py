@@ -21,6 +21,28 @@ def list_connectors() -> list[Capabilities]:
     return services.list_capabilities()
 
 
+class CmdbField(BaseModel):
+    name: str
+    label: str
+    type: str
+
+
+class CmdbFieldsResponse(BaseModel):
+    tables: list[str]
+    fields: list[CmdbField]
+
+
+@router.get("/servicenow/fields", response_model=CmdbFieldsResponse)
+def cmdb_fields(table: str | None = None) -> CmdbFieldsResponse:
+    """Field catalog for the canvas CMDB field picker (pick a table → pick its fields)."""
+    from app.contexts.connectors.infrastructure.simulation import servicenow as sn
+
+    return CmdbFieldsResponse(
+        tables=sn.cmdb_tables(),
+        fields=[CmdbField(**f) for f in sn.cmdb_fields(table)],
+    )
+
+
 @router.get("/{kind}", response_model=Capabilities)
 def get_connector(kind: ConnectorKind) -> Capabilities:
     return services.get_capabilities(kind)

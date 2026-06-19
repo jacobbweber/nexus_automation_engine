@@ -77,7 +77,7 @@ async def run_node_action(
         a = pool.resolve(data.get("variable", ""))
         b = pool.resolve(data.get("value", ""))
         op = data.get("operator", "==")
-        return {"result": _compare(a, b, op)}
+        return {"result": _compare(a, b, op, bool(data.get("case_sensitive", True)))}
 
     if t == NodeType.SWITCH_ROUTER:
         return {"result": pool.resolve(data.get("variable", ""))}
@@ -136,24 +136,46 @@ async def run_node_action(
     raise ConnectorError(f"Unsupported node type: {t}")
 
 
-def _compare(a: Any, b: Any, op: str) -> bool:
-    if op in (">", "<"):
+def _compare(a: Any, b: Any, op: str, case_sensitive: bool = True) -> bool:
+    """Rich condition evaluation supporting numeric, string, regex, and list operators."""
+    import re
+
+    # Unary operators first.
+    if op == "is_empty":
+        return a is None or a == "" or a == [] or a == {}
+    if op == "is_not_empty":
+        return not (a is None or a == "" or a == [] or a == {})
+
+    # Numeric comparison operators.
+    if op in (">", ">=", "<", "<="):
         try:
-            a, b = float(a), float(b)
+            fa, fb = float(a), float(b)
         except (TypeError, ValueError):
             return False
+        return {">": fa > fb, ">=": fa >= fb, "<": fa < fb, "<=": fa <= fb}[op]
+
+    sa, sb = str(a), str(b)
+    if not case_sensitive:
+        sa, sb = sa.lower(), sb.lower()
+
     if op == "==":
-        return str(a) == str(b)
+        return sa == sb
     if op == "!=":
-        return str(a) != str(b)
-    if op == ">":
-        return a > b
-    if op == "<":
-        return a < b
+        return sa != sb
     if op == "contains":
-        return str(b) in str(a)
-    if op == "is_empty":
-        return not a
+        return sb in sa
+    if op == "not_contains":
+        return sb not in sa
+    if op == "starts_with":
+        return sa.startswith(sb)
+    if op == "ends_with":
+        return sa.endswith(sb)
+    if op == "matches_regex":
+        flags = 0 if case_sensitive else re.IGNORECASE
+        return re.search(sb, sa, flags) is not None
+    if op == "in_list":
+        items = [x.strip() for x in sb.split(",")]
+        return sa in items
     return False
 
 

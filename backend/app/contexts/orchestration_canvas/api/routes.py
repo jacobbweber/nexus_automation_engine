@@ -18,8 +18,15 @@ from app.contexts.orchestration_canvas.domain.models import (
     WorkflowRun,
     WorkflowVersion,
 )
+from app.contexts.orchestration_canvas.domain.node_specs import NodeTypeSpec, node_specs
 
 router = APIRouter(prefix="/canvas", tags=["canvas"])
+
+
+@router.get("/node-types", response_model=list[NodeTypeSpec])
+def list_node_types() -> list[NodeTypeSpec]:
+    """Publish the per-node parameter schemas that drive the canvas property UI."""
+    return node_specs()
 
 
 class SaveWorkflowRequest(BaseModel):

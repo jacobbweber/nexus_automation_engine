@@ -214,11 +214,46 @@ export const Jobs = {
   get: (id: string) => api.get<Job>(`/jobs/${id}`),
 };
 
+export interface CmdbField {
+  name: string;
+  label: string;
+  type: string;
+}
+export interface CmdbFieldsResponse {
+  tables: string[];
+  fields: CmdbField[];
+}
+
 export const Connectors = {
   list: () => api.get<Capabilities[]>("/connectors"),
+  cmdbFields: (table?: string) =>
+    api.get<CmdbFieldsResponse>(
+      `/connectors/servicenow/fields${table ? `?table=${encodeURIComponent(table)}` : ""}`,
+    ),
 };
 
+export interface NodeFieldSpec {
+  name: string;
+  type: string;
+  label: string;
+  required: boolean;
+  default: unknown;
+  choices: string[] | null;
+  help: string;
+  source: string | null;
+  placeholder: string;
+}
+export interface NodeTypeSpec {
+  type: string;
+  label: string;
+  category: string;
+  description: string;
+  fields: NodeFieldSpec[];
+  outputs: string[];
+}
+
 export const Canvas = {
+  nodeTypes: () => api.get<NodeTypeSpec[]>("/canvas/node-types"),
   list: () => api.get<Workflow[]>("/canvas/workflows"),
   get: (id: string) => api.get<Workflow>(`/canvas/workflows/${id}`),
   save: (wf: { id?: string; name: string; description?: string; graph: WorkflowGraph }) =>
