@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M21 — Theme Studio** (B13, #74): a fully deterministic theme-authoring page (`/theme-studio`,
+  linked from the shell): start from any theme, edit tokens with color pickers (light/dark tabs),
+  see **live validation** (the same `validateTheme` gate — contract + WCAG-AA) and a **live
+  kitchen-sink preview** (buttons, run-status badges, card/links) under the candidate, an
+  **auto-fix-contrast** helper (`nudgeForContrast`), and **save** to the server (re-validated, then
+  it appears in the picker). No AI involved.
 - **M21 — theme service: volume + server-side validation + hot-reload** (B12, #73): a backend
   `theming` platform module persists user/Studio themes to a writable directory (mounted as the
   `nexus_themes` Docker volume) and serves only themes that pass a **Python port of the
