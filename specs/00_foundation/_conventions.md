@@ -21,7 +21,10 @@ specs/
 │   └── canvas_orchestration.md   # ★ the visual canvas engine
 ├── 03_execution_engine/
 ├── 04_connectors/
-└── 05_catalog/
+├── 05_experience/        # ★ cross-cutting frontend: design system, theming, feature depth, roadmap
+│   ├── 00_overview.md · 01_design_system.md · 02_theming.md
+│   └── 03_feature_depth.md · 04_roadmap.md
+└── 06_catalog/           # (planned) automation catalog spec
 ```
 
 Spec numbering groups by bounded context (see `architecture.md`). Numbers are organizational,
