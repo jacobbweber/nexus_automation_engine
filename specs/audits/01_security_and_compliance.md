@@ -94,4 +94,7 @@ spine. Gaps above are about *enforcement coverage*, not absence of controls.
 - [x] S3 security-headers + body-limit middleware (CSP, nosniff, frame-deny, referrer; 413 on
       oversized bodies).
 - [ ] S3 npm audit triage + CI
-- [ ] S4 secret-non-persistence test + docs
+- [x] S4 secret-non-persistence regression test (lease masked in output; real secret only in the
+      pool for downstream use).
+- [ ] (follow-ups) S2 login throttling; extend the execution gate to direct /jobs + canvas;
+      S3 npm audit in CI; WebSocket token auth.
