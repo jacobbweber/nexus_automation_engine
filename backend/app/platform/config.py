@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     sim_jitter_max_seconds: float = 1.8
     # Seed a lived-in job history on startup so the dashboard looks real. Tests disable it.
     seed_demo_data: bool = True
+    # When set to a built frontend dist directory, the API also serves the SPA (single container).
+    static_dir: str | None = None
 
 
 @lru_cache

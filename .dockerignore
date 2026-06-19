@@ -1,0 +1,17 @@
+**/.venv
+**/node_modules
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.ruff_cache
+**/dist
+**/.vite
+**/coverage
+*.db
+*.db-wal
+*.db-shm
+.git
+.github
+specs
+*.md
+!backend/README.md

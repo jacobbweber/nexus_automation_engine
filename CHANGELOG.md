@@ -7,6 +7,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M9 Containerization** — multi-stage, rootless, OpenShift-SCC-friendly `Dockerfile` (builds the
+  SPA and serves it from the FastAPI app in a single container), `docker-compose.yml`, and
+  `.dockerignore`. The backend optionally serves the built frontend via `NEXUS_STATIC_DIR`.
+  Project `README.md` written.
 - **M7 + M8 Frontend application** (`frontend/src/`): JWT auth (login + context + protected
   routes), the app shell with role display, and all operator/admin surfaces — Dashboard (live run
   stats), Catalog (browse approved building blocks + survey drawer + execute), Console (job list +

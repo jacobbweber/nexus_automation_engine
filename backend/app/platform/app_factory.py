@@ -6,10 +6,12 @@ CORS, the error handler, and database lifespan.
 
 from __future__ import annotations
 
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.contexts.automation_catalog.api import routes as catalog_routes
 from app.contexts.connectors.api import routes as connectors_routes
@@ -64,5 +66,9 @@ def create_app() -> FastAPI:
     app.include_router(catalog_routes.router, prefix="/api/v1")
     app.include_router(execution_routes.router, prefix="/api/v1")
     app.include_router(canvas_routes.router, prefix="/api/v1")
+
+    # Optionally serve the built SPA from the same origin (single-container deploy).
+    if settings.static_dir and os.path.isdir(settings.static_dir):
+        app.mount("/", StaticFiles(directory=settings.static_dir, html=True), name="spa")
 
     return app
