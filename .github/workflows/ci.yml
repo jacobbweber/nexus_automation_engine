@@ -67,6 +67,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Ensure Node on PATH
+        shell: pwsh
+        working-directory: .
+        run: |
+          # Self-hosted runner: Node lives in the user profile. Make it discoverable
+          # regardless of how the runner process was launched.
+          foreach ($d in @("$env:LOCALAPPDATA\hermes\node", "$env:ProgramFiles\nodejs")) {
+            if (Test-Path "$d\npm.cmd") { Add-Content -Path $env:GITHUB_PATH -Value $d }
+          }
+          node --version; npm --version
       - name: Install
         run: npm ci
       - name: Lint
