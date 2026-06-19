@@ -1,14 +1,17 @@
+import { Star } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Canvas, type WorkflowReport } from "@/shared/api/client";
 import { Card, Page, StatusBadge } from "@/shared/ui/primitives";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { useFavorites } from "@/shared/hooks/favorites";
 
 // The workflow library + reporting view: who made each workflow, which team owns it, how it's
 // used (run counts, last run, success rate), and its governance state — filterable by team/tag,
 // with one click to open it in the canvas.
 export function WorkflowLibraryPage() {
   const nav = useNavigate();
+  const { has: isFav, toggle: toggleFav } = useFavorites();
   const [reports, setReports] = useState<WorkflowReport[]>([]);
   const [team, setTeam] = useState("");
   const [tag, setTag] = useState("");
@@ -75,6 +78,7 @@ export function WorkflowLibraryPage() {
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.84rem" }}>
           <thead>
             <tr style={{ textAlign: "left", color: "var(--text-muted)", fontSize: "0.72rem" }}>
+              <th style={{ ...th, width: 28 }} aria-label="Favorite"></th>
               <th style={th}>Workflow</th>
               <th style={th}>Team</th>
               <th style={th}>Owner</th>
@@ -92,6 +96,20 @@ export function WorkflowLibraryPage() {
                 style={{ borderTop: "1px solid var(--border)", cursor: "pointer" }}
                 title="Open in canvas"
               >
+                <td style={{ ...td, width: 28 }}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFav(r.id);
+                    }}
+                    aria-label={isFav(r.id) ? "Unfavorite" : "Favorite"}
+                    aria-pressed={isFav(r.id)}
+                    title={isFav(r.id) ? "Unfavorite" : "Favorite"}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: isFav(r.id) ? "var(--warn)" : "var(--text-subtle)", display: "flex", padding: 2 }}
+                  >
+                    <Star size={15} fill={isFav(r.id) ? "currentColor" : "none"} />
+                  </button>
+                </td>
                 <td style={td}>
                   <div>{r.name}</div>
                   <div style={{ display: "flex", gap: 4, marginTop: 3, flexWrap: "wrap" }}>
@@ -117,7 +135,7 @@ export function WorkflowLibraryPage() {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7}>
+                <td colSpan={8}>
                   <EmptyState
                     title={reports.length === 0 ? "No workflows yet" : "No workflows match these filters"}
                     description={
