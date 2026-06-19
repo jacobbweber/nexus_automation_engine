@@ -63,7 +63,7 @@ class ScheduleRepository:
             row = s.get(ScheduleRow, schedule_id)
             return _to_schedule(row) if row else None
 
-    def list(self) -> list[Schedule]:
+    def list_all(self) -> list[Schedule]:
         with get_sessionmaker()() as s:
             rows = s.execute(select(ScheduleRow).order_by(ScheduleRow.next_run_at)).scalars().all()
             return [_to_schedule(r) for r in rows]

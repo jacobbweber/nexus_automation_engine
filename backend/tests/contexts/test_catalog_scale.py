@@ -29,7 +29,7 @@ def test_seed_creates_large_multivendor_catalog():
     created = seed_templates(TemplateRepository())
     assert created >= 20
     svc = CatalogService()
-    vendors = {t.vendor for t in svc.list(approval_state=ApprovalState.APPROVED)}
+    vendors = {t.vendor for t in svc.list_all(approval_state=ApprovalState.APPROVED)}
     assert {"VMware", "Pure Storage", "Cohesity", "ServiceNow"} <= vendors
 
 
@@ -43,21 +43,21 @@ def test_facets_counts_by_domain_and_vendor():
 def test_filter_by_domain_and_vendor():
     seed_templates(TemplateRepository())
     svc = CatalogService()
-    storage = svc.list(approval_state=ApprovalState.APPROVED, domain="Storage")
+    storage = svc.list_all(approval_state=ApprovalState.APPROVED, domain="Storage")
     assert storage and all(t.domain == "Storage" for t in storage)
-    pure = svc.list(approval_state=ApprovalState.APPROVED, vendor="Pure Storage")
+    pure = svc.list_all(approval_state=ApprovalState.APPROVED, vendor="Pure Storage")
     assert pure and all(t.vendor == "Pure Storage" for t in pure)
 
 
 def test_search_matches_name_and_tags():
     seed_templates(TemplateRepository())
     svc = CatalogService()
-    assert any("datastore" in t.name.lower() for t in svc.list(search="datastore"))
-    assert svc.list(search="cohesity")  # tag match
+    assert any("datastore" in t.name.lower() for t in svc.list_all(search="datastore"))
+    assert svc.list_all(search="cohesity")  # tag match
 
 
 def test_controlled_items_are_high_risk():
     seed_templates(TemplateRepository())
     svc = CatalogService()
-    eradicate = next(t for t in svc.list(search="eradicate"))
+    eradicate = next(t for t in svc.list_all(search="eradicate"))
     assert eradicate.risk.value in ("high", "critical")

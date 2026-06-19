@@ -67,7 +67,9 @@ def list_jobs(
     offset: int = 0,
     _user: UserContext = Depends(get_current_user),
 ) -> list[Job]:
-    return ExecutionService().list(status=status, connector=connector, limit=limit, offset=offset)
+    return ExecutionService().list_all(
+        status=status, connector=connector, limit=limit, offset=offset
+    )
 
 
 @router.get("/jobs/{job_id}", response_model=Job)

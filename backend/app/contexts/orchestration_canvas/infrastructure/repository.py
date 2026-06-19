@@ -291,7 +291,7 @@ class CanvasRepository:
         with get_sessionmaker()() as session:
             result = session.execute(stmt)
             session.commit()
-            return int(result.rowcount or 0)
+            return int(result.rowcount or 0)  # type: ignore[attr-defined]
 
     def prune_runs(self, workflow_id: str, keep: int = 50) -> None:
         with get_sessionmaker()() as session:

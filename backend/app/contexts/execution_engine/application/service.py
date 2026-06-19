@@ -128,8 +128,8 @@ class ExecutionService:
     def get(self, job_id: str) -> Job | None:
         return self.repo.get(job_id)
 
-    def list(self, **kwargs) -> list[Job]:
-        return self.repo.list(**kwargs)
+    def list_all(self, **kwargs) -> list[Job]:
+        return self.repo.list_all(**kwargs)
 
     def logs(self, job_id: str) -> list[JobLogLine]:
         return self.repo.get_logs(job_id)

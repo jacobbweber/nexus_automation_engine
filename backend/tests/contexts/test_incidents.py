@@ -81,7 +81,7 @@ async def test_failed_job_auto_captures_incident():
     )
     result = await exec_svc.run(job.id)
     assert result == JobStatus.FAILED
-    incidents = IncidentService().list()
+    incidents = IncidentService().list_all()
     assert any(i.source_type == "job" and i.source_id == job.id for i in incidents)
 
 
@@ -106,7 +106,7 @@ async def test_failed_workflow_auto_captures_incident():
     wf = canvas.save_workflow(name="Failing WF", graph=graph)
     await canvas.run_workflow(wf.id, {})
     assert any(
-        i.source_type == "workflow" and i.source_id == wf.id for i in IncidentService().list()
+        i.source_type == "workflow" and i.source_id == wf.id for i in IncidentService().list_all()
     )
 
 

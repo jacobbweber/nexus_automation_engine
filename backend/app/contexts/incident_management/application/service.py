@@ -57,11 +57,11 @@ class IncidentService:
             raise NotFoundError(f"Incident {incident_id} not found")
         return inc
 
-    def list(self) -> list[Incident]:
-        return self.repo.list()
+    def list_all(self) -> list[Incident]:
+        return self.repo.list_all()
 
     def board(self) -> dict[str, list[Incident]]:
-        items = self.repo.list()
+        items = self.repo.list_all()
         return {str(col): [i for i in items if i.status == col] for col in BOARD_COLUMNS}
 
     def move(

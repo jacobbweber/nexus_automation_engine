@@ -53,9 +53,9 @@ def test_create_approve_list_lifecycle():
     svc = CatalogService()
     t = svc.create(_draft(), owner="engineer")
     assert t.approval_state == ApprovalState.DRAFT
-    assert svc.list(approval_state=ApprovalState.APPROVED) == []
+    assert svc.list_all(approval_state=ApprovalState.APPROVED) == []
     svc.approve(t.id)
-    approved = svc.list(approval_state=ApprovalState.APPROVED)
+    approved = svc.list_all(approval_state=ApprovalState.APPROVED)
     assert len(approved) == 1 and approved[0].id == t.id
 
 

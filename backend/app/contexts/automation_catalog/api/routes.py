@@ -26,7 +26,7 @@ def list_templates(
     search: str | None = None,
 ) -> list[Template]:
     # Default view = approved building blocks (what operators run).
-    return CatalogService().list(
+    return CatalogService().list_all(
         approval_state=state or ApprovalState.APPROVED, domain=domain, vendor=vendor, search=search
     )
 

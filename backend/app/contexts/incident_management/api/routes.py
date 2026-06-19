@@ -18,7 +18,7 @@ def board() -> dict[str, list[Incident]]:
 
 @router.get("", response_model=list[Incident])
 def list_incidents() -> list[Incident]:
-    return IncidentService().list()
+    return IncidentService().list_all()
 
 
 @router.get("/{incident_id}", response_model=Incident)

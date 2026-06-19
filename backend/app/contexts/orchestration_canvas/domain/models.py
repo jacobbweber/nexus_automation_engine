@@ -47,7 +47,7 @@ class StepStatus(StrEnum):
 class Node(BaseModel):
     id: str
     type: NodeType
-    position: dict[str, float] = Field(default_factory=lambda: {"x": 0, "y": 0})
+    position: dict[str, float] = Field(default_factory=lambda: {"x": 0.0, "y": 0.0})
     data: dict[str, Any] = Field(default_factory=dict)
 
 

@@ -15,7 +15,7 @@ router = APIRouter(prefix="/schedules", tags=["scheduling"])
 
 @router.get("", response_model=list[Schedule])
 def list_schedules() -> list[Schedule]:
-    return ScheduleService().list()
+    return ScheduleService().list_all()
 
 
 class ScheduleRequest(BaseModel):

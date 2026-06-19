@@ -89,7 +89,7 @@ class TemplateRepository:
             row = session.get(TemplateRow, template_id)
             return _to_template(row) if row else None
 
-    def list(
+    def list_all(
         self,
         *,
         approval_state: ApprovalState | None = None,
@@ -122,7 +122,7 @@ class TemplateRepository:
         """Counts by domain and vendor over approved templates (powers faceted nav)."""
         from collections import Counter
 
-        approved = self.list(approval_state=ApprovalState.APPROVED)
+        approved = self.list_all(approval_state=ApprovalState.APPROVED)
         return {
             "domain": dict(Counter(t.domain for t in approved)),
             "vendor": dict(Counter(t.vendor for t in approved if t.vendor)),
