@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Catalog, type CatalogFacets, type Template } from "@/shared/api/client";
-import { Card, Page } from "@/shared/ui/primitives";
+import { Button, Card, Page } from "@/shared/ui/primitives";
 import { AutomationDetail } from "./AutomationDetail";
+import { CompareTemplates } from "./CompareTemplates";
 
 const RISK_COLOR: Record<string, string> = {
   low: "var(--color-ok)",
@@ -18,6 +19,12 @@ export function CatalogPage() {
   const [vendor, setVendor] = useState<string>("");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Template | null>(null);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [comparing, setComparing] = useState(false);
+
+  const toggleCompare = (id: string) =>
+    setCompareIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : ids.length < 3 ? [...ids, id] : ids));
+  const compareTemplates = templates.filter((t) => compareIds.includes(t.id));
 
   useEffect(() => {
     Catalog.facets().then(setFacets).catch(() => undefined);
@@ -60,7 +67,22 @@ export function CatalogPage() {
                       <span style={{ fontSize: "0.66rem", textTransform: "uppercase", color: "var(--color-accent)" }}>
                         {t.vendor || t.connector}
                       </span>
-                      <RiskPill risk={t.risk} />
+                      <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <label
+                          onClick={(e) => e.stopPropagation()}
+                          title="Add to compare"
+                          style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "0.62rem", color: "var(--text-muted)" }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={compareIds.includes(t.id)}
+                            onChange={() => toggleCompare(t.id)}
+                            aria-label={`Compare ${t.name}`}
+                          />
+                          compare
+                        </label>
+                        <RiskPill risk={t.risk} />
+                      </span>
                     </div>
                     <div style={{ fontWeight: 600, margin: "6px 0 4px" }}>{t.name}</div>
                     <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", minHeight: 34, lineHeight: 1.35 }}>
@@ -81,6 +103,35 @@ export function CatalogPage() {
         </div>
       </div>
       {selected && <AutomationDetail template={selected} onClose={() => setSelected(null)} />}
+
+      {compareIds.length > 0 && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 18,
+            left: "50%",
+            transform: "translateX(-50%)",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "10px 16px",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius-pill)",
+            boxShadow: "var(--shadow-3)",
+            zIndex: 900,
+          }}
+        >
+          <span style={{ fontSize: "0.82rem" }}>{compareIds.length} selected to compare</span>
+          <Button size="sm" onClick={() => setComparing(true)} disabled={compareIds.length < 2}>
+            Compare
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setCompareIds([])}>
+            Clear
+          </Button>
+        </div>
+      )}
+      {comparing && <CompareTemplates templates={compareTemplates} onClose={() => setComparing(false)} />}
     </Page>
   );
 }

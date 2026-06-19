@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M22 — Catalog comparison** (E23, #84): select 2–3 automations and compare them side-by-side
+  (vendor, domain, risk, type, duration, version, check/diff support, tags, prerequisites) via a
+  compare tray + modal. (Faceted discovery E22 #83 and the Logic-Flow tab E24 #85 were already
+  delivered by the M14 catalog-at-scale work.)
 - **M22 — Dashboard needs-attention + favorites** (D21, #82): a **Needs attention** card
   aggregating workflows awaiting review, failed runs, and stale / never-reviewed automations (each
   drill-through, hidden when zero with an "all clear" state), and a **Favorites** card of starred
