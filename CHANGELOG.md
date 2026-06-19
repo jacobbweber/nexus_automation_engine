@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **Four formal audit reports** (`specs/audits/`): security & compliance, code quality,
+  architecture/scalability/performance, and best-practice/linting/maturity — each with rated
+  findings, a remediation plan, and a checklist, plus a consolidated remediation order.
 - **M16 Incident / Error Kanban** (`incident_management` context): failed jobs **and** workflow
   runs auto-open an **incident card** (de-duplicated per source) on a triage board
   (New → Triage → Investigating → Resolved). Move cards, and **convert an incident → a draft
