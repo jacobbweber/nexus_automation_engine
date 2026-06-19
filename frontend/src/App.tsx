@@ -3,6 +3,7 @@ import { AppShell } from "@/app/AppShell";
 import { AuthProvider, useAuth } from "@/app/auth";
 import { ModeProvider } from "@/shared/theme/mode";
 import { PrefsProvider } from "@/shared/theme/prefs";
+import { ThemesProvider } from "@/shared/theme/theme-provider";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { CanvasPage } from "@/features/canvas/CanvasPage";
 import { CatalogPage } from "@/features/catalog/CatalogPage";
@@ -39,16 +40,18 @@ function Protected() {
 export default function App() {
   return (
     <ModeProvider>
-      <PrefsProvider>
-        <AuthProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/*" element={<Protected />} />
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </PrefsProvider>
+      <ThemesProvider>
+        <PrefsProvider>
+          <AuthProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/*" element={<Protected />} />
+              </Routes>
+            </BrowserRouter>
+          </AuthProvider>
+        </PrefsProvider>
+      </ThemesProvider>
     </ModeProvider>
   );
 }
