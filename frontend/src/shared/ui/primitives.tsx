@@ -88,18 +88,25 @@ export function StatusBadge({ status, size = "sm" }: { status: string; size?: "s
   const s = STATUS[key] ?? { color: "var(--text-muted)", icon: Circle };
   const Icon = s.icon;
   const px = size === "md" ? 15 : 13;
+  // Label uses --text (always AA); the colored icon (a graphic) carries the status hue, so the
+  // badge is legible and never relies on color alone (design-system §7.1, A7 contrast gate).
   return (
     <span
       style={{
         display: "inline-flex",
         alignItems: "center",
         gap: 6,
+        padding: "2px 8px",
+        borderRadius: "var(--radius-pill)",
+        background: `color-mix(in srgb, ${s.color} 12%, transparent)`,
         fontSize: size === "md" ? "0.82rem" : "0.75rem",
-        color: s.color,
+        color: "var(--text)",
         fontWeight: 600,
       }}
     >
-      <Icon size={px} className={s.spin ? "nx-spin" : undefined} aria-hidden />
+      <span style={{ color: s.color, display: "inline-flex" }}>
+        <Icon size={px} className={s.spin ? "nx-spin" : undefined} aria-hidden />
+      </span>
       <span style={{ textTransform: "capitalize" }}>{key.replace(/_/g, " ")}</span>
     </span>
   );

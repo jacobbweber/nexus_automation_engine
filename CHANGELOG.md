@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M20 — contrast/a11y CI gate** (A7, #68): a reusable WCAG **contrast utility**
+  (`shared/theme/contrast.ts` — luminance, ratio, AA/AAA helpers; reused later by the theme
+  validator) plus a test that gates the **Signal default palette** (light + dark) at WCAG AA in CI.
+  Building the gate surfaced and fixed real issues: the light accent was darkened so white button
+  text clears AA, dark mode got a dark `--accent-contrast`, and the status badge now renders its
+  label in `--text` with the color carried by the icon. **Completes the M20 foundation (A1–A7).**
 - **M20 — component refactor + protected status badge** (A6, #67): the shared primitives
   (Page/Card/Button/StatusBadge) now consume the semantic token contract (radii/spacing/elevation
   vars; `Button` retints per area + gains soft/danger/quiet variants and 44px targets). A global

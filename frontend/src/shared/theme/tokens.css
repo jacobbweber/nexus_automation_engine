@@ -20,8 +20,8 @@
     --n-50:#fbf7f2; --n-100:#f4ece1; --n-150:#ece2d4; --n-200:#e0d3c1; --n-300:#c8b6a0;
     --n-400:#a8927a; --n-500:#7d6a57; --n-600:#5b4f43; --n-650:#47403a; --n-700:#352f2a;
     --n-800:#262220; --n-850:#201d1a; --n-900:#1a1714; --n-950:#141210;
-    /* signal-blue accent ramp */
-    --a-300:#9cc6ec; --a-400:#6ba6db; --a-500:#3f82c4; --a-600:#326aa3; --a-700:#274f7a;
+    /* signal-blue accent ramp (a-500 tuned so white text clears AA on it) */
+    --a-300:#9cc6ec; --a-400:#6ba6db; --a-500:#2f72b0; --a-600:#285f93; --a-700:#214e78;
     /* status ramps (protected semantics) */
     --ok-500:#4c8a5e; --ok-300:#8fc7a1;
     --warn-500:#b07a1e; --warn-300:#e0bd6f;
@@ -128,6 +128,7 @@
     --accent: var(--a-400);
     --accent-hover: var(--a-300);
     --accent-active: var(--a-300);
+    --accent-contrast: var(--n-950); /* dark text on the light dark-mode accent (AA) */
     --success: var(--ok-300); --warn: var(--warn-300);
     --danger: var(--danger-300); --info: var(--info-300);
     --run-running: var(--a-400); --run-ok: var(--ok-300); --run-warn: var(--warn-300);
