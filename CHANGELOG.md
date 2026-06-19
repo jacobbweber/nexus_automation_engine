@@ -5,6 +5,17 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Added
+- **M18 CMDB Lifecycle Validation** ("origin-story validation", `lifecycle_validation` context,
+  ADR-0006): every automation must carry required metadata (authored_by, approved/updated/reviewed
+  dates, CI type + heritage) and pass a **CMDB CI-lifecycle consistency check** before it runs.
+  Rejects runs whose target contradicts the CMDB — retired CIs, CI-type mismatches, unknown CIs,
+  and **destructive actions on cluster-member datastores**. Governed by a **single admin-editable
+  `ValidationPolicy`** every execution consults. The simulated CMDB gained CI type / lifecycle /
+  cluster data; catalog items carry the metadata; approval stamps the review date. New
+  `/governance/validation/policy|check|review-status` endpoints + a **pruning/review dashboard**
+  (fresh / stale / never-reviewed + oldest). 119 backend tests.
+
 ### Security
 - **Audit S1/S2 fixes**: job execution, queries, telemetry, and canvas run now **require
   authentication**; live-vs-check execution is **entitlement-checked**; the auditable

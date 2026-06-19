@@ -59,6 +59,11 @@ class Template(BaseModel):
     prerequisites: str = ""
     version: str = "1.0.0"
     atomic: bool = True  # atomic capability vs. orchestrated multi-phase workflow
+    # Origin-story metadata (lifecycle validation) — authored_by == owner.
+    ci_type: str | None = None  # CI type this automation targets (e.g. "server", "datastore")
+    ci_heritage: str = ""
+    approved_date: datetime | None = None
+    last_reviewed: datetime | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -82,3 +87,5 @@ class TemplateDraft(BaseModel):
     estimated_minutes: int = 5
     prerequisites: str = ""
     atomic: bool = True
+    ci_type: str | None = None
+    ci_heritage: str = ""

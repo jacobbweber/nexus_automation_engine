@@ -3,9 +3,12 @@ import {
   Canvas,
   ChangeApi,
   Schedules,
+  Validation,
   type ChangeRecord,
   type ChangeTemplate,
+  type ReviewStatus,
   type Schedule,
+  type ValidationPolicy,
   type Workflow,
 } from "@/shared/api/client";
 import { useAuth } from "@/app/auth";
@@ -19,12 +22,16 @@ export function GovernancePage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [pending, setPending] = useState<Workflow[]>([]);
+  const [review, setReview] = useState<ReviewStatus | null>(null);
+  const [policy, setPolicy] = useState<ValidationPolicy | null>(null);
 
   const refresh = () => {
     ChangeApi.templates().then(setTemplates).catch(() => undefined);
     ChangeApi.records().then(setRecords).catch(() => undefined);
     Schedules.list().then(setSchedules).catch(() => undefined);
     Canvas.list().then(setWorkflows).catch(() => undefined);
+    Validation.reviewStatus().then(setReview).catch(() => undefined);
+    Validation.policy().then(setPolicy).catch(() => undefined);
     if (canReview) Canvas.pendingReviews().then(setPending).catch(() => setPending([]));
   };
   useEffect(refresh, [canReview]);
@@ -34,7 +41,28 @@ export function GovernancePage() {
   }
 
   return (
-    <Page title="Governance" subtitle="Change control, scheduling & review — the management layer">
+    <Page title="Governance" subtitle="Change control, scheduling, review & lifecycle validation">
+      {review && (
+        <Card style={{ marginBottom: 14 }}>
+          <SectionTitle>Automation review &amp; pruning</SectionTitle>
+          <div style={{ display: "flex", gap: 24, marginBottom: 10 }}>
+            <Stat label="Fresh" value={review.fresh} color="var(--color-ok)" />
+            <Stat label="Stale" value={review.stale} color="var(--color-warn)" />
+            <Stat label="Never reviewed" value={review.never_reviewed} color="var(--color-danger)" />
+            <Stat label="Total" value={review.total} />
+            {policy && (
+              <div style={{ marginLeft: "auto", alignSelf: "center", fontSize: "0.72rem", color: "var(--text-muted)" }}>
+                review SLA: {policy.max_review_age_days}d · CMDB checks {policy.enforce_cmdb_consistency ? "on" : "off"}
+              </div>
+            )}
+          </div>
+          {review.oldest.length > 0 && (
+            <div style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
+              Oldest reviewed: {review.oldest.slice(0, 5).map((o) => o.name).join(" · ")}
+            </div>
+          )}
+        </Card>
+      )}
       {canReview && (
         <Card style={{ marginBottom: 14 }}>
           <SectionTitle>Workflow review inbox</SectionTitle>
@@ -110,6 +138,15 @@ export function GovernancePage() {
         </table>
       </Card>
     </Page>
+  );
+}
+
+function Stat({ label, value, color }: { label: string; value: number; color?: string }) {
+  return (
+    <div>
+      <div style={{ fontSize: "1.5rem", fontWeight: 700, color: color ?? "var(--text)" }}>{value}</div>
+      <div style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>{label}</div>
+    </div>
   );
 }
 

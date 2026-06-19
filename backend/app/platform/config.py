@@ -41,6 +41,8 @@ class Settings(BaseSettings):
     # Background scheduler (dispatches due schedules). Tests disable it.
     scheduler_enabled: bool = True
     scheduler_tick_seconds: float = 30.0
+    # Origin-story validation: gate executions on metadata + CMDB lifecycle consistency.
+    enforce_lifecycle_validation: bool = True
 
 
 @lru_cache

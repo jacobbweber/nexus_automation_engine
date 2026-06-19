@@ -13,44 +13,44 @@ from app.contexts.connectors.domain.models import (
     Resource,
 )
 
-# A small, believable CMDB the discovery adapter filters over.
+
+# A small, believable CMDB the discovery adapter filters over. Each CI carries a ci_type,
+# lifecycle_state, and cluster membership so lifecycle-validation checks have real signal.
+def _ci(id, name, ci_type, env, *, lifecycle="operational", cluster=None, os=None):
+    row: dict[str, object] = {
+        "id": id,
+        "name": name,
+        "fqdn": f"{name}.sim.internal",
+        "ci_type": ci_type,
+        "env": env,
+        "lifecycle_state": lifecycle,
+        "cluster_member": cluster is not None,
+        "cluster": cluster,
+    }
+    if os:
+        row["os"] = os
+    return row
+
+
 _CMDB: list[dict[str, object]] = [
-    {
-        "id": "ci-1001",
-        "name": "web-prod-01",
-        "fqdn": "web-prod-01.sim.internal",
-        "env": "Production",
-        "os": "RHEL9",
-    },
-    {
-        "id": "ci-1002",
-        "name": "web-prod-02",
-        "fqdn": "web-prod-02.sim.internal",
-        "env": "Production",
-        "os": "RHEL9",
-    },
-    {
-        "id": "ci-1003",
-        "name": "app-stg-01",
-        "fqdn": "app-stg-01.sim.internal",
-        "env": "Staging",
-        "os": "RHEL9",
-    },
-    {
-        "id": "ci-1004",
-        "name": "db-prod-01",
-        "fqdn": "db-prod-01.sim.internal",
-        "env": "Production",
-        "os": "Windows2022",
-    },
-    {
-        "id": "ci-1005",
-        "name": "dev-box-07",
-        "fqdn": "dev-box-07.sim.internal",
-        "env": "Development",
-        "os": "Ubuntu24",
-    },
+    _ci("ci-1001", "web-prod-01", "server", "Production", os="RHEL9"),
+    _ci("ci-1002", "web-prod-02", "server", "Production", os="RHEL9"),
+    _ci("ci-1003", "app-stg-01", "server", "Staging", os="RHEL9"),
+    _ci("ci-1004", "db-prod-01", "server", "Production", os="Windows2022"),
+    _ci("ci-1005", "dev-box-07", "server", "Development", os="Ubuntu24"),
+    _ci("ci-1006", "legacy-app-02", "server", "Production", lifecycle="retired", os="RHEL7"),
+    # Storage CIs — datastores; some are members of a vSphere cluster.
+    _ci("ci-2001", "ds-vvol-01", "datastore", "Production", cluster="wld-prod-01"),
+    _ci("ci-2002", "ds-vvol-02", "datastore", "Production", cluster="wld-prod-01"),
+    _ci("ci-2003", "ds-scratch", "datastore", "Development"),
 ]
+
+
+def get_ci(name: str) -> dict[str, object] | None:
+    for r in _CMDB:
+        if r["name"] == name:
+            return r
+    return None
 
 
 class ServiceNowSimConnector:
@@ -100,7 +100,15 @@ class ServiceNowSimConnector:
 
     async def discover(self, query: DiscoveryQuery) -> list[Resource]:
         env = query.filters.get("env")
-        rows = [r for r in _CMDB if not env or r.get("env") == env]
+        ci_type = query.filters.get("ci_type")
+        name = query.filters.get("name")
+        rows = [
+            r
+            for r in _CMDB
+            if (not env or r.get("env") == env)
+            and (not ci_type or r.get("ci_type") == ci_type)
+            and (not name or r.get("name") == name)
+        ]
         rows = rows[: max(1, query.limit)]
         return [
             Resource(id=str(r["id"]), name=str(r["name"]), attributes={k: v for k, v in r.items()})
