@@ -43,9 +43,10 @@ FastAPI auto-docs exist at `/docs`; endpoints lack rich descriptions/examples an
 tags in a few places. → Add summaries/examples; group tags.
 
 ## Plan / checklist
-- [ ] Add mypy (or pyright) to CI (lenient → strict).
-- [ ] Enable ruff `S` rules; annotate the known `eval`.
-- [ ] Add pytest-cov + threshold.
+- [ ] Add mypy (or pyright) to CI (lenient → strict). *(next)*
+- [x] Enable ruff `S` (flake8-bandit) rules; deliberate exceptions documented in pyproject; the
+      known `eval` is `# noqa: S307`; the lone `assert` replaced with a real guard.
+- [x] Add pytest-cov (reporting in CI; **91%** at adoption). Threshold gate to follow.
 - [ ] Review broad-except sites for logging.
 - [ ] Frontend component tests + jsx-a11y.
 - [ ] Structured logging + platform self-metrics.

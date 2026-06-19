@@ -5,6 +5,11 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Changed
+- **Audit B2 — hardened gate**: enabled ruff **`S` (flake8-bandit) security rules** (with
+  documented exceptions; the reviewed `eval` is annotated and the lone `assert` replaced by a
+  guard), and added **test coverage** reporting to CI (91% at adoption).
+
 ### Fixed
 - **Audit A1 — crash recovery**: a startup recovery sweep marks orphaned PENDING/RUNNING jobs and
   RUNNING workflow runs as FAILED after a restart, so persisted state stays honest. Documented the

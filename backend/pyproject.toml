@@ -20,6 +20,7 @@ dependencies = [
 dev = [
     "pytest>=8.3",
     "pytest-asyncio>=0.24",
+    "pytest-cov>=5.0",
     "anyio>=4.6",
     "ruff>=0.7",
 ]
@@ -43,8 +44,15 @@ target-version = "py311"
 src = ["app", "tests"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "W"]
-ignore = ["B008"]  # FastAPI Depends() in defaults is idiomatic
+select = ["E", "F", "I", "UP", "B", "W", "S"]
+ignore = [
+    "B008",  # FastAPI Depends() in defaults is idiomatic
+    "S105",  # "hardcoded password": dev-only default secret/passwords (local/test only)
+    "S106",
+    "S110",  # try/except/pass is used deliberately for WS disconnects
+    "S311",  # stdlib random is fine for the simulation layer (not crypto)
+    "S701",  # Jinja autoescape off is intentional: we render plaintext params, not HTML
+]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["B"]
+"tests/*" = ["B", "S"]  # asserts + dev creds are expected in tests
