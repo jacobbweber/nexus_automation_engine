@@ -57,4 +57,7 @@ context specs before building (SDD).
 - M6 (canvas backend): **done** — DAG engine, 15 node types, approval gates, persistence, WS.
 - M7 (canvas UI) + M8 (frontend surfaces): **done** — auth, dashboard, catalog, console (live WS),
   admin, and the visual canvas (palette, connect, connector dropdown, run highlight, approval).
-- M9 (containerization & QA → v1.0): **in progress.**
+- M9 (containerization & QA): **done** — rootless Dockerfile + compose; live end-to-end server
+  smoke passed (auth, seeded data, canvas run). **Released v1.0.0.**
+- **1.0 reached.** Next: the 2.0 ops-engineering pass (change control, change templates, per-job
+  scheduling, platform-as-management-layer).
