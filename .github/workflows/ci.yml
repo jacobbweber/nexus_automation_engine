@@ -17,7 +17,7 @@ concurrency:
 jobs:
   smoke:
     name: Runner Smoke Test
-    runs-on: [self-hosted, nexus]
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,7 +30,9 @@ jobs:
   backend:
     name: Backend (lint + tests)
     needs: smoke
-    runs-on: [self-hosted, nexus]
+    runs-on: self-hosted
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"  # keep the workspace clean for actions/checkout
     defaults:
       run:
         shell: pwsh
@@ -52,12 +54,12 @@ jobs:
         run: .\.venv\Scripts\python.exe -m ruff format --check .
 
       - name: Pytest
-        run: .\.venv\Scripts\python.exe -m pytest -q
+        run: .\.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider
 
   frontend:
     name: Frontend (lint + types + tests + build)
     needs: smoke
-    runs-on: [self-hosted, nexus]
+    runs-on: self-hosted
     defaults:
       run:
         shell: pwsh

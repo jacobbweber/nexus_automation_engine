@@ -115,6 +115,19 @@ export interface Template {
   default_params: Record<string, unknown>;
   owner: string;
   approval_state: string;
+  domain: string;
+  vendor: string;
+  tags: string[];
+  risk: string;
+  estimated_minutes: number;
+  prerequisites: string;
+  version: string;
+  atomic: boolean;
+}
+
+export interface CatalogFacets {
+  domain: Record<string, number>;
+  vendor: Record<string, number>;
 }
 export interface SurveyField {
   name: string;
@@ -173,7 +186,15 @@ export const Auth = {
 };
 
 export const Catalog = {
-  list: () => api.get<Template[]>("/catalog/templates"),
+  list: (opts: { domain?: string; vendor?: string; search?: string } = {}) => {
+    const q = new URLSearchParams();
+    if (opts.domain) q.set("domain", opts.domain);
+    if (opts.vendor) q.set("vendor", opts.vendor);
+    if (opts.search) q.set("search", opts.search);
+    const qs = q.toString();
+    return api.get<Template[]>(`/catalog/templates${qs ? `?${qs}` : ""}`);
+  },
+  facets: () => api.get<CatalogFacets>("/catalog/facets"),
   get: (id: string) => api.get<Template>(`/catalog/templates/${id}`),
   execute: (id: string, survey_answers: Record<string, unknown>, check_mode = false) =>
     api.post<{ job_id: string; status: string }>(`/catalog/templates/${id}/execute`, {
