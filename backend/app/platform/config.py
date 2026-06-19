@@ -43,6 +43,8 @@ class Settings(BaseSettings):
     scheduler_tick_seconds: float = 30.0
     # Origin-story validation: gate executions on metadata + CMDB lifecycle consistency.
     enforce_lifecycle_validation: bool = True
+    # SSRF guard: allow the http_request canvas node to reach private/loopback/link-local hosts.
+    http_allow_private: bool = False
 
 
 @lru_cache

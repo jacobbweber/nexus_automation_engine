@@ -157,9 +157,40 @@ def _compare(a: Any, b: Any, op: str) -> bool:
     return False
 
 
+def _ssrf_guard(url: str) -> None:
+    """Block requests to loopback/private/link-local/metadata hosts (audit S3)."""
+    import ipaddress
+    import socket
+    from urllib.parse import urlparse
+
+    from app.platform.config import get_settings
+
+    if get_settings().http_allow_private:
+        return
+    host = urlparse(url).hostname
+    if not host:
+        raise ConnectorError("http_request: invalid URL (no host)")
+    if host in {"localhost", "metadata.google.internal", "metadata"}:
+        raise ConnectorError(f"http_request: blocked host '{host}' (SSRF policy)")
+
+    candidates: list[str] = []
+    try:
+        candidates = [host] if ipaddress.ip_address(host) else []
+    except ValueError:
+        try:
+            candidates = [info[4][0] for info in socket.getaddrinfo(host, None)]
+        except OSError:
+            return  # unresolvable — let the request fail naturally
+    for addr in candidates:
+        ip = ipaddress.ip_address(addr)
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
+            raise ConnectorError(f"http_request: blocked address {addr} (SSRF policy)")
+
+
 async def _http_request(data: dict[str, Any], pool: VariablePool) -> dict[str, Any]:
     method = str(data.get("method", "GET")).upper()
     url = str(pool.resolve(data.get("url", "")))
+    _ssrf_guard(url)
     headers = pool.resolve(data.get("headers", {})) or {}
     body = pool.resolve(data.get("body", "")) or None
     async with httpx.AsyncClient(timeout=30) as client:

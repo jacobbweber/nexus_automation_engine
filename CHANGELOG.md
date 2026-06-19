@@ -27,6 +27,9 @@ All notable changes to this project are documented here. Format follows
   (fresh / stale / never-reviewed + oldest). 119 backend tests.
 
 ### Security
+- **Audit S3 hardening**: security-response headers (CSP, `nosniff`, frame-deny, referrer) + a
+  request body-size limit (413), and an **SSRF guard** on the `http_request` canvas node that
+  blocks loopback/private/link-local/cloud-metadata targets (override via `NEXUS_HTTP_ALLOW_PRIVATE`).
 - **Audit S1/S2 fixes**: job execution, queries, telemetry, and canvas run now **require
   authentication**; live-vs-check execution is **entitlement-checked**; the auditable
   `initiated_by` is **derived from the token** (client-supplied executor is ignored — anti-spoof);

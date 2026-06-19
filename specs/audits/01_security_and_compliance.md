@@ -87,8 +87,11 @@ spine. Gaps above are about *enforcement coverage*, not absence of controls.
 - [ ] S1 (remaining) WebSocket auth via query-param token; entitlement on canvas run; auth on
       catalog/connectors browse.
 - [ ] S2 login throttling
-- [ ] S2 centralized execution gate (folds into the CMDB-validation feature)
-- [ ] S3 SSRF allowlist
-- [ ] S3 security-headers/body-limit middleware
+- [x] S2 centralized execution gate — the M18 lifecycle-validation gate enforces metadata + CMDB
+      consistency on the catalog execute path (extend to direct /jobs + canvas next).
+- [x] S3 SSRF guard on the `http_request` node (blocks loopback/private/link-local/metadata;
+      `NEXUS_HTTP_ALLOW_PRIVATE` to override).
+- [x] S3 security-headers + body-limit middleware (CSP, nosniff, frame-deny, referrer; 413 on
+      oversized bodies).
 - [ ] S3 npm audit triage + CI
 - [ ] S4 secret-non-persistence test + docs
