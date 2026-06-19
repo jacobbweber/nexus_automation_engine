@@ -92,6 +92,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               <div style={{ marginTop: 4 }}>
                 <ThemePicker />
               </div>
+              <NavLink to="/theme-studio" style={{ display: "inline-block", marginTop: 8, fontSize: "0.74rem", color: "var(--accent)" }}>
+                Open Theme Studio →
+              </NavLink>
             </div>
           </details>
           <div style={{ padding: "8px" }}>

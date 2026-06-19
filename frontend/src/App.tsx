@@ -8,6 +8,7 @@ import { LoginPage } from "@/features/auth/LoginPage";
 import { CanvasPage } from "@/features/canvas/CanvasPage";
 import { CatalogPage } from "@/features/catalog/CatalogPage";
 import { WorkflowLibraryPage } from "@/features/library/WorkflowLibraryPage";
+import { ThemeStudioPage } from "@/features/theme-studio/ThemeStudioPage";
 import { ConsolePage } from "@/features/console/ConsolePage";
 import { AdminPage } from "@/features/admin/AdminPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
@@ -27,6 +28,7 @@ function Protected() {
         <Route path="/catalog" element={<CatalogPage />} />
         <Route path="/canvas" element={<CanvasPage />} />
         <Route path="/library" element={<WorkflowLibraryPage />} />
+        <Route path="/theme-studio" element={<ThemeStudioPage />} />
         <Route path="/console" element={<ConsolePage />} />
         <Route path="/governance" element={<GovernancePage />} />
         <Route path="/incidents" element={<IncidentsPage />} />
