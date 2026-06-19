@@ -74,11 +74,16 @@ jobs:
           # Self-hosted runner: Node lives in the user profile. Make it discoverable
           # regardless of how the runner process was launched.
           foreach ($d in @("$env:LOCALAPPDATA\hermes\node", "$env:ProgramFiles\nodejs")) {
-            if (Test-Path "$d\npm.cmd") { Add-Content -Path $env:GITHUB_PATH -Value $d }
+            if (Test-Path "$d\npm.cmd") {
+              Add-Content -Path $env:GITHUB_PATH -Value $d
+              Write-Output "Added to PATH: $d"
+            }
           }
-          node --version; npm --version
       - name: Install
-        run: npm ci
+        run: |
+          node --version
+          npm --version
+          npm ci
       - name: Lint
         run: npm run lint
       - name: Typecheck
