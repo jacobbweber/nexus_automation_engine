@@ -54,7 +54,7 @@ jobs:
         run: .\.venv\Scripts\python.exe -m ruff format --check .
 
       - name: Pytest
-        run: .\.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider
+        run: .\.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --cov=app --cov-report=term-missing
 
   frontend:
     name: Frontend (lint + types + tests + build)

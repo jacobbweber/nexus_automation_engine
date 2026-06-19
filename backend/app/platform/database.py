@@ -56,7 +56,8 @@ def get_engine() -> Engine:
 def get_sessionmaker() -> sessionmaker[Session]:
     if _sessionmaker is None:
         get_engine()
-    assert _sessionmaker is not None
+    if _sessionmaker is None:  # pragma: no cover - get_engine always sets it
+        raise RuntimeError("Session factory not initialized")
     return _sessionmaker
 
 
