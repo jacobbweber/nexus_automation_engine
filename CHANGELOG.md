@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M21 — 10 built-in themes** (B11, #72): Signal, Paper, Midnight Ops, Slate Pro, Focus Flow +
+  Calm Clarity (ADHD/ADD), High Contrast (AAA), Terminal, Daylight, Ember — each built from the
+  validated base + overrides and **gated through `validateTheme` in CI** (every theme passes the
+  AA/allow-list contract). Themes apply by injecting their tokens into the `@layer theme` cascade
+  (`theme-apply.ts`) keyed by `data-theme` (dark override scoped); a `ThemesProvider` persists the
+  choice and a `ThemePicker` (with swatches) lives in the shell's Display & accessibility panel.
 - **M21 — theme schema + deterministic validator** (B9/B10, #70/#71): the `nexus-theme/v1` contract
   (`shared/theme/theme-schema.ts`) — a theme is **data** that may only remap an allow-listed set of
   semantic tokens for light + dark. `validateTheme()` is the sole safety gate (no AI): it checks

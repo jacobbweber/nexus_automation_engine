@@ -5,6 +5,7 @@ import { useAuth } from "@/app/auth";
 import { useMode } from "@/shared/theme/mode";
 import { ModeToggle } from "@/shared/theme/ModeToggle";
 import { DisplayControls } from "@/shared/theme/DisplayControls";
+import { ThemePicker } from "@/shared/theme/ThemePicker";
 
 const NAV = [
   { to: "/", area: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} />, end: true },
@@ -86,6 +87,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               Display &amp; accessibility
             </summary>
             <DisplayControls />
+            <div style={{ marginTop: 8 }}>
+              <span style={{ fontSize: "0.68rem", color: "var(--text-muted)" }}>Theme</span>
+              <div style={{ marginTop: 4 }}>
+                <ThemePicker />
+              </div>
+            </div>
           </details>
           <div style={{ padding: "8px" }}>
             {user?.username} · <span style={{ color: "var(--color-accent)" }}>{user?.global_role}</span>
