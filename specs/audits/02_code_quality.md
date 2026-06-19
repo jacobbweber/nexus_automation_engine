@@ -40,8 +40,10 @@ Only one frontend test (the auth gate). → Add component tests for catalog filt
 reducer logic, and incident board rendering.
 
 ## Plan / checklist
-- [ ] Extract `AsyncBroker` to shared_kernel; both contexts use it.
-- [ ] Shared `fresh_db` test fixture; delete per-file `_ensure_schema` copies.
+- [x] Extract `AsyncBroker` to `shared_kernel`; execution + canvas brokers are thin singletons
+      over it (LogBroker/RunBroker kept as aliases).
+- [ ] Shared `fresh_db` test fixture; delete per-file `_ensure_schema` copies. *(low-value churn;
+      deferred)*
 - [ ] Standardize tz-aware datetime reads.
 - [ ] Enum-ize `source_type` / review decision / close codes.
 - [ ] Add coverage reporting to CI.
