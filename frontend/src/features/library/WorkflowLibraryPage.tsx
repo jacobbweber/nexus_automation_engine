@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Canvas, type WorkflowReport } from "@/shared/api/client";
 import { Card, Page, StatusBadge } from "@/shared/ui/primitives";
+import { EmptyState } from "@/shared/ui/EmptyState";
 
 // The workflow library + reporting view: who made each workflow, which team owns it, how it's
 // used (run counts, last run, success rate), and its governance state — filterable by team/tag,
@@ -116,8 +117,15 @@ export function WorkflowLibraryPage() {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7} style={{ padding: "14px 6px", color: "var(--text-muted)" }}>
-                  No workflows match these filters.
+                <td colSpan={7}>
+                  <EmptyState
+                    title={reports.length === 0 ? "No workflows yet" : "No workflows match these filters"}
+                    description={
+                      reports.length === 0
+                        ? "Saved workflows will appear here with their team, owner, and usage."
+                        : "Try clearing the team or tag filter, or a different search."
+                    }
+                  />
                 </td>
               </tr>
             )}
