@@ -67,6 +67,24 @@ class ValidationService:
                 "Lifecycle validation rejected this run: " + "; ".join(result.reasons)
             )
 
+    async def validate_cmdb_only(
+        self, meta: AutomationMeta, target: str | None
+    ) -> ValidationResult:
+        """CMDB-consistency-only check (no metadata-completeness) for ad-hoc/direct execution."""
+        ci = await self._resolve_ci(target)
+        reasons = check_cmdb(meta, ci, self.repo.get())
+        return ValidationResult(ok=not reasons, stage="prelaunch", reasons=reasons)
+
+    async def enforce_cmdb_only(self, meta: AutomationMeta, target: str | None) -> None:
+        # No target CI named => nothing to check against (e.g. a Terraform workspace op).
+        if not target:
+            return
+        result = await self.validate_cmdb_only(meta, target)
+        if not result.ok:
+            raise ValidationRejected(
+                "CMDB lifecycle check rejected this run: " + "; ".join(result.reasons)
+            )
+
 
 def seed_default_policy(repo: ValidationPolicyRepository | None = None) -> None:
     repo = repo or ValidationPolicyRepository()

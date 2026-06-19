@@ -29,6 +29,9 @@ All notable changes to this project are documented here. Format follows
   (fresh / stale / never-reviewed + oldest). 119 backend tests.
 
 ### Security
+- **Central gate extended**: the `/api/v1/jobs/execute` direct path now also runs the CMDB
+  lifecycle-consistency gate on its target (ad-hoc jobs to retired/cluster/unknown CIs are
+  rejected) — not just catalog runs.
 - **Audit S3 hardening**: security-response headers (CSP, `nosniff`, frame-deny, referrer) + a
   request body-size limit (413), and an **SSRF guard** on the `http_request` canvas node that
   blocks loopback/private/link-local/cloud-metadata targets (override via `NEXUS_HTTP_ALLOW_PRIVATE`).

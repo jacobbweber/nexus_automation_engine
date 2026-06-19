@@ -65,6 +65,31 @@ def test_execute_returns_pending_and_records_authenticated_executor():
         assert got.json()["initiated_by"] == "operator"  # not "spoofed"
 
 
+def test_direct_job_blocked_by_cmdb_lifecycle_gate():
+    import os
+
+    from app.platform.config import get_settings
+
+    os.environ["NEXUS_ENFORCE_LIFECYCLE_VALIDATION"] = "true"
+    get_settings.cache_clear()
+    try:
+        with TestClient(create_app()) as client:
+            resp = client.post(
+                "/api/v1/jobs/execute",
+                headers=_auth(client),
+                json={
+                    "name": "Delete cluster datastore",
+                    "connector": "vmware",
+                    "action": "delete_datastore",
+                    "params": {"target": "ds-vvol-01"},  # cluster member -> blocked
+                },
+            )
+        assert resp.status_code == 422
+    finally:
+        os.environ["NEXUS_ENFORCE_LIFECYCLE_VALIDATION"] = "false"
+        get_settings.cache_clear()
+
+
 def test_get_missing_job_404():
     with TestClient(create_app()) as client:
         assert client.get("/api/v1/jobs/nope", headers=_auth(client)).status_code == 404
