@@ -37,6 +37,14 @@ async def _lifespan(_app: FastAPI):
 
     seed_default_users()
     seed_default_policy()  # the single admin-editable validation gate
+
+    # Crash-recovery sweep (architecture audit A1): a previous process's in-flight runs are gone;
+    # mark orphaned PENDING/RUNNING jobs + RUNNING workflow runs as FAILED so state is honest.
+    from app.contexts.execution_engine.infrastructure.repository import JobRepository
+    from app.contexts.orchestration_canvas.infrastructure.repository import CanvasRepository
+
+    JobRepository().fail_orphaned_running()
+    CanvasRepository().fail_orphaned_runs()
     if get_settings().seed_demo_data:
         from app.contexts.automation_catalog.application.seed import seed_templates
         from app.contexts.change_management.application.service import seed_change_management

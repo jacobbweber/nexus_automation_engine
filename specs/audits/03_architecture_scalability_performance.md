@@ -17,9 +17,15 @@ cross-instance, and the scheduler double-fires. → For scale, adopt the **event
 architecture** (central DB queue, stateless API, separate runner) — already on the backlog from
 the Ava harvest. Document the current **single-instance ceiling** explicitly.
 
-### A1 — In-flight runs are not crash-recoverable
-A job/workflow marked RUNNING is lost if the process restarts (no requeue/resume). → Persist a
-claim/lease and a recovery sweep on startup (mark orphaned RUNNING → FAILED or requeue).
+### A1 — In-flight runs are not crash-recoverable  ✅ (sweep done)
+A job/workflow marked RUNNING is lost if the process restarts (no requeue/resume). → **Done:** a
+startup **recovery sweep** marks orphaned PENDING/RUNNING jobs and RUNNING workflow runs as FAILED
+(`JobRepository.fail_orphaned_running` / `CanvasRepository.fail_orphaned_runs`, called in the app
+lifespan) so persisted state is honest after a restart. Requeue/resume remains future work.
+
+> **Single-instance ceiling (documented):** live log fan-out, approvals, the scheduler, and
+> background run tasks are in-process. Run **one** API instance until the event-driven-pull
+> split lands; the recovery sweep keeps state consistent across restarts of that instance.
 
 ### A2 — SQLite single-writer ceiling
 SQLite/WAL is great for the POC but is a single-writer store. At real concurrency it bottlenecks.
