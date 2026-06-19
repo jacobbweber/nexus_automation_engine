@@ -273,6 +273,26 @@ class CanvasRepository:
                 for r in rows
             ]
 
+    def fail_orphaned_runs(self, reason: str = "Interrupted by a service restart") -> int:
+        """Mark workflow runs left RUNNING by a previous process as FAILED. Returns the count."""
+        from datetime import UTC, datetime
+
+        from sqlalchemy import update
+
+        stmt = (
+            update(WorkflowRunRow)
+            .where(WorkflowRunRow.status == str(RunStatus.RUNNING))
+            .values(
+                status=str(RunStatus.FAILED),
+                completed_at=datetime.now(UTC),
+                error_message=reason,
+            )
+        )
+        with get_sessionmaker()() as session:
+            result = session.execute(stmt)
+            session.commit()
+            return int(result.rowcount or 0)
+
     def prune_runs(self, workflow_id: str, keep: int = 50) -> None:
         with get_sessionmaker()() as session:
             old = (

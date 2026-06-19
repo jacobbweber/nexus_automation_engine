@@ -128,6 +128,26 @@ class JobRepository:
         with get_sessionmaker()() as session:
             return int(session.execute(select(func.count(JobRow.id))).scalar() or 0)
 
+    def fail_orphaned_running(self, reason: str = "Interrupted by a service restart") -> int:
+        """Mark jobs left PENDING/RUNNING by a previous process as FAILED. Returns the count."""
+        from datetime import UTC, datetime
+
+        from sqlalchemy import update
+
+        stmt = (
+            update(JobRow)
+            .where(JobRow.status.in_([JobStatus.PENDING.value, JobStatus.RUNNING.value]))
+            .values(
+                status=JobStatus.FAILED.value,
+                finished_at=datetime.now(UTC),
+                error_message=reason,
+            )
+        )
+        with get_sessionmaker()() as session:
+            result = session.execute(stmt)
+            session.commit()
+            return int(result.rowcount or 0)
+
     def get_logs(self, job_id: str) -> list[JobLogLine]:
         stmt = select(JobLogRow).where(JobLogRow.job_id == job_id).order_by(JobLogRow.sequence)
         with get_sessionmaker()() as session:

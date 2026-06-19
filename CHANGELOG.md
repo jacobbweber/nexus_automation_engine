@@ -5,6 +5,11 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Fixed
+- **Audit A1 — crash recovery**: a startup recovery sweep marks orphaned PENDING/RUNNING jobs and
+  RUNNING workflow runs as FAILED after a restart, so persisted state stays honest. Documented the
+  single-instance ceiling.
+
 ### Added
 - **M18 CMDB Lifecycle Validation** ("origin-story validation", `lifecycle_validation` context,
   ADR-0006): every automation must carry required metadata (authored_by, approved/updated/reviewed
