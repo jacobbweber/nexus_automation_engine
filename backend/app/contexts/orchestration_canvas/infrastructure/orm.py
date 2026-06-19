@@ -17,8 +17,22 @@ class WorkflowRow(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str] = mapped_column(Text, default="")
     graph_json: Mapped[str] = mapped_column(Text, default="{}")
+    review_state: Mapped[str] = mapped_column(String, default="draft", index=True)
+    submitted_by: Mapped[str | None] = mapped_column(String, nullable=True)
+    reviewed_by: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class WorkflowReviewRow(Base):
+    __tablename__ = "canvas_workflow_reviews"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    workflow_id: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    decision: Mapped[str] = mapped_column(String, nullable=False)
+    actor: Mapped[str] = mapped_column(String, nullable=False)
+    comment: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
 
 class WorkflowVersionRow(Base):

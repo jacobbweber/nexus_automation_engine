@@ -107,6 +107,14 @@ export function CanvasPage() {
     setNodeStates({});
   }
 
+  async function submitForReview() {
+    let id = currentId;
+    if (!id) id = (await Canvas.save({ name, graph: { nodes, edges, viewport: {} } })).id;
+    await Canvas.submitForReview(id);
+    setCurrentId(id);
+    Canvas.list().then(setWorkflows);
+  }
+
   async function run() {
     if (!currentId) await save();
     const id = currentId ?? (await Canvas.save({ name, graph: { nodes, edges, viewport: {} } })).id;
@@ -149,6 +157,7 @@ export function CanvasPage() {
           onNew={newWorkflow}
           onSave={save}
           onRun={run}
+          onSubmit={submitForReview}
           running={running}
         />
         <div
@@ -232,6 +241,7 @@ function Toolbar(props: {
   onNew: () => void;
   onSave: () => void;
   onRun: () => void;
+  onSubmit: () => void;
   running: boolean;
 }) {
   return (
@@ -245,6 +255,7 @@ function Toolbar(props: {
       </select>
       <Button variant="ghost" onClick={props.onNew}>New</Button>
       <Button variant="ghost" onClick={props.onSave}>Save</Button>
+      <Button variant="ghost" onClick={props.onSubmit}>Submit for review</Button>
       <div style={{ marginLeft: "auto" }}>
         <Button onClick={props.onRun} disabled={props.running}>{props.running ? "Running…" : "▶ Run"}</Button>
       </div>

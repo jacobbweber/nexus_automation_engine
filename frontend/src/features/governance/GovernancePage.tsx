@@ -8,24 +8,54 @@ import {
   type Schedule,
   type Workflow,
 } from "@/shared/api/client";
+import { useAuth } from "@/app/auth";
 import { Button, Card, Page, StatusBadge } from "@/shared/ui/primitives";
 
 export function GovernancePage() {
+  const { user } = useAuth();
+  const canReview = user?.global_role === "engineer" || user?.global_role === "admin";
   const [templates, setTemplates] = useState<ChangeTemplate[]>([]);
   const [records, setRecords] = useState<ChangeRecord[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [pending, setPending] = useState<Workflow[]>([]);
 
   const refresh = () => {
     ChangeApi.templates().then(setTemplates).catch(() => undefined);
     ChangeApi.records().then(setRecords).catch(() => undefined);
     Schedules.list().then(setSchedules).catch(() => undefined);
     Canvas.list().then(setWorkflows).catch(() => undefined);
+    if (canReview) Canvas.pendingReviews().then(setPending).catch(() => setPending([]));
   };
-  useEffect(refresh, []);
+  useEffect(refresh, [canReview]);
+
+  function decide(id: string, decision: string) {
+    Canvas.review(id, decision).then(refresh).catch(() => undefined);
+  }
 
   return (
-    <Page title="Governance" subtitle="Change control & scheduling — the management layer">
+    <Page title="Governance" subtitle="Change control, scheduling & review — the management layer">
+      {canReview && (
+        <Card style={{ marginBottom: 14 }}>
+          <SectionTitle>Workflow review inbox</SectionTitle>
+          {pending.length === 0 && <Empty>No workflows awaiting review.</Empty>}
+          {pending.map((w) => (
+            <Row key={w.id}>
+              <span>
+                {w.name}{" "}
+                <span style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>
+                  by {w.submitted_by ?? "?"} · {w.review_state}
+                </span>
+              </span>
+              <span style={{ display: "flex", gap: 6 }}>
+                <Button onClick={() => decide(w.id, "approve")}>Approve</Button>
+                <Button variant="ghost" onClick={() => decide(w.id, "request_changes")}>Changes</Button>
+                <Button variant="ghost" onClick={() => decide(w.id, "reject")}>Reject</Button>
+              </span>
+            </Row>
+          ))}
+        </Card>
+      )}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <Card>
           <SectionTitle>Change templates</SectionTitle>

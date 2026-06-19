@@ -74,4 +74,5 @@ context specs before building (SDD).
     (domain/vendor/tags/risk), faceted filtering, 27-item multi-vendor seed.
   - M14 (catalog-at-scale UX + automation detail + animated Logic-Flow tab): **done** — faceted
     catalog, detail drawer (docs/params/logic-flow), Markdown + animated SVG components.
-  - M15 governed submission/review · M16 incident kanban · M17 command palette/analytics: **next.**
+  - M15 (governed submission/review): **done** — submit→review lifecycle, review inbox, audit trail.
+  - M16 incident kanban · M17 command palette/analytics: **next.**
