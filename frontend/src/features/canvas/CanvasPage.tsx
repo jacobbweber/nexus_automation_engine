@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Canvas, Connectors, openSocket, type Capabilities, type CanvasEdge, type CanvasNode, type NodeTypeSpec, type Workflow } from "@/shared/api/client";
+import { useAuth } from "@/app/auth";
 import { Button } from "@/shared/ui/primitives";
 import { ACCENT_BY_TYPE, NODE_CATEGORIES, defaultData } from "./nodeTypes";
 import { SchemaProperties } from "./SchemaForm";
@@ -22,9 +24,14 @@ const NODE_H = 62;
 type StepStatus = "running" | "completed" | "failed" | "skipped";
 
 export function CanvasPage() {
+  const { user } = useAuth();
+  const [params, setParams] = useSearchParams();
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [currentId, setCurrentId] = useState<string | undefined>();
   const [name, setName] = useState("Untitled workflow");
+  const [team, setTeam] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [owner, setOwner] = useState("");
   const [nodes, setNodes] = useState<CanvasNode[]>([]);
   const [edges, setEdges] = useState<CanvasEdge[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -102,26 +109,44 @@ export function CanvasPage() {
       id: currentId,
       name,
       graph: { nodes, edges, viewport: { x: pan.x, y: pan.y, zoom } },
+      owner: owner || user?.username,
+      team,
+      tags,
     });
     setCurrentId(wf.id);
+    setOwner(wf.owner);
     Canvas.list().then(setWorkflows);
   }
 
-  async function load(id: string) {
+  const load = useCallback(async (id: string) => {
     const wf = await Canvas.get(id);
     setCurrentId(wf.id);
     setName(wf.name);
+    setTeam(wf.team);
+    setTags(wf.tags);
+    setOwner(wf.owner);
     setNodes(wf.graph.nodes);
     setEdges(wf.graph.edges);
     setNodeStates({});
-  }
+  }, []);
+
+  // Deep-link from the Workflow Library: /canvas?id=<wf> auto-loads that workflow.
+  useEffect(() => {
+    const id = params.get("id");
+    if (id && id !== currentId) load(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params, load]);
 
   function newWorkflow() {
     setCurrentId(undefined);
     setName("Untitled workflow");
+    setTeam("");
+    setTags([]);
+    setOwner("");
     setNodes([]);
     setEdges([]);
     setNodeStates({});
+    if (params.get("id")) setParams({}, { replace: true });
   }
 
   async function submitForReview() {
@@ -168,6 +193,11 @@ export function CanvasPage() {
         <Toolbar
           name={name}
           setName={setName}
+          team={team}
+          setTeam={setTeam}
+          tags={tags}
+          setTags={setTags}
+          owner={owner}
           workflows={workflows}
           currentId={currentId}
           onLoad={load}
@@ -271,6 +301,11 @@ function Palette({ onAdd }: { onAdd: (t: string) => void }) {
 function Toolbar(props: {
   name: string;
   setName: (v: string) => void;
+  team: string;
+  setTeam: (v: string) => void;
+  tags: string[];
+  setTags: (v: string[]) => void;
+  owner: string;
   workflows: Workflow[];
   currentId?: string;
   onLoad: (id: string) => void;
@@ -280,10 +315,14 @@ function Toolbar(props: {
   onSubmit: () => void;
   running: boolean;
 }) {
+  const tb: React.CSSProperties = { padding: "7px 10px", borderRadius: 7, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--text)" };
   return (
-    <div style={{ display: "flex", gap: 10, alignItems: "center", padding: "10px 14px", borderBottom: "1px solid var(--border)", background: "var(--surface)" }}>
-      <input value={props.name} onChange={(e) => props.setName(e.target.value)} style={{ padding: "7px 10px", borderRadius: 7, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--text)" }} />
-      <select value={props.currentId ?? ""} onChange={(e) => e.target.value && props.onLoad(e.target.value)} style={{ padding: "7px", borderRadius: 7, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--text)" }}>
+    <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "10px 14px", borderBottom: "1px solid var(--border)", background: "var(--surface)", flexWrap: "wrap" }}>
+      <input value={props.name} onChange={(e) => props.setName(e.target.value)} placeholder="Workflow name" style={{ ...tb, width: 180 }} />
+      <input value={props.team} onChange={(e) => props.setTeam(e.target.value)} placeholder="Team" style={{ ...tb, width: 110 }} />
+      <input value={props.tags.join(", ")} onChange={(e) => props.setTags(e.target.value.split(",").map((t) => t.trim()).filter(Boolean))} placeholder="tags, comma-sep" style={{ ...tb, width: 150 }} />
+      {props.owner && <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>owner: {props.owner}</span>}
+      <select value={props.currentId ?? ""} onChange={(e) => e.target.value && props.onLoad(e.target.value)} style={tb}>
         <option value="">— open —</option>
         {props.workflows.map((w) => (
           <option key={w.id} value={w.id}>{w.name}</option>

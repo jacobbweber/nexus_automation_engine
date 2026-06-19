@@ -6,6 +6,19 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M19 — workflow library, ownership metadata & usage reporting**: workflows now carry
+  **owner / team / tags** (preserved across graph edits), and a new
+  `GET /canvas/workflows/report` joins each workflow with its run telemetry (run count, success /
+  failure, last run, success rate). A new **Workflow Library** page (`/library`) lists every saved
+  workflow filterable by team/tag with usage and governance state, and opens one in the canvas via
+  `/canvas?id=`. The canvas toolbar edits team/tags and shows the owner.
+- **Seeded enterprise workflow library**: a fresh login is now a full control plane — ~14
+  realistic, governed workflows across **Storage / Compute / Backup / ITSM / Security / Platform /
+  Networking** (CMDB-driven inventory, approval gates, secret leasing, cluster-aware destructive
+  guards, telemetry-driven self-healing, Terraform plan→apply), with varied review states
+  (published / submitted / draft) and seeded run telemetry.
+- **Additive SQLite column migration**: `init_db` now adds ORM columns missing from an existing
+  SQLite table (additive-only) so a persisted dev DB picks up new fields without a manual reset.
 - **M19 — schema-driven node parameters** (`node_specs.py`, `GET /canvas/node-types`): every
   canvas node type now publishes a typed parameter schema, so the property panel renders guided
   controls (select, toggle, number, key-value, multi-select, cases, assignments, run-inputs) from

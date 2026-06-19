@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "@/app/auth";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { CanvasPage } from "@/features/canvas/CanvasPage";
 import { CatalogPage } from "@/features/catalog/CatalogPage";
+import { WorkflowLibraryPage } from "@/features/library/WorkflowLibraryPage";
 import { ConsolePage } from "@/features/console/ConsolePage";
 import { AdminPage } from "@/features/admin/AdminPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
@@ -22,6 +23,7 @@ function Protected() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/catalog" element={<CatalogPage />} />
         <Route path="/canvas" element={<CanvasPage />} />
+        <Route path="/library" element={<WorkflowLibraryPage />} />
         <Route path="/console" element={<ConsolePage />} />
         <Route path="/governance" element={<GovernancePage />} />
         <Route path="/incidents" element={<IncidentsPage />} />

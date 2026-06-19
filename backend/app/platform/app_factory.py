@@ -50,10 +50,12 @@ async def _lifespan(_app: FastAPI):
         from app.contexts.automation_catalog.application.seed import seed_templates
         from app.contexts.change_management.application.service import seed_change_management
         from app.contexts.execution_engine.application.seed import seed_history
+        from app.contexts.orchestration_canvas.application.seed import seed_workflow_library
 
         seed_templates()
         seed_change_management()
         seed_history()
+        seed_workflow_library()
 
     scheduler_task = None
     if get_settings().scheduler_enabled:

@@ -65,6 +65,36 @@ def init_db() -> None:
     """Create all registered tables. Models must be imported before calling this."""
     engine = get_engine()
     Base.metadata.create_all(engine)
+    if engine.dialect.name == "sqlite":
+        _ensure_sqlite_columns(engine)
+
+
+def _ensure_sqlite_columns(engine: Engine) -> None:
+    """Add columns that exist in the ORM metadata but not yet in an existing SQLite table.
+
+    A pragmatic, additive-only migration for the POC: ``create_all`` never alters existing tables,
+    so a persisted dev DB would miss columns added in a later release. We only ADD columns (with
+    their scalar default), never drop or retype — safe to run on every startup.
+    """
+    from sqlalchemy import inspect, text
+
+    insp = inspect(engine)
+    existing = set(insp.get_table_names())
+    with engine.begin() as conn:
+        for table in Base.metadata.sorted_tables:
+            if table.name not in existing:
+                continue
+            have = {c["name"] for c in insp.get_columns(table.name)}
+            for col in table.columns:
+                if col.name in have:
+                    continue
+                coltype = col.type.compile(engine.dialect)
+                ddl = f'ALTER TABLE "{table.name}" ADD COLUMN "{col.name}" {coltype}'
+                default = getattr(col.default, "arg", None)
+                if default is not None and not callable(default):
+                    literal = f"'{default}'" if isinstance(default, str) else str(default)
+                    ddl += f" DEFAULT {literal}"
+                conn.execute(text(ddl))
 
 
 def dispose_db() -> None:

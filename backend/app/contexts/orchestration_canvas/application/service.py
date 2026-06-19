@@ -15,7 +15,9 @@ from app.contexts.orchestration_canvas.domain.models import (
     RunStatus,
     Workflow,
     WorkflowGraph,
+    WorkflowReport,
     WorkflowRun,
+    WorkflowUsage,
     WorkflowVersion,
 )
 from app.contexts.orchestration_canvas.infrastructure.repository import CanvasRepository
@@ -56,6 +58,9 @@ class CanvasService:
         graph: WorkflowGraph,
         description: str = "",
         workflow_id: str | None = None,
+        owner: str | None = None,
+        team: str | None = None,
+        tags: list[str] | None = None,
     ) -> Workflow:
         existing = self.repo.get_workflow(workflow_id) if workflow_id else None
         now = _now()
@@ -64,6 +69,10 @@ class CanvasService:
             name=name,
             description=description,
             graph=graph,
+            # Preserve existing ownership metadata across graph edits unless explicitly overridden.
+            owner=owner if owner is not None else (existing.owner if existing else ""),
+            team=team if team is not None else (existing.team if existing else ""),
+            tags=tags if tags is not None else (existing.tags if existing else []),
             created_at=existing.created_at if existing else now,
             updated_at=now,
         )
@@ -77,6 +86,28 @@ class CanvasService:
 
     def list_workflows(self) -> list[Workflow]:
         return self.repo.list_workflows()
+
+    def report(self) -> list[WorkflowReport]:
+        """Workflow library: each workflow's metadata joined with its run telemetry."""
+        usage = self.repo.usage_by_workflow()
+        reports: list[WorkflowReport] = []
+        for wf in self.repo.list_workflows():
+            reports.append(
+                WorkflowReport(
+                    id=wf.id,
+                    name=wf.name,
+                    description=wf.description,
+                    owner=wf.owner,
+                    team=wf.team,
+                    tags=wf.tags,
+                    review_state=wf.review_state,
+                    node_count=len(wf.graph.nodes),
+                    created_at=wf.created_at,
+                    updated_at=wf.updated_at,
+                    usage=usage.get(wf.id, WorkflowUsage(workflow_id=wf.id)),
+                )
+            )
+        return reports
 
     def delete_workflow(self, workflow_id: str) -> None:
         self.repo.delete_workflow(workflow_id)

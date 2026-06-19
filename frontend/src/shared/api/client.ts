@@ -163,8 +163,33 @@ export interface Workflow {
   review_state: string;
   submitted_by: string | null;
   reviewed_by: string | null;
+  owner: string;
+  team: string;
+  tags: string[];
   created_at: string;
   updated_at: string;
+}
+
+export interface WorkflowUsage {
+  workflow_id: string;
+  run_count: number;
+  success_count: number;
+  failure_count: number;
+  last_run_at: string | null;
+  success_rate: number;
+}
+export interface WorkflowReport {
+  id: string;
+  name: string;
+  description: string;
+  owner: string;
+  team: string;
+  tags: string[];
+  review_state: string;
+  node_count: number;
+  created_at: string;
+  updated_at: string;
+  usage: WorkflowUsage;
 }
 export interface WorkflowGraph {
   nodes: CanvasNode[];
@@ -255,9 +280,17 @@ export interface NodeTypeSpec {
 export const Canvas = {
   nodeTypes: () => api.get<NodeTypeSpec[]>("/canvas/node-types"),
   list: () => api.get<Workflow[]>("/canvas/workflows"),
+  report: () => api.get<WorkflowReport[]>("/canvas/workflows/report"),
   get: (id: string) => api.get<Workflow>(`/canvas/workflows/${id}`),
-  save: (wf: { id?: string; name: string; description?: string; graph: WorkflowGraph }) =>
-    api.post<Workflow>("/canvas/workflows", wf),
+  save: (wf: {
+    id?: string;
+    name: string;
+    description?: string;
+    graph: WorkflowGraph;
+    owner?: string;
+    team?: string;
+    tags?: string[];
+  }) => api.post<Workflow>("/canvas/workflows", wf),
   remove: (id: string) => api.del<void>(`/canvas/workflows/${id}`),
   run: (id: string, inputs: Record<string, unknown>) =>
     api.post<{ run_id: string }>(`/canvas/workflows/${id}/run`, { inputs }),

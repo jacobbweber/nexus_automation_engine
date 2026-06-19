@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import case, delete, func, select
 
 from app.contexts.orchestration_canvas.domain.models import (
     ReviewRecord,
@@ -15,6 +15,7 @@ from app.contexts.orchestration_canvas.domain.models import (
     WorkflowGraph,
     WorkflowRun,
     WorkflowStep,
+    WorkflowUsage,
     WorkflowVersion,
 )
 from app.contexts.orchestration_canvas.infrastructure.orm import (
@@ -36,6 +37,9 @@ def _to_workflow(row: WorkflowRow) -> Workflow:
         review_state=ReviewState(row.review_state),
         submitted_by=row.submitted_by,
         reviewed_by=row.reviewed_by,
+        owner=row.owner or "",
+        team=row.team or "",
+        tags=json.loads(row.tags_json or "[]"),
         created_at=row.created_at,
         updated_at=row.updated_at,
     )
@@ -56,6 +60,9 @@ class CanvasRepository:
             row.name = workflow.name
             row.description = workflow.description
             row.graph_json = workflow.graph.model_dump_json()
+            row.owner = workflow.owner
+            row.team = workflow.team
+            row.tags_json = json.dumps(workflow.tags)
             row.updated_at = workflow.updated_at
             session.commit()
             session.refresh(row)
@@ -140,6 +147,32 @@ class CanvasRepository:
     def count_workflows(self) -> int:
         with get_sessionmaker()() as session:
             return int(session.execute(select(func.count(WorkflowRow.id))).scalar() or 0)
+
+    # --- usage telemetry ---------------------------------------------------------------------
+
+    def usage_by_workflow(self) -> dict[str, WorkflowUsage]:
+        """Aggregate run telemetry per workflow from persisted runs (counts, last run, success)."""
+        stmt = select(
+            WorkflowRunRow.workflow_id,
+            func.count(WorkflowRunRow.run_id),
+            func.sum(case((WorkflowRunRow.status == str(RunStatus.COMPLETED), 1), else_=0)),
+            func.sum(case((WorkflowRunRow.status == str(RunStatus.FAILED), 1), else_=0)),
+            func.max(WorkflowRunRow.started_at),
+        ).group_by(WorkflowRunRow.workflow_id)
+        out: dict[str, WorkflowUsage] = {}
+        with get_sessionmaker()() as session:
+            for wf_id, total, ok, failed, last in session.execute(stmt).all():
+                ok_i, failed_i = int(ok or 0), int(failed or 0)
+                finished = ok_i + failed_i
+                out[wf_id] = WorkflowUsage(
+                    workflow_id=wf_id,
+                    run_count=int(total or 0),
+                    success_count=ok_i,
+                    failure_count=failed_i,
+                    last_run_at=last,
+                    success_rate=(ok_i / finished) if finished else 0.0,
+                )
+        return out
 
     # --- versions ----------------------------------------------------------------------------
 
