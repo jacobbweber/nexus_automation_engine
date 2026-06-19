@@ -49,8 +49,20 @@ class CatalogService:
             raise NotFoundError(f"Template {template_id} not found")
         return template
 
-    def list(self, *, approval_state: ApprovalState | None = None) -> list[Template]:
-        return self.repo.list(approval_state=approval_state)
+    def list(
+        self,
+        *,
+        approval_state: ApprovalState | None = None,
+        domain: str | None = None,
+        vendor: str | None = None,
+        search: str | None = None,
+    ) -> list[Template]:
+        return self.repo.list(
+            approval_state=approval_state, domain=domain, vendor=vendor, search=search
+        )
+
+    def facets(self) -> dict[str, dict[str, int]]:
+        return self.repo.facets()
 
     def submit_for_approval(self, template_id: str) -> Template:
         self.get(template_id)

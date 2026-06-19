@@ -68,3 +68,9 @@ context specs before building (SDD).
   - Continuing post-2.0: policy depth (theme C), platform-builder/connector-SDK UX (E),
     cross-functional features — drift, promotion, notifications (F); plus deferred canvas node
     types (#19) and in-container build verification (#26).
+
+- **3.0 operator-experience line** (vision_operator_experience.md):
+  - M13 (connectors + rich catalog): **done** — VMware/Pure/Cohesity connectors, catalog metadata
+    (domain/vendor/tags/risk), faceted filtering, 27-item multi-vendor seed.
+  - M14 (catalog-at-scale UX + automation detail + animated Logic-Flow tab): **next.**
+  - M15 governed submission/review · M16 incident kanban · M17 command palette/analytics.

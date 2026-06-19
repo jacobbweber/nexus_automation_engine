@@ -19,9 +19,21 @@ router = APIRouter(prefix="/catalog", tags=["catalog"])
 
 
 @router.get("/templates", response_model=list[Template])
-def list_templates(state: ApprovalState | None = None) -> list[Template]:
+def list_templates(
+    state: ApprovalState | None = None,
+    domain: str | None = None,
+    vendor: str | None = None,
+    search: str | None = None,
+) -> list[Template]:
     # Default view = approved building blocks (what operators run).
-    return CatalogService().list(approval_state=state or ApprovalState.APPROVED)
+    return CatalogService().list(
+        approval_state=state or ApprovalState.APPROVED, domain=domain, vendor=vendor, search=search
+    )
+
+
+@router.get("/facets")
+def catalog_facets() -> dict[str, dict[str, int]]:
+    return CatalogService().facets()
 
 
 @router.get("/templates/{template_id}", response_model=Template)
