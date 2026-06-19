@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M21 — theme import/export + library management** (B14, #75): the Theme Studio gains a
+  Library & portability panel — **export** the draft as portable JSON (no lock-in), **import** a
+  theme file (client-validated, loaded into the editor to preview before saving), and a
+  **custom-theme list** with delete (built-ins are read-only). The theme provider exposes `reload`
+  for instant refresh after save/delete (in addition to SSE hot-reload). Completes the M21 theme
+  system (B8–B14).
 - **M21 — Theme Studio** (B13, #74): a fully deterministic theme-authoring page (`/theme-studio`,
   linked from the shell): start from any theme, edit tokens with color pickers (light/dark tabs),
   see **live validation** (the same `validateTheme` gate — contract + WCAG-AA) and a **live

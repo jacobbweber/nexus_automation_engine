@@ -1,7 +1,7 @@
 // Active-theme provider (B11/B12): applies the chosen theme, persists the choice, and merges
 // server/volume themes (B12) with the bundled built-ins — hot-reloading via the SSE change stream.
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Themes, openThemeStream, type ServerThemeDoc } from "@/shared/api/client";
 import { applyTheme } from "./theme-apply";
 import { BUILTIN_THEMES, DEFAULT_THEME_ID, type BuiltinTheme } from "./themes/builtins";
@@ -19,7 +19,9 @@ function loadThemeId(): string {
 interface ThemeContextValue {
   themeId: string;
   themes: BuiltinTheme[];
+  builtinIds: Set<string>;
   setTheme: (id: string) => void;
+  reload: () => void;
 }
 
 const Ctx = createContext<ThemeContextValue | null>(null);
@@ -37,22 +39,26 @@ export function ThemesProvider({ children }: { children: ReactNode }) {
     return [...BUILTIN_THEMES.filter((t) => !ids.has(t.id)), ...serverThemes];
   }, [serverThemes]);
 
-  // Load server/volume themes + hot-reload when the volume changes.
-  useEffect(() => {
-    const refresh = () =>
+  const reload = useCallback(
+    () =>
       Themes.list()
         .then((r) => setServerThemes(r.themes.map(toBuiltin)))
-        .catch(() => undefined);
-    refresh();
+        .catch(() => undefined),
+    [],
+  );
+
+  // Load server/volume themes + hot-reload when the volume changes.
+  useEffect(() => {
+    reload();
     let es: EventSource | undefined;
     try {
       es = openThemeStream();
-      es.addEventListener("theme:changed", refresh);
+      es.addEventListener("theme:changed", reload);
     } catch {
       /* SSE unavailable — built-ins still work */
     }
     return () => es?.close();
-  }, []);
+  }, [reload]);
 
   useEffect(() => {
     const theme = themes.find((t) => t.id === themeId) ?? themes[0] ?? BUILTIN_THEMES[0];
@@ -64,9 +70,10 @@ export function ThemesProvider({ children }: { children: ReactNode }) {
     }
   }, [themeId, themes]);
 
+  const builtinIds = useMemo(() => new Set(BUILTIN_THEMES.map((t) => t.id)), []);
   const value = useMemo<ThemeContextValue>(
-    () => ({ themeId, themes, setTheme: setThemeId }),
-    [themeId, themes],
+    () => ({ themeId, themes, builtinIds, setTheme: setThemeId, reload }),
+    [themeId, themes, builtinIds, reload],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

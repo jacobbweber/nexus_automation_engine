@@ -2,7 +2,7 @@
 // tokens with color pickers, see a live kitchen-sink preview + validation, and save to the server
 // (which re-validates). No AI anywhere (ADR-0008); validateTheme is the gate.
 
-import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useRef, useState, type CSSProperties } from "react";
 import { Themes, type ServerThemeDoc } from "@/shared/api/client";
 import { Button, Card, Page, StatusBadge } from "@/shared/ui/primitives";
 import { useTheme } from "@/shared/theme/theme-provider";
@@ -22,7 +22,9 @@ const GROUPS: { label: string; keys: string[] }[] = [
 const RUN_STATUSES = ["running", "completed", "failed", "pending", "skipped"];
 
 export function ThemeStudioPage() {
-  const { themes } = useTheme();
+  const { themes, builtinIds, reload } = useTheme();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [importMsg, setImportMsg] = useState<string | null>(null);
   const [id, setId] = useState("my-theme");
   const [name, setName] = useState("My Theme");
   const [base, setBase] = useState<"light" | "dark">("light");
@@ -64,11 +66,49 @@ export function ThemeStudioPage() {
     setSaved(null);
     try {
       await Themes.save(doc);
+      reload();
       setSaved("Saved — available in the theme picker.");
     } catch (e) {
       setSaved(e instanceof Error ? `Save failed: ${e.message}` : "Save failed");
     }
   }
+
+  function exportTheme() {
+    const blob = new Blob([JSON.stringify(doc, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${id || "theme"}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function importFile(file: File) {
+    setImportMsg(null);
+    try {
+      const parsed = JSON.parse(await file.text());
+      const r = validateTheme(parsed);
+      if (!r.ok) {
+        setImportMsg(`Invalid theme: ${r.errors[0] ?? "failed validation"}`);
+        return;
+      }
+      setId(String(parsed.id ?? "imported"));
+      setName(String(parsed.name ?? "Imported"));
+      setBase(parsed.base === "dark" ? "dark" : "light");
+      setLight({ ...BASE_LIGHT, ...parsed.tokens.light });
+      setDark({ ...BASE_DARK, ...parsed.tokens.dark });
+      setImportMsg("Imported into the editor — preview, then Save.");
+    } catch {
+      setImportMsg("Could not read that file (expected theme JSON).");
+    }
+  }
+
+  async function removeTheme(themeId: string) {
+    await Themes.remove(themeId).catch(() => undefined);
+    reload();
+  }
+
+  const customThemes = themes.filter((t) => !builtinIds.has(t.id));
 
   // Preview wrapper: apply the edited mode's tokens directly as CSS variables on a scoped subtree.
   const previewStyle = { ...tokens, background: "var(--bg)", color: "var(--text)" } as CSSProperties;
@@ -164,6 +204,38 @@ export function ThemeStudioPage() {
                 </p>
               </div>
             </div>
+          </Card>
+
+          <Card>
+            <SectionTitle>Library &amp; portability</SectionTitle>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
+              <Button variant="ghost" onClick={exportTheme}>Export draft (JSON)</Button>
+              <Button variant="ghost" onClick={() => fileRef.current?.click()}>Import theme…</Button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="application/json,.json"
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void importFile(f);
+                  e.target.value = "";
+                }}
+              />
+            </div>
+            {importMsg && <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", margin: "0 0 8px" }}>{importMsg}</p>}
+            <div style={{ fontSize: "0.68rem", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 4 }}>
+              Custom themes
+            </div>
+            {customThemes.length === 0 && (
+              <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>None yet — save or import one above.</p>
+            )}
+            {customThemes.map((t) => (
+              <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 0", borderTop: "1px solid var(--border)" }}>
+                <span style={{ fontSize: "0.82rem" }}>{t.name} <code style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>{t.id}</code></span>
+                <Button size="sm" variant="ghost" onClick={() => removeTheme(t.id)}>Delete</Button>
+              </div>
+            ))}
           </Card>
         </div>
       </div>
