@@ -1,7 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Canvas, Connectors, openSocket, type Capabilities, type CanvasEdge, type CanvasNode, type Workflow } from "@/shared/api/client";
+import { Canvas, Connectors, openSocket, type Capabilities, type CanvasEdge, type CanvasNode, type NodeTypeSpec, type Workflow } from "@/shared/api/client";
 import { Button } from "@/shared/ui/primitives";
 import { ACCENT_BY_TYPE, NODE_CATEGORIES, defaultData } from "./nodeTypes";
+import { SchemaProperties } from "./SchemaForm";
+
+// Builds a node's initial data from its schema defaults so new nodes start fully populated.
+function defaultFromSpec(spec: NodeTypeSpec | undefined, type: string): Record<string, unknown> {
+  if (!spec) return defaultData(type);
+  const data: Record<string, unknown> = { name: spec.label };
+  for (const f of spec.fields) {
+    if (f.default !== null && f.default !== undefined) data[f.name] = f.default;
+    else if (f.type === "keyvalue") data[f.name] = {};
+    else if (["assignments", "cases", "inputs", "multiselect"].includes(f.type)) data[f.name] = [];
+  }
+  return data;
+}
 
 const NODE_W = 172;
 const NODE_H = 62;
@@ -21,6 +34,7 @@ export function CanvasPage() {
   const [nodeStates, setNodeStates] = useState<Record<string, StepStatus>>({});
   const [approval, setApproval] = useState<{ run_id: string; node_id: string; message: string } | null>(null);
   const [caps, setCaps] = useState<Capabilities[]>([]);
+  const [specs, setSpecs] = useState<NodeTypeSpec[]>([]);
   const [running, setRunning] = useState(false);
 
   const dragRef = useRef<{ id: string; ox: number; oy: number } | null>(null);
@@ -29,7 +43,10 @@ export function CanvasPage() {
   useEffect(() => {
     Canvas.list().then(setWorkflows).catch(() => undefined);
     Connectors.list().then(setCaps).catch(() => undefined);
+    Canvas.nodeTypes().then(setSpecs).catch(() => undefined);
   }, []);
+
+  const specFor = (type: string) => specs.find((s) => s.type === type);
 
   const onMouseMove = useCallback((e: MouseEvent) => {
     if (dragRef.current) {
@@ -62,7 +79,7 @@ export function CanvasPage() {
     const id = `${type}_${Math.random().toString(36).slice(2, 7)}`;
     const x = (200 - pan.x) / zoom + Math.random() * 60;
     const y = (160 - pan.y) / zoom + Math.random() * 60;
-    setNodes((ns) => [...ns, { id, type, position: { x, y }, data: defaultData(type) }]);
+    setNodes((ns) => [...ns, { id, type, position: { x, y }, data: defaultFromSpec(specFor(type), type) }]);
   }
 
   function startConnect(nodeId: string, handle: string, e: React.MouseEvent) {
@@ -175,6 +192,7 @@ export function CanvasPage() {
                 key={n.id}
                 node={n}
                 accent={ACCENT_BY_TYPE[n.type] ?? "var(--text-muted)"}
+                outputs={specFor(n.type)?.outputs ?? ["output"]}
                 state={nodeStates[n.id]}
                 selected={selectedId === n.id}
                 connecting={!!connecting}
@@ -193,7 +211,25 @@ export function CanvasPage() {
           </div>
         </div>
       </div>
-      <Properties node={selected} caps={caps} onChange={(data) => setNodes((ns) => ns.map((n) => (n.id === selectedId ? { ...n, data } : n)))} onDelete={() => { setNodes((ns) => ns.filter((n) => n.id !== selectedId)); setEdges((es) => es.filter((e) => e.source !== selectedId && e.target !== selectedId)); setSelectedId(null); }} />
+      <div style={{ width: 300, borderLeft: "1px solid var(--border)", background: "var(--surface)", padding: 16, overflow: "auto" }}>
+        {selected ? (
+          <>
+            <div style={{ fontSize: "0.66rem", textTransform: "uppercase", color: ACCENT_BY_TYPE[selected.type] ?? "var(--text-muted)", fontWeight: 700 }}>
+              {specFor(selected.type)?.label ?? selected.type}
+            </div>
+            <SchemaProperties
+              node={selected}
+              spec={specFor(selected.type)}
+              caps={caps}
+              workflows={workflows}
+              onChange={(data) => setNodes((ns) => ns.map((n) => (n.id === selectedId ? { ...n, data } : n)))}
+              onDelete={() => { setNodes((ns) => ns.filter((n) => n.id !== selectedId)); setEdges((es) => es.filter((e) => e.source !== selectedId && e.target !== selectedId)); setSelectedId(null); }}
+            />
+          </>
+        ) : (
+          <div style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>Select a node to edit its properties.</div>
+        )}
+      </div>
       {approval && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "grid", placeItems: "center" }}>
           <div style={{ width: 380, padding: 24, borderRadius: 12, background: "var(--surface)", border: "1px solid var(--border)" }}>
@@ -270,9 +306,24 @@ const STATE_COLOR: Record<StepStatus, string> = {
   skipped: "var(--text-muted)",
 };
 
+function handleColor(handle: string, accent: string): string {
+  if (handle === "true") return "var(--color-ok)";
+  if (handle === "false" || handle === "error") return "var(--color-danger)";
+  return accent;
+}
+
+function handleLabel(handle: string): string {
+  if (handle === "output") return "";
+  if (handle === "true") return "T";
+  if (handle === "false") return "F";
+  if (handle.startsWith("case_")) return handle.replace("case_", "");
+  return handle.slice(0, 3);
+}
+
 function NodeBox(props: {
   node: CanvasNode;
   accent: string;
+  outputs: string[];
   state?: StepStatus;
   selected: boolean;
   connecting: boolean;
@@ -281,9 +332,11 @@ function NodeBox(props: {
   onStartConnect: (handle: string, e: React.MouseEvent) => void;
   onFinishConnect: () => void;
 }) {
-  const { node, accent, state } = props;
+  const { node, accent, state, outputs } = props;
   const border = state ? STATE_COLOR[state] : props.selected ? "var(--color-accent)" : "var(--border)";
-  const isCondition = node.type === "condition";
+  // Stack output handles down the right edge; "error" is always offered for retry/recovery edges.
+  const handles = outputs.includes("error") ? outputs : [...outputs, "error"];
+  const height = Math.max(NODE_H, handles.length * 20 + 24);
   return (
     <div
       onMouseDown={(e) => { e.stopPropagation(); props.onDragStart(e); }}
@@ -292,30 +345,32 @@ function NodeBox(props: {
         if (props.connecting) props.onFinishConnect();
         else props.onSelect();
       }}
-      style={{ position: "absolute", left: node.position.x, top: node.position.y, width: NODE_W, minHeight: NODE_H, padding: "8px 10px", borderRadius: 9, border: `2px solid ${border}`, background: "var(--surface)", boxShadow: "0 1px 4px rgba(0,0,0,0.25)", cursor: "grab", userSelect: "none" }}
+      style={{ position: "absolute", left: node.position.x, top: node.position.y, width: NODE_W, minHeight: height, padding: "8px 10px", borderRadius: 9, border: `2px solid ${border}`, background: "var(--surface)", boxShadow: "0 1px 4px rgba(0,0,0,0.25)", cursor: "grab", userSelect: "none" }}
     >
       <div style={{ fontSize: "0.62rem", textTransform: "uppercase", color: accent, fontWeight: 700 }}>{node.type}</div>
       <div style={{ fontSize: "0.84rem" }}>{String(node.data.name ?? node.id)}</div>
       {/* input handle */}
-      <span style={{ position: "absolute", left: -7, top: NODE_H / 2 - 6, width: 12, height: 12, borderRadius: "50%", background: "var(--border)" }} />
-      {/* output handle(s) */}
-      {isCondition ? (
-        <>
-          <Handle label="T" color="var(--color-ok)" top={6} onClick={(e) => props.onStartConnect("true", e)} />
-          <Handle label="F" color="var(--color-danger)" top={NODE_H - 4} onClick={(e) => props.onStartConnect("false", e)} />
-        </>
-      ) : (
-        <Handle label="" color={accent} top={NODE_H / 2 - 6} onClick={(e) => props.onStartConnect("output", e)} />
-      )}
+      <span style={{ position: "absolute", left: -7, top: height / 2 - 6, width: 12, height: 12, borderRadius: "50%", background: "var(--border)" }} />
+      {/* output handle(s) — one per declared branch + error */}
+      {handles.map((h, i) => (
+        <Handle
+          key={h}
+          label={handleLabel(h)}
+          title={h}
+          color={handleColor(h, accent)}
+          top={handles.length === 1 ? height / 2 - 7 : 16 + i * 20}
+          onClick={(e) => props.onStartConnect(h, e)}
+        />
+      ))}
     </div>
   );
 }
 
-function Handle({ label, color, top, onClick }: { label: string; color: string; top: number; onClick: (e: React.MouseEvent) => void }) {
+function Handle({ label, title, color, top, onClick }: { label: string; title: string; color: string; top: number; onClick: (e: React.MouseEvent) => void }) {
   return (
     <span
       onClick={onClick}
-      title="Click to start a connection"
+      title={`${title} — click to start a connection`}
       style={{ position: "absolute", right: -8, top, width: 14, height: 14, borderRadius: "50%", background: color, cursor: "crosshair", fontSize: 8, color: "#000", display: "grid", placeItems: "center", fontWeight: 700 }}
     >
       {label}
@@ -345,112 +400,3 @@ function Edges({ nodes, edges }: { nodes: CanvasNode[]; edges: CanvasEdge[] }) {
   );
 }
 
-function Properties({ node, caps, onChange, onDelete }: {
-  node: CanvasNode | null;
-  caps: Capabilities[];
-  onChange: (data: Record<string, unknown>) => void;
-  onDelete: () => void;
-}) {
-  if (!node) {
-    return (
-      <div style={{ width: 280, borderLeft: "1px solid var(--border)", background: "var(--surface)", padding: 16, color: "var(--text-muted)", fontSize: "0.85rem" }}>
-        Select a node to edit its properties.
-      </div>
-    );
-  }
-  const data = node.data;
-  const set = (k: string, v: unknown) => onChange({ ...data, [k]: v });
-  const execCaps = caps.filter((c) => c.category === "execution");
-  const activeConn = execCaps.find((c) => c.kind === data.connector);
-
-  return (
-    <div style={{ width: 280, borderLeft: "1px solid var(--border)", background: "var(--surface)", padding: 16, overflow: "auto" }}>
-      <div style={{ fontSize: "0.66rem", textTransform: "uppercase", color: "var(--text-muted)" }}>{node.type}</div>
-      <Input label="Name" value={String(data.name ?? "")} onChange={(v) => set("name", v)} />
-
-      {node.type === "automation_task" && (
-        <>
-          <Select label="Connector" value={String(data.connector ?? "")} options={execCaps.map((c) => c.kind)} onChange={(v) => set("connector", v)} />
-          <Select label="Action" value={String(data.action ?? "")} options={(activeConn?.actions ?? []).map((a) => a.name)} onChange={(v) => set("action", v)} />
-          <JsonArea label="Params (JSON)" value={data.params ?? {}} onChange={(v) => set("params", v)} />
-          <Check label="Check mode" value={!!data.check_mode} onChange={(v) => set("check_mode", v)} />
-        </>
-      )}
-      {node.type === "condition" && (
-        <>
-          <Input label="Variable" value={String(data.variable ?? "")} onChange={(v) => set("variable", v)} />
-          <Select label="Operator" value={String(data.operator ?? "==")} options={["==", "!=", ">", "<", "contains", "is_empty"]} onChange={(v) => set("operator", v)} />
-          <Input label="Value" value={String(data.value ?? "")} onChange={(v) => set("value", v)} />
-        </>
-      )}
-      {!["automation_task", "condition", "start"].includes(node.type) && (
-        <JsonArea label="Data (JSON)" value={data} onChange={onChange} />
-      )}
-
-      <div style={{ marginTop: 14 }}>
-        <Button variant="ghost" onClick={onDelete}>Delete node</Button>
-      </div>
-    </div>
-  );
-}
-
-function Input({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <label style={{ display: "block", margin: "10px 0" }}>
-      <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>{label}</span>
-      <input value={value} onChange={(e) => onChange(e.target.value)} style={ctl} />
-    </label>
-  );
-}
-function Select({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (v: string) => void }) {
-  return (
-    <label style={{ display: "block", margin: "10px 0" }}>
-      <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>{label}</span>
-      <select value={value} onChange={(e) => onChange(e.target.value)} style={ctl}>
-        <option value="">—</option>
-        {options.map((o) => <option key={o} value={o}>{o}</option>)}
-      </select>
-    </label>
-  );
-}
-function Check({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <label style={{ display: "flex", gap: 8, alignItems: "center", margin: "10px 0", fontSize: "0.82rem" }}>
-      <input type="checkbox" checked={value} onChange={(e) => onChange(e.target.checked)} /> {label}
-    </label>
-  );
-}
-function JsonArea({ label, value, onChange }: { label: string; value: unknown; onChange: (v: Record<string, unknown>) => void }) {
-  const [text, setText] = useState(JSON.stringify(value, null, 2));
-  const [err, setErr] = useState(false);
-  return (
-    <label style={{ display: "block", margin: "10px 0" }}>
-      <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>{label}</span>
-      <textarea
-        value={text}
-        onChange={(e) => {
-          setText(e.target.value);
-          try {
-            onChange(JSON.parse(e.target.value));
-            setErr(false);
-          } catch {
-            setErr(true);
-          }
-        }}
-        rows={6}
-        style={{ ...ctl, fontFamily: "ui-monospace, monospace", fontSize: "0.75rem", borderColor: err ? "var(--color-danger)" : "var(--border)" }}
-      />
-    </label>
-  );
-}
-
-const ctl: React.CSSProperties = {
-  width: "100%",
-  marginTop: 4,
-  padding: "7px 9px",
-  borderRadius: 7,
-  border: "1px solid var(--border)",
-  background: "var(--bg)",
-  color: "var(--text)",
-  boxSizing: "border-box",
-};

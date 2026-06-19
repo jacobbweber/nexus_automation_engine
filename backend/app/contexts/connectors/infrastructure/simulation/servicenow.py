@@ -53,6 +53,44 @@ def get_ci(name: str) -> dict[str, object] | None:
     return None
 
 
+# CMDB tables exposed to the canvas CMDB-lookup field picker. Maps a ServiceNow-style table name
+# to the CI types it holds, so the UI can offer "pick a table → pick its fields".
+CMDB_TABLES: dict[str, list[str]] = {
+    "cmdb_ci_server": ["server"],
+    "cmdb_ci_storage_device": ["datastore"],
+    "cmdb_ci": ["server", "datastore"],  # base table: all CIs
+}
+
+# Stable, documented field catalog for the picker (superset across CI types).
+_CMDB_FIELDS: list[dict[str, str]] = [
+    {"name": "id", "label": "CI sys_id", "type": "string"},
+    {"name": "name", "label": "Name", "type": "string"},
+    {"name": "fqdn", "label": "FQDN", "type": "string"},
+    {"name": "ci_type", "label": "CI type", "type": "string"},
+    {"name": "env", "label": "Environment", "type": "string"},
+    {"name": "lifecycle_state", "label": "Lifecycle state", "type": "string"},
+    {"name": "cluster_member", "label": "Cluster member", "type": "boolean"},
+    {"name": "cluster", "label": "Cluster", "type": "string"},
+    {"name": "os", "label": "Operating system", "type": "string"},
+]
+
+
+def cmdb_tables() -> list[str]:
+    return list(CMDB_TABLES)
+
+
+def cmdb_fields(table: str | None = None) -> list[dict[str, str]]:
+    """Return selectable CI fields, optionally narrowed to those present in a table's CI types."""
+    if not table or table not in CMDB_TABLES or table == "cmdb_ci":
+        return _CMDB_FIELDS
+    ci_types = set(CMDB_TABLES[table])
+    present: set[str] = set()
+    for row in _CMDB:
+        if row.get("ci_type") in ci_types:
+            present.update(row.keys())
+    return [f for f in _CMDB_FIELDS if f["name"] in present]
+
+
 class ServiceNowSimConnector:
     kind = ConnectorKind.SERVICENOW
 

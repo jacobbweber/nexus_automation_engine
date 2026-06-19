@@ -5,6 +5,20 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Added
+- **M19 — schema-driven node parameters** (`node_specs.py`, `GET /canvas/node-types`): every
+  canvas node type now publishes a typed parameter schema, so the property panel renders guided
+  controls (select, toggle, number, key-value, multi-select, cases, assignments, run-inputs) from
+  data instead of raw JSON. Adding a parameter is a one-line registry change — extensible per node.
+- **Richer condition logic**: the Condition node gained operators `>=`, `<=`, `not_contains`,
+  `starts_with`, `ends_with`, `matches_regex`, `in_list`, `is_not_empty`, plus a **case-sensitive**
+  toggle, evaluated in the engine's `_compare`.
+- **CMDB field picker** (`GET /connectors/servicenow/fields`): the CMDB-lookup node lets operators
+  pick a CMDB table → choose real CI fields from a catalogue (narrowed per table) → use them
+  conditionally downstream. The simulated CMDB exposes its table/field metadata.
+- **Dynamic node output handles**: node branch handles (true/false, switch cases, error) are now
+  rendered from each node's declared `outputs`, not hard-coded per type.
+
 ### Changed
 - **Audit B1 — static typing**: adopted **mypy** in CI (clean across 125 files). Fixed real type
   issues found along the way and renamed shadowing `list()` repository/service methods to
