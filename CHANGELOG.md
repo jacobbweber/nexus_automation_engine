@@ -7,6 +7,14 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M7 + M8 Frontend application** (`frontend/src/`): JWT auth (login + context + protected
+  routes), the app shell with role display, and all operator/admin surfaces — Dashboard (live run
+  stats), Catalog (browse approved building blocks + survey drawer + execute), Console (job list +
+  live WebSocket log streaming with ANSI stripping), Admin (connector capabilities + access), and
+  the **visual Canvas**: pan/zoom, grouped node palette, draggable nodes, port-based connections
+  with condition true/false handles, a properties panel featuring the **connector dropdown** for
+  `automation_task`, save/open workflows, run with live node-state highlighting, and the
+  human-approval overlay. Typed API client + ESLint/tsc/Vitest/build all green.
 - **M6 Canvas backend** (`backend/app/contexts/orchestration_canvas/`): the ported Foundry DAG
   engine, re-targeted to backend orchestration. Topological parallel execution with a
   concurrency semaphore, condition/switch routing with skip propagation, per-node
