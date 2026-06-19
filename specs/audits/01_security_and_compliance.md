@@ -96,5 +96,7 @@ spine. Gaps above are about *enforcement coverage*, not absence of controls.
 - [ ] S3 npm audit triage + CI
 - [x] S4 secret-non-persistence regression test (lease masked in output; real secret only in the
       pool for downstream use).
-- [ ] (follow-ups) S2 login throttling; extend the execution gate to direct /jobs + canvas;
+- [x] Extend the execution gate to **direct `/jobs/execute`** (CMDB-consistency gate on the
+      target; catalog path keeps full metadata validation).
+- [ ] (follow-ups) S2 login throttling; extend the gate to canvas `automation_task` nodes;
       S3 npm audit in CI; WebSocket token auth.

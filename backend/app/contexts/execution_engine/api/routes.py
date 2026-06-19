@@ -39,6 +39,20 @@ async def execute_job(
     capability = Capability.EXECUTE_LIVE if live else Capability.EXECUTE_CHECK
     if not has_capability(user, capability):
         raise EntitlementError("Not entitled to execute jobs in the requested mode")
+
+    # Origin-story validation (3.0): ad-hoc/direct jobs get a CMDB-consistency gate on their
+    # target (catalog runs additionally enforce metadata completeness). Audit S2 central gate.
+    from app.platform.config import get_settings
+
+    if get_settings().enforce_lifecycle_validation:
+        from app.contexts.lifecycle_validation.application.service import ValidationService
+        from app.contexts.lifecycle_validation.domain.models import AutomationMeta
+
+        params = submission.params
+        target = params.get("target") or params.get("inventory") or params.get("name")
+        meta = AutomationMeta(name=submission.name, action=submission.action)
+        await ValidationService().enforce_cmdb_only(meta, str(target) if target else None)
+
     # The auditable executor is the authenticated user, never client-supplied.
     submission.initiated_by = user.username
     job = await ExecutionService().submit_and_run(submission)
