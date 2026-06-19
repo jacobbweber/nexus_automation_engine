@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M16 Incident / Error Kanban** (`incident_management` context): failed jobs **and** workflow
+  runs auto-open an **incident card** (de-duplicated per source) on a triage board
+  (New → Triage → Investigating → Resolved). Move cards, and **convert an incident → a draft
+  remediation workflow** on the canvas (one click). `/api/v1/incidents/board|move|remediate` +
+  a frontend kanban board. 107 backend tests.
 - **M15 Governed workflow submission & review**: operators **submit** a composed workflow for
   review; engineers/admins **approve / request changes / reject** with comments via a Governance
   **review inbox**. Workflows carry a `review_state` (draft→submitted→…→approved/published) and a

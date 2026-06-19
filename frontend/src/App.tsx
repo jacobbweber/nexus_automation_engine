@@ -8,6 +8,7 @@ import { ConsolePage } from "@/features/console/ConsolePage";
 import { AdminPage } from "@/features/admin/AdminPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import { GovernancePage } from "@/features/governance/GovernancePage";
+import { IncidentsPage } from "@/features/incidents/IncidentsPage";
 
 function Protected() {
   const { user, loading } = useAuth();
@@ -23,6 +24,7 @@ function Protected() {
         <Route path="/canvas" element={<CanvasPage />} />
         <Route path="/console" element={<ConsolePage />} />
         <Route path="/governance" element={<GovernancePage />} />
+        <Route path="/incidents" element={<IncidentsPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

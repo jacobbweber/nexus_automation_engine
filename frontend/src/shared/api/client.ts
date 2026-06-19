@@ -296,4 +296,25 @@ export const Schedules = {
   runNow: (id: string) => api.post<{ run_id: string }>(`/schedules/${id}/run-now`),
 };
 
+export interface Incident {
+  id: string;
+  title: string;
+  status: string;
+  severity: string;
+  source_type: string;
+  source_id: string;
+  summary: string;
+  assigned_to: string | null;
+  remediation_workflow_id: string | null;
+  opened_at: string;
+  resolved_at: string | null;
+}
+
+export const Incidents = {
+  board: () => api.get<Record<string, Incident[]>>("/incidents/board"),
+  move: (id: string, status: string) =>
+    api.post<Incident>(`/incidents/${id}/move`, { status }),
+  remediate: (id: string) => api.post<{ workflow_id: string }>(`/incidents/${id}/remediate`),
+};
+
 export const getHealth = () => api.get<Health>("/health");
