@@ -1,19 +1,41 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Jobs, Schedules, type Job, type Schedule } from "@/shared/api/client";
+import {
+  Canvas,
+  Jobs,
+  Schedules,
+  Validation,
+  type Job,
+  type ReviewStatus,
+  type Schedule,
+  type Workflow,
+} from "@/shared/api/client";
 import { Card, Page, StatusBadge } from "@/shared/ui/primitives";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { useFavorites } from "@/shared/hooks/favorites";
 import { formatDuration, summarizeJobs } from "./summary";
 
 export function DashboardPage() {
   const navigate = useNavigate();
+  const { ids: favIds } = useFavorites();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [pendingReviews, setPendingReviews] = useState<Workflow[]>([]);
+  const [reviewStatus, setReviewStatus] = useState<ReviewStatus | null>(null);
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
 
   useEffect(() => {
     Jobs.list().then(setJobs).catch(() => setJobs([]));
     Schedules.list().then(setSchedules).catch(() => setSchedules([]));
+    Canvas.pendingReviews().then(setPendingReviews).catch(() => setPendingReviews([]));
+    Validation.reviewStatus().then(setReviewStatus).catch(() => setReviewStatus(null));
+    Canvas.list().then(setWorkflows).catch(() => setWorkflows([]));
   }, []);
+
+  const favorites = useMemo(
+    () => workflows.filter((w) => favIds.includes(w.id)),
+    [workflows, favIds],
+  );
 
   const s = useMemo(() => summarizeJobs(jobs), [jobs]);
   const recent = useMemo(
@@ -55,6 +77,51 @@ export function DashboardPage() {
           <Label>Total runs</Label>
           <Big>{s.total}</Big>
           <Sub>{s.running} in flight</Sub>
+        </Card>
+      </div>
+
+      {/* needs attention + favorites */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 18 }}>
+        <Card>
+          <SectionTitle>Needs attention</SectionTitle>
+          {(() => {
+            const items: { label: string; count: number; to: string }[] = [
+              { label: "Workflows awaiting review", count: pendingReviews.length, to: "/governance" },
+              { label: "Failed runs", count: s.failed, to: "/incidents" },
+              { label: "Stale automations", count: reviewStatus?.stale ?? 0, to: "/governance" },
+              { label: "Never reviewed", count: reviewStatus?.never_reviewed ?? 0, to: "/governance" },
+            ].filter((i) => i.count > 0);
+            if (items.length === 0)
+              return <EmptyState title="All clear" description="No approvals, failures, or stale automations need you right now." />;
+            return items.map((i) => (
+              <div
+                key={i.label}
+                onClick={() => navigate(i.to)}
+                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderTop: "1px solid var(--border)", cursor: "pointer" }}
+              >
+                <span style={{ fontSize: "0.85rem" }}>{i.label}</span>
+                <span style={{ fontWeight: 700, color: "var(--area-accent)" }}>{i.count}</span>
+              </div>
+            ));
+          })()}
+        </Card>
+
+        <Card>
+          <SectionTitle>Favorites</SectionTitle>
+          {favorites.length === 0 ? (
+            <EmptyState title="No favorites yet" description="Star workflows in the Library to pin them here." />
+          ) : (
+            favorites.map((w) => (
+              <div
+                key={w.id}
+                onClick={() => navigate(`/canvas?id=${w.id}`)}
+                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderTop: "1px solid var(--border)", cursor: "pointer" }}
+              >
+                <span style={{ fontSize: "0.85rem" }}>{w.name}</span>
+                <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>{w.team}</span>
+              </div>
+            ))
+          )}
         </Card>
       </div>
 

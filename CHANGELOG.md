@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M22 — Dashboard needs-attention + favorites** (D21, #82): a **Needs attention** card
+  aggregating workflows awaiting review, failed runs, and stale / never-reviewed automations (each
+  drill-through, hidden when zero with an "all clear" state), and a **Favorites** card of starred
+  workflows. Adds a shared `useFavorites` hook (localStorage, cross-component sync) and a **star
+  toggle** in the Workflow Library. Pure `toggleId` unit-tested.
 - **M22 — Dashboard fleet pulse** (D20, #81): the Operations Dashboard now shows a
   drill-through pulse (running / succeeded / failed → console/incidents), **trend cards**
   (success rate with color thresholds, average run duration, total/in-flight), a richer recent
