@@ -55,4 +55,6 @@ context specs before building (SDD).
 - M4 (identity & access): **done** — RBAC model + entitlements, JWT auth, login/me/users, seeded users.
 - M5 (automation catalog): **done** — templates/surveys/approval + execute-from-template.
 - M6 (canvas backend): **done** — DAG engine, 15 node types, approval gates, persistence, WS.
-- M7 (canvas UI): **in progress.**
+- M7 (canvas UI) + M8 (frontend surfaces): **done** — auth, dashboard, catalog, console (live WS),
+  admin, and the visual canvas (palette, connect, connector dropdown, run highlight, approval).
+- M9 (containerization & QA → v1.0): **in progress.**
