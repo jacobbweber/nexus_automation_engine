@@ -19,6 +19,7 @@ from app.contexts.connectors.api import routes as connectors_routes
 from app.contexts.execution_engine.api import routes as execution_routes
 from app.contexts.identity_access.api import routes as identity_routes
 from app.contexts.orchestration_canvas.api import routes as canvas_routes
+from app.contexts.scheduling.api import routes as scheduling_routes
 from app.platform import health
 from app.platform.config import get_settings
 from app.platform.database import dispose_db, init_db
@@ -40,7 +41,17 @@ async def _lifespan(_app: FastAPI):
         seed_templates()
         seed_change_management()
         seed_history()
+
+    scheduler_task = None
+    if get_settings().scheduler_enabled:
+        import asyncio
+
+        from app.contexts.scheduling.application.service import scheduler_loop
+
+        scheduler_task = asyncio.create_task(scheduler_loop(get_settings().scheduler_tick_seconds))
     yield
+    if scheduler_task is not None:
+        scheduler_task.cancel()
     dispose_db()
 
 
@@ -70,6 +81,7 @@ def create_app() -> FastAPI:
     app.include_router(change_routes.router, prefix="/api/v1")
     app.include_router(execution_routes.router, prefix="/api/v1")
     app.include_router(canvas_routes.router, prefix="/api/v1")
+    app.include_router(scheduling_routes.router, prefix="/api/v1")
 
     # Optionally serve the built SPA from the same origin (single-container deploy).
     if settings.static_dir and os.path.isdir(settings.static_dir):

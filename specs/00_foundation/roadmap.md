@@ -59,5 +59,9 @@ context specs before building (SDD).
   admin, and the visual canvas (palette, connect, connector dropdown, run highlight, approval).
 - M9 (containerization & QA): **done** — rootless Dockerfile + compose; live end-to-end server
   smoke passed (auth, seeded data, canvas run). **Released v1.0.0.**
-- **1.0 reached.** Next: the 2.0 ops-engineering pass (change control, change templates, per-job
-  scheduling, platform-as-management-layer).
+- **1.0 reached.** 2.0 ops-engineering pass in progress:
+  - M10 (change management): **done** — change templates, policies, records; catalog execute
+    opens/stamps a change; CAB-required blocks live (ADR-0005).
+  - M11 (scheduling): **done** — interval/daily schedules, maintenance windows, background ticker.
+  - M12 (governance & scheduling UI): **next** — then tag **v2.0.0**.
+  - Continuing post-2.0: policy depth (theme C), platform-builder UX (E), cross-functional (F).
