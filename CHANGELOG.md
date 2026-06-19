@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M22 — Dashboard fleet pulse** (D20, #81): the Operations Dashboard now shows a
+  drill-through pulse (running / succeeded / failed → console/incidents), **trend cards**
+  (success rate with color thresholds, average run duration, total/in-flight), a richer recent
+  activity stream with timestamps, and an **upcoming-scheduled / change-window peek**. Pure
+  `summarizeJobs` (case-insensitive counts, success rate, avg duration) is unit-tested.
 - **M21 — empty states + offline/degraded banner** (C19, #80): a reusable calm `EmptyState`
   (icon + title + helper + action; adopted in the Library) and a non-blocking `ConnectionBanner`
   that watches the browser online state + pings API health and surfaces a clear "backend
