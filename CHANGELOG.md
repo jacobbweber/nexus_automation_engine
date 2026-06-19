@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M21 — collapsible, keyboard-navigable nav rail** (C16, #77): the app-shell rail collapses to
+  an icon-only strip (persisted), with tooltips when collapsed, and supports arrow-key roving focus
+  (Up/Down/Home/End) across nav items plus a proper `<nav aria-label>` landmark. Active-item +
+  logo retint per area (from B8) carry through.
 - **M21 — theme import/export + library management** (B14, #75): the Theme Studio gains a
   Library & portability panel — **export** the draft as portable JSON (no lock-in), **import** a
   theme file (client-validated, loaded into the editor to preview before saving), and a
