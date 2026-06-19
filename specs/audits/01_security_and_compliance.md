@@ -100,4 +100,6 @@ spine. Gaps above are about *enforcement coverage*, not absence of controls.
       target; catalog path keeps full metadata validation).
 - [x] Extend the gate to canvas `automation_task` nodes (single-target ops).
 - [x] S3 `npm audit` advisory step in CI.
-- [ ] (remaining) WebSocket token auth.
+- [x] WebSocket token auth (JWT via `?token=` query param; unauthenticated streams rejected).
+
+**Security audit: all findings resolved.**

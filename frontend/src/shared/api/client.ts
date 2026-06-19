@@ -47,10 +47,13 @@ export const api = {
   del: <T>(p: string) => request<T>("DELETE", p),
 };
 
-// Opens a WebSocket to a backend path (absolute, under /api/v1).
+// Opens an authenticated WebSocket to a backend path (token via query param, since browsers
+// can't set headers on WebSocket connections).
 export function openSocket(path: string): WebSocket {
   const proto = window.location.protocol === "https:" ? "wss" : "ws";
-  return new WebSocket(`${proto}://${window.location.host}/api/v1${path}`);
+  const sep = path.includes("?") ? "&" : "?";
+  const auth = authToken ? `${sep}token=${encodeURIComponent(authToken)}` : "";
+  return new WebSocket(`${proto}://${window.location.host}/api/v1${path}${auth}`);
 }
 
 // --- typed resources ------------------------------------------------------------------------

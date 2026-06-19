@@ -25,6 +25,22 @@ from app.shared_kernel.errors import EntitlementError, NotFoundError
 router = APIRouter(tags=["jobs"])
 
 
+def _ws_authenticated(websocket: WebSocket) -> bool:
+    """Validate a JWT passed as the ``token`` query param (browsers can't set WS headers)."""
+    import jwt as _jwt
+
+    from app.contexts.identity_access.application.security import decode_token
+
+    token = websocket.query_params.get("token", "")
+    if not token:
+        return False
+    try:
+        decode_token(token)
+        return True
+    except _jwt.PyJWTError:
+        return False
+
+
 class ExecuteResponse(BaseModel):
     job_id: str
     status: JobStatus
@@ -98,6 +114,10 @@ async def get_job_telemetry(
 @router.websocket("/jobs/{job_id}/stream")
 async def stream_job(websocket: WebSocket, job_id: str) -> None:
     await websocket.accept()
+    if not _ws_authenticated(websocket):
+        await websocket.send_json({"type": "error", "detail": "unauthorized"})
+        await websocket.close(code=1008)
+        return
     service = ExecutionService()
     job = service.get(job_id)
     if job is None:

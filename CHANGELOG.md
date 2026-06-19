@@ -32,6 +32,8 @@ All notable changes to this project are documented here. Format follows
   (fresh / stale / never-reviewed + oldest). 119 backend tests.
 
 ### Security
+- **WebSocket auth**: job-log and canvas-run streams now require a valid JWT (`?token=` query
+  param); unauthenticated stream connections are rejected. Closes the last security-audit item.
 - **Gate now covers canvas `automation_task` nodes** (single-target ops) in addition to catalog +
   direct-job paths; added an advisory `npm audit` step to CI.
 - **Audit S2 — login throttling**: repeated failed logins are rate-limited (5 failures / 5 min
