@@ -104,12 +104,25 @@ class ScheduleService:
         return run_ids
 
 
-async def scheduler_loop(tick_seconds: float) -> None:
-    """Background ticker: periodically dispatch due schedules."""
+async def scheduler_loop(tick_seconds: float, *, compliance_sweep_every: int = 20) -> None:
+    """Background ticker: dispatch due schedules and periodically run a compliance sweep.
+
+    The compliance sweep (M25.4) runs every ``compliance_sweep_every`` ticks so the estate's drift
+    posture is refreshed continuously and drift opens incidents — without a tick-rate sweep.
+    """
     service = ScheduleService()
+    tick = 0
     while True:
         try:
             await service.run_due()
         except Exception as exc:  # noqa: BLE001
             log.warning("Scheduler tick error: %s", exc)
+        if compliance_sweep_every and tick % compliance_sweep_every == 0:
+            try:
+                from app.contexts.compliance.application.service import ComplianceSweepService
+
+                ComplianceSweepService().run_sweep()
+            except Exception as exc:  # noqa: BLE001
+                log.warning("Compliance sweep error: %s", exc)
+        tick += 1
         await asyncio.sleep(tick_seconds)
