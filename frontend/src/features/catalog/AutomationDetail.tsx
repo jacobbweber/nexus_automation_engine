@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Catalog, type Template } from "@/shared/api/client";
+import { Catalog, Compliance, type DriftReport, type Template } from "@/shared/api/client";
 import { Button } from "@/shared/ui/primitives";
 import { Markdown } from "@/shared/ui/Markdown";
 import { LogicFlow, type FlowPhase } from "@/shared/ui/LogicFlow";
+import { DriftReportView } from "@/shared/ui/DriftReportView";
 
 type Tab = "overview" | "parameters" | "flow";
 
@@ -35,6 +36,17 @@ export function AutomationDetail({ template, onClose }: { template: Template; on
   const [checkMode, setCheckMode] = useState(template.supports_check_mode);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [drift, setDrift] = useState<DriftReport | null>(null);
+
+  async function checkCompliance() {
+    setError(null);
+    setDrift(null);
+    try {
+      setDrift(await Compliance.template(template.id, answers));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Compliance check failed.");
+    }
+  }
 
   const missing = template.survey
     .filter((f) => f.required && !answers[f.name])
@@ -167,9 +179,15 @@ export function AutomationDetail({ template, onClose }: { template: Template; on
           )}
           <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
             <Button variant="ghost" onClick={onClose}>Cancel</Button>
+            <Button variant="ghost" onClick={checkCompliance}>Check compliance</Button>
             <Button onClick={run} disabled={busy}>{busy ? "Dispatching…" : "Run"}</Button>
           </div>
         </div>
+        {drift && (
+          <div style={{ marginTop: 12, maxHeight: 260, overflow: "auto" }}>
+            <DriftReportView report={drift} />
+          </div>
+        )}
       </div>
     </div>
   );
