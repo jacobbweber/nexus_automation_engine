@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **Seeded incident triage board** (QA): startup now opens incidents for a sample of the seeded
+  failed jobs, spread across the board columns (NEW/TRIAGE/INVESTIGATING/RESOLVED) with severities,
+  assignees, and resolution times — so the Incidents board, mean-time-to-resolution, top-failing-
+  automation trends, and RCA failure-mode tags all have realistic data in simulation mode instead
+  of an empty board next to 13 failed runs. Idempotent; pure-ish `seed_incidents` unit-tested.
 - **M23 — hardening: token regression + a11y tests** (L46/L47, #107/#108): a **theme-token
   regression matrix** snapshots every built-in theme's generated CSS (light + dark) so unintended
   palette changes fail CI, and an **automated structural a11y suite** asserts key components expose
