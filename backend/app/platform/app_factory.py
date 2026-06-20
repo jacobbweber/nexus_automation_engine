@@ -12,6 +12,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.responses import Response
+from starlette.types import Scope
 
 from app.contexts.automation_catalog.api import routes as catalog_routes
 from app.contexts.change_management.api import routes as change_routes
@@ -51,12 +54,14 @@ async def _lifespan(_app: FastAPI):
         from app.contexts.automation_catalog.application.seed import seed_templates
         from app.contexts.change_management.application.service import seed_change_management
         from app.contexts.execution_engine.application.seed import seed_history
+        from app.contexts.incident_management.application.seed import seed_incidents
         from app.contexts.orchestration_canvas.application.seed import seed_workflow_library
 
         seed_templates()
         seed_change_management()
         seed_history()
         seed_workflow_library()
+        seed_incidents()  # open a triage board from the seeded failures
 
     scheduler_task = None
     if get_settings().scheduler_enabled:
@@ -74,7 +79,29 @@ async def _lifespan(_app: FastAPI):
 _DEFAULT_JWT_SECRET = "dev-only-not-a-secret-change-me-in-prod"
 
 
-def create_app() -> FastAPI:
+class SpaStaticFiles(StaticFiles):
+    """StaticFiles that falls back to index.html for unknown paths.
+
+    A single-page app owns its own client-side routing, so a hard refresh or deep link to a
+    client route (e.g. ``/catalog``) must still return ``index.html`` rather than a 404 — the
+    JS router then renders the right view. Real files (assets) are served verbatim; only a
+    missing path triggers the fallback. API routes are registered before this mount, so they
+    are never reached here.
+    """
+
+    async def get_response(self, path: str, scope: Scope) -> Response:
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            # Never mask an unknown API route with the SPA shell — those stay JSON 404s.
+            # StaticFiles normalizes separators per-OS, so compare on the first path segment.
+            first_segment = path.replace("\\", "/").lstrip("/").split("/", 1)[0]
+            if exc.status_code == 404 and first_segment != "api":
+                return await super().get_response("index.html", scope)
+            raise
+
+
+def create_app(static_dir: str | None = None) -> FastAPI:
     settings = get_settings()
     # Security audit S2: never run a non-local environment on the dev JWT secret.
     if settings.environment not in ("local", "test") and settings.jwt_secret == _DEFAULT_JWT_SECRET:
@@ -111,8 +138,10 @@ def create_app() -> FastAPI:
     app.include_router(validation_routes.router, prefix="/api/v1")
     app.include_router(theming_routes.router, prefix="/api/v1")
 
-    # Optionally serve the built SPA from the same origin (single-container deploy).
-    if settings.static_dir and os.path.isdir(settings.static_dir):
-        app.mount("/", StaticFiles(directory=settings.static_dir, html=True), name="spa")
+    # Optionally serve the built SPA from the same origin (single-container deploy). The SPA-aware
+    # static handler falls back to index.html so client-side deep links survive a hard refresh.
+    spa_dir = static_dir or settings.static_dir
+    if spa_dir and os.path.isdir(spa_dir):
+        app.mount("/", SpaStaticFiles(directory=spa_dir, html=True), name="spa")
 
     return app

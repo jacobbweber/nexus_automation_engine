@@ -10,8 +10,18 @@ All notable changes to this project are documented here. Format follows
   `index.html` ships `<html class="dark">` for anti-FOUC, and the mode engine updated `data-mode`
   but never cleared that legacy class, so the `:where(.dark)` token rule pinned every surface to
   dark. The mode engine now keeps `.dark` in sync with the resolved mode. Regression-tested.
+- **SPA deep-link 404** (QA): when the API serves the built frontend (single-container deploy),
+  a hard refresh or deep link to a client-side route (e.g. `/catalog`, `/canvas`) returned
+  `{"detail":"Not Found"}` instead of the app. The static mount now falls back to `index.html`
+  for unknown non-API paths (unknown `/api/*` paths still return JSON 404s; real assets are
+  served verbatim).
 
 ### Added
+- **Seeded incident triage board** (QA): startup now opens incidents for a sample of the seeded
+  failed jobs, spread across the board columns (NEW/TRIAGE/INVESTIGATING/RESOLVED) with severities,
+  assignees, and resolution times — so the Incidents board, mean-time-to-resolution, top-failing-
+  automation trends, and RCA failure-mode tags all have realistic data in simulation mode instead
+  of an empty board next to 13 failed runs. Idempotent; pure-ish `seed_incidents` unit-tested.
 - **M23 — hardening: token regression + a11y tests** (L46/L47, #107/#108): a **theme-token
   regression matrix** snapshots every built-in theme's generated CSS (light + dark) so unintended
   palette changes fail CI, and an **automated structural a11y suite** asserts key components expose
