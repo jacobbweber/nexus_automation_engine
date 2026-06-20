@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M22 — run step timeline** (H35 partial, #96): run-history rows (in the Library drill-down)
+  expand to a **per-step timeline** — each step's status, node, type, retry count, and duration —
+  fetched on demand from `/canvas/runs/{id}`. (Run compare + retry/cancel controls deferred — they
+  need new backend mutation endpoints.)
 - **M22 — Library lifecycle quick-action** (G33, #94): the per-workflow drill-down drawer can
   **submit a draft workflow for review** in one click (then refreshes the library). (Bulk
   tag/own/archive operations deferred — they need new backend endpoints.)

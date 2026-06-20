@@ -289,6 +289,17 @@ export interface NodeTypeSpec {
   outputs: string[];
 }
 
+export interface WorkflowStep {
+  step_id: string;
+  run_id: string;
+  node_id: string;
+  node_type: string;
+  status: string;
+  started_at: string;
+  completed_at: string | null;
+  retry_count: number;
+  error_message: string | null;
+}
 export interface WorkflowRun {
   run_id: string;
   workflow_id: string;
@@ -296,6 +307,7 @@ export interface WorkflowRun {
   started_at: string;
   completed_at: string | null;
   error_message: string | null;
+  steps?: WorkflowStep[];
 }
 
 export const Canvas = {
@@ -303,6 +315,7 @@ export const Canvas = {
   list: () => api.get<Workflow[]>("/canvas/workflows"),
   report: () => api.get<WorkflowReport[]>("/canvas/workflows/report"),
   runs: (id: string) => api.get<WorkflowRun[]>(`/canvas/workflows/${id}/runs`),
+  getRun: (runId: string) => api.get<WorkflowRun>(`/canvas/runs/${runId}`),
   get: (id: string) => api.get<Workflow>(`/canvas/workflows/${id}`),
   save: (wf: {
     id?: string;
