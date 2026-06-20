@@ -16,6 +16,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import Response
 from starlette.types import Scope
 
+import app.contexts.cmdb.infrastructure.orm  # noqa: F401  (register cmdb tables for init_db)
 from app.contexts.automation_catalog.api import routes as catalog_routes
 from app.contexts.change_management.api import routes as change_routes
 from app.contexts.connectors.api import routes as connectors_routes
@@ -53,12 +54,14 @@ async def _lifespan(_app: FastAPI):
     if get_settings().seed_demo_data:
         from app.contexts.automation_catalog.application.seed import seed_templates
         from app.contexts.change_management.application.service import seed_change_management
+        from app.contexts.cmdb.application.seed import seed_cmdb_schemas
         from app.contexts.execution_engine.application.seed import seed_history
         from app.contexts.incident_management.application.seed import seed_incidents
         from app.contexts.orchestration_canvas.application.seed import seed_workflow_library
 
         seed_templates()
         seed_change_management()
+        seed_cmdb_schemas()  # CMDB-as-contract: CI type schemas
         seed_history()
         seed_workflow_library()
         seed_incidents()  # open a triage board from the seeded failures
