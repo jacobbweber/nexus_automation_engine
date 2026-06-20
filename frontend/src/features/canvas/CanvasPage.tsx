@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Canvas, Connectors, openSocket, type Capabilities, type CanvasEdge, type CanvasNode, type NodeTypeSpec, type Workflow } from "@/shared/api/client";
 import { useAuth } from "@/app/auth";
 import { Button } from "@/shared/ui/primitives";
 import { ACCENT_BY_TYPE, NODE_CATEGORIES, defaultData } from "./nodeTypes";
 import { SchemaProperties } from "./SchemaForm";
+import { lintGraph } from "./lint";
 
 // Builds a node's initial data from its schema defaults so new nodes start fully populated.
 function defaultFromSpec(spec: NodeTypeSpec | undefined, type: string): Record<string, unknown> {
@@ -205,6 +206,8 @@ export function CanvasPage() {
   }
 
   const selected = nodes.find((n) => n.id === selectedId) ?? null;
+  const lint = useMemo(() => lintGraph(nodes, edges, specs), [nodes, edges, specs]);
+  const lintErrors = lint.filter((i) => i.severity === "error").length;
 
   return (
     <div style={{ display: "flex", height: "100%" }}>
@@ -227,6 +230,23 @@ export function CanvasPage() {
           onSubmit={submitForReview}
           running={running}
         />
+        {lint.length > 0 && (
+          <div style={{ display: "flex", gap: 12, alignItems: "center", padding: "6px 14px", borderBottom: "1px solid var(--border)", background: lintErrors ? "var(--danger-soft)" : "var(--warn-soft)", fontSize: "0.78rem", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: 600 }}>
+              {lintErrors > 0 ? `${lintErrors} error${lintErrors > 1 ? "s" : ""}` : `${lint.length} warning${lint.length > 1 ? "s" : ""}`}
+            </span>
+            {lint.slice(0, 4).map((iss, i) => (
+              <button
+                key={i}
+                onClick={() => iss.nodeId && setSelectedId(iss.nodeId)}
+                style={{ background: "none", border: "none", color: iss.severity === "error" ? "var(--danger)" : "var(--warn)", cursor: iss.nodeId ? "pointer" : "default", fontSize: "0.76rem", padding: 0 }}
+              >
+                • {iss.message}
+              </button>
+            ))}
+            {lint.length > 4 && <span style={{ color: "var(--text-muted)" }}>+{lint.length - 4} more</span>}
+          </div>
+        )}
         <div
           onWheel={(e) => setZoom((z) => Math.min(2.2, Math.max(0.4, z - e.deltaY * 0.001)))}
           onMouseDown={(e) => {
