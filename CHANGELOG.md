@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M24.6 — CMDB Schema Studio** (v4.0 Pillar A): an admin surface (`/cmdb-schema`, linked from the
+  command palette) to define/edit CI type **schemas** (fields with datatype/required/enum/regex,
+  required tags, naming pattern) and **lineage** (typed required relationships), saved through the
+  deterministic backend validator — author→validate→save, mirroring Theme Studio. Adds the `Cmdb`
+  API client (schemas/lineage/validate-ci/ci-health) + types.
 - **M24.5 — lifecycle gate consults CMDB health** (v4.0 Pillar A): the execution lifecycle-validation
   gate now optionally requires the target CI to be healthy against its schema + lineage. Two new
   `ValidationPolicy` flags (`require_healthy_ci`, `min_health_score`, default off) — when enabled, a

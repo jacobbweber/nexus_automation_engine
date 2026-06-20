@@ -467,6 +467,68 @@ export const Validation = {
   reviewStatus: () => api.get<ReviewStatus>("/governance/validation/review-status"),
 };
 
+// --- CMDB schema, lineage & health (v4.0 Pillar A) ----
+export interface CmdbFieldDef {
+  name: string;
+  label: string;
+  datatype: string; // string | integer | boolean | enum | datetime | reference
+  required: boolean;
+  allowed_values: string[] | null;
+  regex: string | null;
+  default: string | null;
+  sensitive: boolean;
+}
+export interface CITypeSchema {
+  type: string;
+  label: string;
+  version: number;
+  description: string;
+  fields: CmdbFieldDef[];
+  required_tags: string[];
+  naming_pattern: string | null;
+  updated_by: string;
+  updated_at: string;
+}
+export interface LineageRelationship {
+  name: string;
+  target_type: string;
+  direction: string; // up | down
+  cardinality: string; // one | many
+  required: boolean;
+}
+export interface LineageSpec {
+  type: string;
+  relationships: LineageRelationship[];
+}
+export interface CIHealthIssue {
+  code: string;
+  target: string;
+  message: string;
+  severity: string; // error | warning
+  weight: number;
+}
+export interface CIHealthReport {
+  ci_id: string;
+  ci_type: string;
+  status: string; // healthy | degraded | unhealthy
+  score: number;
+  field_issues: CIHealthIssue[];
+  lineage_issues: CIHealthIssue[];
+  tag_issues: CIHealthIssue[];
+  remediation_hints: string[];
+}
+
+export const Cmdb = {
+  schemas: () => api.get<CITypeSchema[]>("/cmdb/schemas"),
+  schema: (t: string) => api.get<CITypeSchema>(`/cmdb/schemas/${t}`),
+  saveSchema: (t: string, s: CITypeSchema) => api.put<CITypeSchema>(`/cmdb/schemas/${t}`, s),
+  lineage: () => api.get<LineageSpec[]>("/cmdb/lineage"),
+  lineageFor: (t: string) => api.get<LineageSpec>(`/cmdb/lineage/${t}`),
+  saveLineage: (t: string, s: LineageSpec) => api.put<LineageSpec>(`/cmdb/lineage/${t}`, s),
+  validateCi: (ci: Record<string, unknown>) => api.post<CIHealthReport>("/cmdb/validate-ci", ci),
+  ciHealth: (name: string) => api.get<CIHealthReport>(`/cmdb/ci/${encodeURIComponent(name)}/health`),
+};
+
 export interface ServerThemeDoc {
   $schema: string;
   id: string;
