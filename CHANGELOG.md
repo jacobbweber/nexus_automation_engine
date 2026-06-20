@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M23 — incident RCA assist** (I36, #97): each incident card shows a **failure-mode tag**
+  (timeout/permission/connection/validation/approval/capacity, from keywords), a **similar-past-
+  failures** count (same title), and a **"remediation available"** hint when a similar incident
+  already has a remediation workflow — all from data + rules, no AI. Pure helpers unit-tested.
 - **M22 — canvas subgraph blocks** (F31, #92): save the current graph as a named, reusable **block**
   (persisted locally) and insert clones of it (fresh node ids, remapped edges, offset position) from
   a Blocks section in the palette. Pure `cloneBlock` is unit-tested.

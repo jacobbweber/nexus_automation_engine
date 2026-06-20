@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Incidents, type Incident } from "@/shared/api/client";
 import { Button, Card, Page } from "@/shared/ui/primitives";
 import { formatMttr, incidentTrends } from "./trends";
+import { failureMode, rcaForIncident } from "./rca";
 
 const COLUMNS: { key: string; label: string }[] = [
   { key: "new", label: "New" },
@@ -86,6 +87,24 @@ export function IncidentsPage() {
                 <div style={{ fontSize: "0.72rem", color: "var(--text-muted)", maxHeight: 48, overflow: "hidden" }}>
                   {inc.summary}
                 </div>
+                {(() => {
+                  const rca = rcaForIncident(inc, all);
+                  return (
+                    <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 6, flexWrap: "wrap" }}>
+                      <span style={{ fontSize: "0.62rem", padding: "1px 6px", borderRadius: "var(--radius-pill)", background: "var(--surface-2)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>
+                        {failureMode(inc)}
+                      </span>
+                      {rca.similarCount > 0 && (
+                        <span style={{ fontSize: "0.66rem", color: "var(--text-muted)" }}>↺ {rca.similarCount} similar</span>
+                      )}
+                      {rca.suggestedRemediationId && (
+                        <span title="A similar incident has a remediation workflow" style={{ fontSize: "0.66rem", color: "var(--info)" }}>
+                          remediation available
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
                 <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
                   {NEXT[inc.status] && (
                     <Button onClick={() => move(inc)}>→ {NEXT[inc.status]}</Button>
