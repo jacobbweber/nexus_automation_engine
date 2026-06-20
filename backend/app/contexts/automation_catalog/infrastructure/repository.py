@@ -16,6 +16,7 @@ from app.contexts.automation_catalog.domain.models import (
 from app.contexts.automation_catalog.infrastructure.orm import TemplateRow
 from app.contexts.connectors.domain.models import ConnectorKind
 from app.platform.database import get_sessionmaker
+from app.shared_kernel.idempotency import IdempotencyClass
 
 
 def _to_template(row: TemplateRow) -> Template:
@@ -28,6 +29,7 @@ def _to_template(row: TemplateRow) -> Template:
         markdown_documentation=row.markdown_documentation,
         supports_check_mode=row.supports_check_mode,
         supports_diff=row.supports_diff,
+        idempotency=IdempotencyClass(row.idempotency or "idempotent"),
         survey=[SurveyField(**f) for f in json.loads(row.survey_json or "[]")],
         default_params=json.loads(row.default_params_json or "{}"),
         owner=row.owner,
@@ -63,6 +65,7 @@ class TemplateRepository:
             row.markdown_documentation = template.markdown_documentation
             row.supports_check_mode = template.supports_check_mode
             row.supports_diff = template.supports_diff
+            row.idempotency = str(template.idempotency)
             row.survey_json = json.dumps([f.model_dump() for f in template.survey])
             row.default_params_json = json.dumps(template.default_params)
             row.owner = template.owner

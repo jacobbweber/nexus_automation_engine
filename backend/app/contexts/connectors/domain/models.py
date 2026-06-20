@@ -10,7 +10,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from app.shared_kernel.idempotency import IdempotencyClass, infer_idempotency
 
 
 def _utcnow() -> datetime:
@@ -52,6 +54,18 @@ class ConnectorAction(BaseModel):
     label: str
     description: str = ""
     params: list[ParamField] = Field(default_factory=list)
+    idempotency: IdempotencyClass = IdempotencyClass.IDEMPOTENT
+
+    @model_validator(mode="after")
+    def _infer_idempotency(self) -> ConnectorAction:
+        # Auto-classify check-only (plan/lookup) and non-idempotent (delete/destroy) actions from
+        # the name when left at the default, so every adapter's actions self-describe with no
+        # per-adapter edits. Adapters may still set a non-default class explicitly to override.
+        if self.idempotency == IdempotencyClass.IDEMPOTENT:
+            inferred = infer_idempotency(self.name)
+            if inferred != IdempotencyClass.IDEMPOTENT:
+                object.__setattr__(self, "idempotency", inferred)
+        return self
 
 
 class Capabilities(BaseModel):

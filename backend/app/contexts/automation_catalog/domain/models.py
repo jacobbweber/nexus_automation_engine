@@ -8,6 +8,7 @@ from enum import StrEnum
 from pydantic import BaseModel, Field
 
 from app.contexts.connectors.domain.models import ConnectorKind
+from app.shared_kernel.idempotency import IdempotencyClass
 
 
 class ApprovalState(StrEnum):
@@ -46,6 +47,7 @@ class Template(BaseModel):
     markdown_documentation: str = ""
     supports_check_mode: bool = False
     supports_diff: bool = False
+    idempotency: IdempotencyClass = IdempotencyClass.IDEMPOTENT
     survey: list[SurveyField] = Field(default_factory=list)
     default_params: dict[str, object] = Field(default_factory=dict)
     owner: str = "engineer"
@@ -78,6 +80,7 @@ class TemplateDraft(BaseModel):
     markdown_documentation: str = ""
     supports_check_mode: bool = False
     supports_diff: bool = False
+    idempotency: IdempotencyClass = IdempotencyClass.IDEMPOTENT
     survey: list[SurveyField] = Field(default_factory=list)
     default_params: dict[str, object] = Field(default_factory=dict)
     domain: str = "General"
