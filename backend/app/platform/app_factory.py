@@ -16,12 +16,12 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import Response
 from starlette.types import Scope
 
-import app.contexts.determinism.infrastructure.orm  # noqa: F401  (register tables; router in 27.4)
 from app.contexts.automation_catalog.api import routes as catalog_routes
 from app.contexts.change_management.api import routes as change_routes
 from app.contexts.cmdb.api import routes as cmdb_routes
 from app.contexts.compliance.api import routes as compliance_routes
 from app.contexts.connectors.api import routes as connectors_routes
+from app.contexts.determinism.api import routes as determinism_routes
 from app.contexts.execution_engine.api import routes as execution_routes
 from app.contexts.identity_access.api import routes as identity_routes
 from app.contexts.incident_management.api import routes as incident_routes
@@ -143,6 +143,7 @@ def create_app(static_dir: str | None = None) -> FastAPI:
     app.include_router(change_routes.router, prefix="/api/v1")
     app.include_router(cmdb_routes.router, prefix="/api/v1")
     app.include_router(compliance_routes.router, prefix="/api/v1")
+    app.include_router(determinism_routes.router, prefix="/api/v1")
     app.include_router(review_routes.router, prefix="/api/v1")
     app.include_router(execution_routes.router, prefix="/api/v1")
     app.include_router(canvas_routes.router, prefix="/api/v1")

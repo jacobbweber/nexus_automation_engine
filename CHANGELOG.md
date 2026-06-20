@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M27.4 — pinning API + CI-change trigger** (v4.0 Pillar D): REST for pinning rules
+  (`GET /determinism/rules[/{id}]`, admin `PUT`/`DELETE`), `GET /determinism/coverage`, and admin
+  `POST /determinism/reconcile`. The CI-change path (M26.5) now also fires the **on-change trigger**:
+  enforce-mode rules whose guaranteed workflow resolves open a review approval automatically.
 - **M27.2/27.3 — pinning reconciler + coverage** (v4.0 Pillar D): a deterministic reconciler turns
   rules + live CMDB CIs into a **pinned-actions plan** (per CI × matching rule, with the enforcement
   mode: assert / enforce / gate), optionally filtered by trigger; and a **coverage** computation

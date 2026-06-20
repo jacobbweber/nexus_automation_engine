@@ -44,6 +44,23 @@ class DeterminismService:
 
         return plan_actions(self.repo.list_all(), await all_cis(), trigger)
 
+    def on_ci_change(self, ci: dict[str, object]) -> list[PinnedAction]:
+        """Trigger hook: plan on-change actions for one CI and open review approvals for enforce
+        rules whose guaranteed workflow resolves. assert/gate are surfaced in the returned plan."""
+        from app.contexts.determinism.domain.models import Enforcement
+        from app.contexts.orchestration_canvas.application.service import CanvasService
+        from app.contexts.review.application.service import ReviewService
+
+        plan = plan_actions(self.repo.list_all(), [ci], Trigger.ON_CHANGE)
+        by_name = {w.name: w.id for w in CanvasService().list_workflows()}
+        review = ReviewService()
+        for action in plan:
+            if action.enforcement == Enforcement.ENFORCE:
+                wf_id = by_name.get(action.workflow)
+                if wf_id:
+                    review.request_approval(wf_id, requested_by="pinning-reconciler")
+        return plan
+
     async def coverage(self) -> Coverage:
         from app.contexts.connectors.application.services import evaluate_compliance
         from app.contexts.connectors.domain.models import ConnectorKind, ExecutionRequest
