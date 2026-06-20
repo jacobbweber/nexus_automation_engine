@@ -17,8 +17,22 @@ from app.contexts.connectors.domain.models import (
 
 
 # A small, believable CMDB the discovery adapter filters over. Each CI carries a ci_type,
-# lifecycle_state, and cluster membership so lifecycle-validation checks have real signal.
-def _ci(id, name, ci_type, env, *, lifecycle="operational", cluster=None, os=None):
+# lifecycle_state, cluster membership, plus tags + typed relationships so the CMDB schema/lineage
+# health checker (context `cmdb`) and lifecycle-validation have real signal. CI types use the
+# standardized vocabulary (vm/host/cluster/datastore/volume/backup_policy) the schemas declare.
+def _ci(
+    id,
+    name,
+    ci_type,
+    env,
+    *,
+    lifecycle="operational",
+    cluster=None,
+    os=None,
+    tags=None,
+    relationships=None,
+    extra=None,
+):
     row: dict[str, object] = {
         "id": id,
         "name": name,
@@ -28,23 +42,180 @@ def _ci(id, name, ci_type, env, *, lifecycle="operational", cluster=None, os=Non
         "lifecycle_state": lifecycle,
         "cluster_member": cluster is not None,
         "cluster": cluster,
+        "tags": tags or {},
+        "relationships": relationships or {},
     }
     if os:
         row["os"] = os
+    if extra:
+        row.update(extra)
     return row
 
 
+def _tags(env, *, owner="a.khan", team="Platform", cost="CC-1000", **more):
+    return {"owner": owner, "team": team, "environment": env, "cost_center": cost, **more}
+
+
+# Supporting infrastructure CIs the VMs/datastores relate to (so lineage resolves).
+_INFRA: list[dict[str, object]] = [
+    _ci(
+        "cl-1",
+        "wld-prod-01",
+        "cluster",
+        "Production",
+        tags=_tags("Production"),
+        extra={"ha_enabled": True},
+    ),
+    _ci(
+        "host-1",
+        "esx-prod-01",
+        "host",
+        "Production",
+        tags=_tags("Production"),
+        relationships={"cluster": ["wld-prod-01"]},
+        extra={"model": "Dell R760"},
+    ),
+    _ci(
+        "host-2",
+        "esx-prod-02",
+        "host",
+        "Production",
+        tags=_tags("Production"),
+        relationships={"cluster": ["wld-prod-01"]},
+        extra={"model": "Dell R760"},
+    ),
+    _ci(
+        "bp-1",
+        "bp-gold",
+        "backup_policy",
+        "Production",
+        tags={"owner": "s.patel", "team": "Backup"},
+        extra={"rpo_hours": 4, "retention_days": 30},
+    ),
+    _ci(
+        "vol-1",
+        "vol-prod-01",
+        "volume",
+        "Production",
+        tags=_tags("Production", team="Storage"),
+        relationships={"backup_policy": ["bp-gold"]},
+        extra={"array": "FlashArray-X", "size_gb": 2048, "protection_group": "pg-prod"},
+    ),
+    _ci(
+        "vol-2",
+        "vol-prod-02",
+        "volume",
+        "Production",
+        tags=_tags("Production", team="Storage"),
+        relationships={"backup_policy": ["bp-gold"]},
+        extra={"array": "FlashArray-X", "size_gb": 2048},
+    ),
+]
+
 _CMDB: list[dict[str, object]] = [
-    _ci("ci-1001", "web-prod-01", "server", "Production", os="RHEL9"),
-    _ci("ci-1002", "web-prod-02", "server", "Production", os="RHEL9"),
-    _ci("ci-1003", "app-stg-01", "server", "Staging", os="RHEL9"),
-    _ci("ci-1004", "db-prod-01", "server", "Production", os="Windows2022"),
-    _ci("ci-1005", "dev-box-07", "server", "Development", os="Ubuntu24"),
-    _ci("ci-1006", "legacy-app-02", "server", "Production", lifecycle="retired", os="RHEL7"),
-    # Storage CIs — datastores; some are members of a vSphere cluster.
-    _ci("ci-2001", "ds-vvol-01", "datastore", "Production", cluster="wld-prod-01"),
-    _ci("ci-2002", "ds-vvol-02", "datastore", "Production", cluster="wld-prod-01"),
-    _ci("ci-2003", "ds-scratch", "datastore", "Development"),
+    *_INFRA,
+    # VMs (compute) — related to a host, datastores, and a backup policy.
+    _ci(
+        "ci-1001",
+        "web-prod-01",
+        "vm",
+        "Production",
+        os="RHEL9",
+        tags=_tags("Production", backup_tier="gold"),
+        relationships={
+            "host": ["esx-prod-01"],
+            "datastores": ["ds-vvol-01"],
+            "backup_policy": ["bp-gold"],
+        },
+        extra={"cpu": 4, "memory_gb": 16},
+    ),
+    _ci(
+        "ci-1002",
+        "web-prod-02",
+        "vm",
+        "Production",
+        os="RHEL9",
+        tags=_tags("Production", backup_tier="gold"),
+        relationships={
+            "host": ["esx-prod-02"],
+            "datastores": ["ds-vvol-02"],
+            "backup_policy": ["bp-gold"],
+        },
+        extra={"cpu": 4, "memory_gb": 16},
+    ),
+    # app-stg-01: intentionally incomplete (no relationships/backup_tier) → a "degraded" CI.
+    _ci(
+        "ci-1003",
+        "app-stg-01",
+        "vm",
+        "Staging",
+        os="RHEL9",
+        tags={"owner": "m.rossi", "team": "Compute", "environment": "Staging"},
+        extra={"cpu": 2, "memory_gb": 8},
+    ),
+    _ci(
+        "ci-1004",
+        "db-prod-01",
+        "vm",
+        "Production",
+        os="Windows2022",
+        tags=_tags("Production", team="Data", backup_tier="gold"),
+        relationships={
+            "host": ["esx-prod-01"],
+            "datastores": ["ds-vvol-01"],
+            "backup_policy": ["bp-gold"],
+        },
+        extra={"cpu": 8, "memory_gb": 64},
+    ),
+    _ci(
+        "ci-1005",
+        "dev-box-07",
+        "vm",
+        "Development",
+        os="Ubuntu24",
+        tags={"owner": "p.alvarez", "team": "Dev", "environment": "Development"},
+        extra={"cpu": 2, "memory_gb": 8},
+    ),
+    _ci(
+        "ci-1006",
+        "legacy-app-02",
+        "vm",
+        "Production",
+        lifecycle="retired",
+        os="RHEL7",
+        tags={"owner": "unknown", "team": "Legacy", "environment": "Production"},
+        extra={"cpu": 2, "memory_gb": 4},
+    ),
+    # Datastores — backed by a volume; some are members of a vSphere cluster.
+    _ci(
+        "ci-2001",
+        "ds-vvol-01",
+        "datastore",
+        "Production",
+        cluster="wld-prod-01",
+        tags=_tags("Production", team="Storage"),
+        relationships={"volume": ["vol-prod-01"]},
+        extra={"capacity_gb": 4096},
+    ),
+    _ci(
+        "ci-2002",
+        "ds-vvol-02",
+        "datastore",
+        "Production",
+        cluster="wld-prod-01",
+        tags=_tags("Production", team="Storage"),
+        relationships={"volume": ["vol-prod-02"]},
+        extra={"capacity_gb": 4096},
+    ),
+    _ci(
+        "ci-2003",
+        "ds-scratch",
+        "datastore",
+        "Development",
+        tags=_tags("Development", team="Storage"),
+        relationships={"volume": ["vol-prod-02"]},
+        extra={"capacity_gb": 512},
+    ),
 ]
 
 
@@ -58,9 +229,9 @@ def get_ci(name: str) -> dict[str, object] | None:
 # CMDB tables exposed to the canvas CMDB-lookup field picker. Maps a ServiceNow-style table name
 # to the CI types it holds, so the UI can offer "pick a table → pick its fields".
 CMDB_TABLES: dict[str, list[str]] = {
-    "cmdb_ci_server": ["server"],
-    "cmdb_ci_storage_device": ["datastore"],
-    "cmdb_ci": ["server", "datastore"],  # base table: all CIs
+    "cmdb_ci_server": ["vm"],
+    "cmdb_ci_storage_device": ["datastore", "volume"],
+    "cmdb_ci": ["vm", "host", "cluster", "datastore", "volume", "backup_policy"],  # base: all CIs
 }
 
 # Stable, documented field catalog for the picker (superset across CI types).
