@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from app.contexts.orchestration_canvas.application.service import CanvasService
+from app.contexts.orchestration_canvas.application.service import CanvasService, _apply_plan
 from app.contexts.orchestration_canvas.domain.models import (
     Edge,
     Node,
@@ -14,6 +14,22 @@ from app.contexts.orchestration_canvas.domain.models import (
 from app.platform import database
 from app.platform.app_factory import create_app
 from fastapi.testclient import TestClient
+
+
+def test_apply_plan_forces_check_mode_on_automation_tasks_only():
+    nodes = [
+        Node(id="start", type=NodeType.START),
+        Node(
+            id="t",
+            type=NodeType.AUTOMATION_TASK,
+            data={"connector": "ansible", "check_mode": False},
+        ),
+        Node(id="c", type=NodeType.CONDITION, data={"variable": "{{x}}"}),
+    ]
+    planned = {n.id: n for n in _apply_plan(nodes)}
+    assert planned["t"].data["check_mode"] is True
+    assert "check_mode" not in planned["c"].data  # non-task nodes untouched
+    assert nodes[1].data["check_mode"] is False  # original not mutated
 
 
 def _ensure_schema():

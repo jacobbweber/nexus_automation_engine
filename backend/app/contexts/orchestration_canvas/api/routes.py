@@ -77,6 +77,7 @@ def delete_workflow(workflow_id: str) -> dict[str, str]:
 
 class RunRequest(BaseModel):
     inputs: dict[str, object] = Field(default_factory=dict)
+    plan: bool = False  # dry-run: force automation tasks into check mode (nothing mutates)
 
 
 class RunResponse(BaseModel):
@@ -88,7 +89,7 @@ async def run_workflow(
     workflow_id: str, body: RunRequest, _user: UserContext = Depends(get_current_user)
 ) -> RunResponse:
     # async so asyncio.create_task in start_run has a running event loop. Auth: security audit S1.
-    run_id = CanvasService().start_run(workflow_id, body.inputs)
+    run_id = CanvasService().start_run(workflow_id, body.inputs, plan=body.plan)
     return RunResponse(run_id=run_id)
 
 

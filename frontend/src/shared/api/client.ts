@@ -336,8 +336,8 @@ export const Canvas = {
     tags?: string[];
   }) => api.post<Workflow>("/canvas/workflows", wf),
   remove: (id: string) => api.del<void>(`/canvas/workflows/${id}`),
-  run: (id: string, inputs: Record<string, unknown>) =>
-    api.post<{ run_id: string }>(`/canvas/workflows/${id}/run`, { inputs }),
+  run: (id: string, inputs: Record<string, unknown>, plan = false) =>
+    api.post<{ run_id: string }>(`/canvas/workflows/${id}/run`, { inputs, plan }),
   resolveApproval: (run_id: string, node_id: string, approved: boolean, response = "") =>
     api.post<{ resolved: boolean }>("/canvas/approvals/resolve", {
       run_id,

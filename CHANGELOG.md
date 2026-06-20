@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M22 — dry-run / plan** (F28, #89): a **Dry run** action on the canvas (and a `plan` flag on
+  `POST /canvas/workflows/{id}/run`) executes the whole DAG with every automation task forced into
+  **check mode** so nothing mutates — a safe plan of the workflow. Pure `_apply_plan` unit-tested.
 - **M22 — blast-radius preview** (E25, #86): a `POST /connectors/servicenow/impact` endpoint
   computes which CMDB CIs an action on a target would touch (the target + **cluster siblings**);
   the canvas surfaces it on automation-task / CMDB-lookup nodes that target a literal CI, so an
