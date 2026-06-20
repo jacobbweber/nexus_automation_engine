@@ -115,7 +115,9 @@ export const BUILTIN_THEMES: BuiltinTheme[] = [
       "--bg": "#0a0e0a", "--surface": "#0f140f", "--surface-2": "#141a14", "--surface-3": "#1c241c",
       "--text": "#d7f5d7", "--text-muted": "#8cc08c", "--border": "#1f2a1f", "--border-strong": "#2c3c2c",
       "--divider": "#141a14", "--accent": "#46d246", "--accent-hover": "#6fe06f", "--accent-active": "#6fe06f",
-      "--accent-contrast": "#0a0e0a", "--run-running": "#46d246", "--run-ok": "#6fe06f", "--run-warn": "#e0b84a",
+      // running is a classic-terminal cyan so it stays distinct from the green --run-ok (the rest of
+      // the theme is intentionally green, which would otherwise collide running↔ok).
+      "--accent-contrast": "#0a0e0a", "--run-running": "#4ac8d8", "--run-ok": "#6fe06f", "--run-warn": "#e0b84a",
       "--run-failed": "#ff6f5e", "--run-skipped": "#7a8a7a", "--focus": "#46d246", "--link": "#6fe06f",
       "--success": "#46d246", "--warn": "#e0b84a", "--danger": "#ff6f5e", "--info": "#5ad0c0",
     },

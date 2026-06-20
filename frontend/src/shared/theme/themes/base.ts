@@ -26,7 +26,9 @@ export const BASE_DARK: Tokens = {
   "--accent": "#6ba6db", "--accent-hover": "#9cc6ec", "--accent-active": "#9cc6ec", "--accent-contrast": "#141210",
   "--success": "#8fc7a1", "--warn": "#e0bd6f", "--danger": "#e08a82", "--info": "#8fbdd6",
   "--run-running": "#6ba6db", "--run-ok": "#8fc7a1", "--run-warn": "#e0bd6f",
-  "--run-failed": "#e08a82", "--run-skipped": "#a8927a",
+  // Skipped is a desaturated cool gray so it never reads as amber next to --run-warn (status
+  // distinguishability — the theme validator flags warm-skipped vs amber-warn hue collisions).
+  "--run-failed": "#e08a82", "--run-skipped": "#8f949c",
   "--focus": "#6ba6db", "--link": "#9cc6ec",
 };
 
