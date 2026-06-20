@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   Boxes,
+  ClipboardCheck,
   GaugeCircle,
   LayoutDashboard,
   Library,
@@ -31,6 +32,7 @@ const NAV = [
   { to: "/console", area: "console", label: "Console", icon: <Terminal size={18} /> },
   { to: "/incidents", area: "incidents", label: "Incidents", icon: <AlertTriangle size={18} /> },
   { to: "/compliance", area: "governance", label: "Compliance", icon: <GaugeCircle size={18} /> },
+  { to: "/approvals", area: "governance", label: "Approvals", icon: <ClipboardCheck size={18} /> },
   { to: "/governance", area: "governance", label: "Governance", icon: <ShieldCheck size={18} /> },
   { to: "/admin", area: "admin", label: "Admin", icon: <Settings size={18} /> },
 ];

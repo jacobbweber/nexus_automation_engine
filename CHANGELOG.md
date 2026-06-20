@@ -6,6 +6,13 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M26.6/26.7 — review UI + ADR-0011** (v4.0 Pillar C): a **Review Packet viewer** with a
+  **Technical / Non-technical / Executive** audience toggle + flowchart (executive view hides
+  connectors/params, shows plain outcomes + risk + rollback), an **Approvals queue** (`/approvals`,
+  in nav + palette) to approve / reject / request-changes pending run & CI-change reviews, and the
+  `Review` API client. ADR-0011 records the multi-audience-review + run-approval decision. Completes
+  M26 — humans of every technical level can now review and gate changes. (A distinct executive RBAC
+  role is a deferred security-model change; the executive *view* ships now.)
 - **M26.5 — CI-change approval path** (v4.0 Pillar C): proposing a CI add/modify
   (`POST /review/ci-change`) runs the CMDB health check (M24) and opens an approval request
   (`source_type=ci_change`) carrying the health score + remediation hints — so a human approves the

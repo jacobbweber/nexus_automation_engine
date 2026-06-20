@@ -526,6 +526,64 @@ export interface CIHealthReport {
   remediation_hints: string[];
 }
 
+// --- multi-audience review & approval (v4.0 Pillar C) ----
+export interface TechnicalStep {
+  node_id: string;
+  name: string;
+  connector: string;
+  action: string;
+  params: Record<string, unknown>;
+  idempotency: string;
+}
+export interface NarrativeStep {
+  step: number;
+  text: string;
+}
+export interface ReviewFlowPhase {
+  label: string;
+  kind: string;
+}
+export interface ReviewPacket {
+  workflow_id: string;
+  workflow_name: string;
+  change_class: string;
+  required_level: string;
+  requires_approval: boolean;
+  reasons: string[];
+  risk: string;
+  blast_radius: number;
+  technical: TechnicalStep[];
+  narrative: NarrativeStep[];
+  flowchart: ReviewFlowPhase[];
+  summary: string;
+  rollback: string;
+}
+export interface ApprovalRequest {
+  id: string;
+  source_type: string;
+  source_id: string;
+  title: string;
+  change_class: string;
+  required_level: string;
+  status: string;
+  packet: ReviewPacket | null;
+  requested_by: string;
+  decided_by: string | null;
+  comment: string;
+  created_at: string;
+  decided_at: string | null;
+}
+
+export const Review = {
+  packet: (workflowId: string) => api.get<ReviewPacket>(`/review/packet/${workflowId}`),
+  approvals: () => api.get<ApprovalRequest[]>("/review/approvals"),
+  approval: (id: string) => api.get<ApprovalRequest>(`/review/approvals/${id}`),
+  requestApproval: (workflowId: string, inputs: Record<string, unknown> = {}) =>
+    api.post<ApprovalRequest>("/review/approvals", { workflow_id: workflowId, inputs }),
+  decide: (id: string, decision: string, comment = "") =>
+    api.post<ApprovalRequest>(`/review/approvals/${id}/decision`, { decision, comment }),
+};
+
 // --- compliance & drift (v4.0 Pillar B) ----
 export interface FieldDrift {
   field: string;
