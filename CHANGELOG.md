@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M28.3/28.4 — config sync + pull-preview** (v4.0 Pillar E): `GitOpsService.sync(actor)` serializes
+  the live config and commits it to the local git repo only when it changed (idempotent backup, audit
+  message); it runs on the scheduler cadence (`gitops_sync_every`) and on demand. `pull_preview()`
+  diffs the committed config (repo HEAD = desired) against the live snapshot → per-path create/delete/
+  update — the basis for an optional, admin-gated GitOps reconcile. Plus history/diff/restore. New
+  `config_repo_dir` setting.
 - **M28.2 — local-git versioning adapter** (v4.0 Pillar E): a `VersioningPort` + `LocalGitRepo`
   (official git via subprocess in a local dir) — init, commit-on-change with an audit message
   (idempotent: no commit when nothing changed; mirrors the desired file set, deleting dropped

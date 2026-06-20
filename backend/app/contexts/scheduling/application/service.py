@@ -104,6 +104,21 @@ class ScheduleService:
         return run_ids
 
 
+def _maybe_gitops_sync(tick: int) -> None:
+    """Periodically back up the platform config to the local git repo (M28.3)."""
+    from app.platform.config import get_settings
+
+    every = get_settings().gitops_sync_every
+    if not every or tick % every != 0:
+        return
+    try:
+        from app.contexts.gitops.application.service import GitOpsService
+
+        GitOpsService().sync(actor="scheduler", reason="scheduled config backup")
+    except Exception as exc:  # noqa: BLE001
+        log.warning("GitOps sync error: %s", exc)
+
+
 async def scheduler_loop(tick_seconds: float, *, compliance_sweep_every: int = 20) -> None:
     """Background ticker: dispatch due schedules and periodically run a compliance sweep.
 
@@ -124,5 +139,6 @@ async def scheduler_loop(tick_seconds: float, *, compliance_sweep_every: int = 2
                 ComplianceSweepService().run_sweep()
             except Exception as exc:  # noqa: BLE001
                 log.warning("Compliance sweep error: %s", exc)
+        _maybe_gitops_sync(tick)
         tick += 1
         await asyncio.sleep(tick_seconds)
