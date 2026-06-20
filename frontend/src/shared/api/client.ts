@@ -277,10 +277,20 @@ export interface NodeTypeSpec {
   outputs: string[];
 }
 
+export interface WorkflowRun {
+  run_id: string;
+  workflow_id: string;
+  status: string;
+  started_at: string;
+  completed_at: string | null;
+  error_message: string | null;
+}
+
 export const Canvas = {
   nodeTypes: () => api.get<NodeTypeSpec[]>("/canvas/node-types"),
   list: () => api.get<Workflow[]>("/canvas/workflows"),
   report: () => api.get<WorkflowReport[]>("/canvas/workflows/report"),
+  runs: (id: string) => api.get<WorkflowRun[]>(`/canvas/workflows/${id}/runs`),
   get: (id: string) => api.get<Workflow>(`/canvas/workflows/${id}`),
   save: (wf: {
     id?: string;

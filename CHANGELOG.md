@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M22 — Library per-workflow drill-down** (G32, #93): a details drawer in the Workflow Library
+  shows a workflow's usage summary (runs / success / failures) and **recent run history** (status,
+  start, duration) via `/canvas/workflows/{id}/runs`, with quick links to the canvas and console.
 - **M22 — Canvas comprehension aids** (F26, #87): fit-to-view, zoom in/out/reset controls, and a
   node search that centers + selects a node by name — overlaid on the canvas. (Minimap / auto-layout
   / group-comment nodes remain as follow-ups under the same issue.)

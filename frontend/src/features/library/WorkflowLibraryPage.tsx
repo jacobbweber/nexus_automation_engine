@@ -1,10 +1,11 @@
-import { Star } from "lucide-react";
+import { PanelRight, Star } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Canvas, type WorkflowReport } from "@/shared/api/client";
 import { Card, Page, StatusBadge } from "@/shared/ui/primitives";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useFavorites } from "@/shared/hooks/favorites";
+import { WorkflowDrawer } from "./WorkflowDrawer";
 
 // The workflow library + reporting view: who made each workflow, which team owns it, how it's
 // used (run counts, last run, success rate), and its governance state — filterable by team/tag,
@@ -13,6 +14,7 @@ export function WorkflowLibraryPage() {
   const nav = useNavigate();
   const { has: isFav, toggle: toggleFav } = useFavorites();
   const [reports, setReports] = useState<WorkflowReport[]>([]);
+  const [drawer, setDrawer] = useState<WorkflowReport | null>(null);
   const [team, setTeam] = useState("");
   const [tag, setTag] = useState("");
   const [search, setSearch] = useState("");
@@ -86,6 +88,7 @@ export function WorkflowLibraryPage() {
               <th style={{ ...th, textAlign: "right" }}>Runs</th>
               <th style={{ ...th, textAlign: "right" }}>Success</th>
               <th style={{ ...th, textAlign: "right" }}>Last run</th>
+              <th style={{ ...th, width: 28 }} aria-label="Details"></th>
             </tr>
           </thead>
           <tbody>
@@ -131,11 +134,24 @@ export function WorkflowLibraryPage() {
                 <td style={{ ...td, textAlign: "right", color: "var(--text-muted)", fontSize: "0.76rem" }}>
                   {r.usage.last_run_at ? new Date(r.usage.last_run_at).toLocaleDateString() : "never"}
                 </td>
+                <td style={{ ...td, width: 28 }}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDrawer(r);
+                    }}
+                    aria-label={`Details for ${r.name}`}
+                    title="Details & run history"
+                    style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-subtle)", display: "flex", padding: 2 }}
+                  >
+                    <PanelRight size={15} />
+                  </button>
+                </td>
               </tr>
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={8}>
+                <td colSpan={9}>
                   <EmptyState
                     title={reports.length === 0 ? "No workflows yet" : "No workflows match these filters"}
                     description={
@@ -150,6 +166,7 @@ export function WorkflowLibraryPage() {
           </tbody>
         </table>
       </Card>
+      {drawer && <WorkflowDrawer report={drawer} onClose={() => setDrawer(null)} />}
     </Page>
   );
 }
