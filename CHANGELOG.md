@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M25.3 — compliance-mode runs** (v4.0 Pillar B): run any building block or workflow in
+  *compliance mode* — a read-only evaluation that returns a `DriftReport` without mutating.
+  `POST /catalog/templates/{id}/compliance` evaluates one block; `POST /canvas/workflows/{id}/
+  compliance` evaluates every automation task and **aggregates** the drift across the workflow.
+  Deterministic + auth-gated. (The drift/posture UI lands in 25.5.)
 - **M25.2 — drift / compliance model** (v4.0 Pillar B, ADR-0010): a first-class `DriftReport`
   (per-resource + per-field desired-vs-observed: `compliant | drifted | unknown`, with the reconcile
   action that would converge each, an aggregate status + drift count) and a `CompliancePort`

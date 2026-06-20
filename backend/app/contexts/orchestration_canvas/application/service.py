@@ -100,6 +100,36 @@ class CanvasService:
     def list_workflows(self) -> list[Workflow]:
         return self.repo.list_workflows()
 
+    def compliance(self, workflow_id: str):
+        """Evaluate every automation task in a workflow in compliance mode and aggregate the drift.
+
+        Read-only: nothing mutates. Returns one aggregated DriftReport across the workflow's steps.
+        """
+        from app.contexts.connectors.application.services import (
+            aggregate_drift,
+            evaluate_compliance,
+        )
+        from app.contexts.connectors.domain.models import ConnectorKind, ExecutionRequest
+
+        wf = self.get_workflow(workflow_id)
+        reports = []
+        for node in wf.graph.nodes:
+            if node.type != NodeType.AUTOMATION_TASK:
+                continue
+            connector = node.data.get("connector")
+            action = node.data.get("action")
+            if not connector or not action:
+                continue
+            params = node.data.get("params") or {}
+            request = ExecutionRequest(
+                kind=ConnectorKind(str(connector)),
+                action=str(action),
+                params=params if isinstance(params, dict) else {},
+                check_mode=True,
+            )
+            reports.append(evaluate_compliance(request))
+        return aggregate_drift(reports, target=wf.name)
+
     def report(self) -> list[WorkflowReport]:
         """Workflow library: each workflow's metadata joined with its run telemetry."""
         usage = self.repo.usage_by_workflow()
