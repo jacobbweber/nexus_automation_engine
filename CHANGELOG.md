@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M23 — incident trends** (I37, #98): the Incidents board gains a trends row — open/resolved
+  counts, **mean time to resolution**, and **top failing automations** — all computed client-side
+  from the board data (pure `incidentTrends`, unit-tested).
 - **M23 — connector registry view** (K42, #103): the Admin page's connector cards now show a
   simulation/health indicator (from `/health`) and expand to list each connector's **actions**
   (label, name, param count) alongside capability chips (check-mode / diff / streams-logs).
