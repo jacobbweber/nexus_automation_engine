@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M23 — hardening: token regression + a11y tests** (L46/L47, #107/#108): a **theme-token
+  regression matrix** snapshots every built-in theme's generated CSS (light + dark) so unintended
+  palette changes fail CI, and an **automated structural a11y suite** asserts key components expose
+  correct roles + accessible names (color contrast already gated by A7). Full browser/screen-reader
+  audit remains the documented manual step. **This completes the M20–M23 experience roadmap.**
 - **M23 — RBAC matrix viewer** (J41, #102): a `GET /auth/rbac-matrix` endpoint exposes the role ×
   capability baseline; Admin renders it as a grid. Read-only by design — the baseline is part of the
   security model (refined per-resource by entitlements), not a runtime toggle. (Users list endpoint
