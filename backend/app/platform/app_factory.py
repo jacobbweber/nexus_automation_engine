@@ -16,6 +16,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import Response
 from starlette.types import Scope
 
+import app.contexts.determinism.infrastructure.orm  # noqa: F401  (register tables; router in 27.4)
 from app.contexts.automation_catalog.api import routes as catalog_routes
 from app.contexts.change_management.api import routes as change_routes
 from app.contexts.cmdb.api import routes as cmdb_routes
@@ -65,6 +66,9 @@ async def _lifespan(_app: FastAPI):
         seed_change_management()
         seed_cmdb_schemas()  # CMDB-as-contract: CI type schemas
         seed_cmdb_lineage()  # required relationships per CI type
+        from app.contexts.determinism.application.seed import seed_pinning_rules
+
+        seed_pinning_rules()  # example workflow-pinning guardrail rules
         seed_history()
         seed_workflow_library()
         seed_incidents()  # open a triage board from the seeded failures

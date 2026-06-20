@@ -159,7 +159,7 @@ _CMDB: list[dict[str, object]] = [
         "vm",
         "Production",
         os="Windows2022",
-        tags=_tags("Production", team="Data", backup_tier="gold"),
+        tags=_tags("Production", team="Data", backup_tier="gold", **{"DR-Tier": "0"}),
         relationships={
             "host": ["esx-prod-01"],
             "datastores": ["ds-vvol-01"],

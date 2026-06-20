@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M27.1 — workflow pinning rules** (v4.0 Pillar D): a new `determinism` context — a `PinningRule`
+  binds a **selector** (CI type + tag/field predicates) to a **guaranteed workflow**, a **trigger**
+  (create/change/schedule/on-demand), and an **enforcement mode** (assert | enforce | gate), with a
+  pure priority-ordered matcher. Seeded example rules (every VM → tag/CMDB validation; DR-Tier-0 VM →
+  guaranteed Zerto DR VPG) and tagged a seeded VM `DR-Tier=0` so the rule demonstrates. Management-
+  by-invariant: declare what must be true of the estate.
 - **M26.6/26.7 — review UI + ADR-0011** (v4.0 Pillar C): a **Review Packet viewer** with a
   **Technical / Non-technical / Executive** audience toggle + flowchart (executive view hides
   connectors/params, shows plain outcomes + risk + rollback), an **Approvals queue** (`/approvals`,
