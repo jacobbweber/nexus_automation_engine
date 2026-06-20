@@ -76,5 +76,25 @@ context specs before building (SDD).
     catalog, detail drawer (docs/params/logic-flow), Markdown + animated SVG components.
   - M15 (governed submission/review): **done** — submit→review lifecycle, review inbox, audit trail.
   - M16 (incident kanban): **done** — auto-capture failures, triage board, convert-to-remediation.
-  - M17 command palette/analytics: **next.** Then the operator-requested CMDB lifecycle-validation
-    feature + the 4 formal audits (security / quality / architecture / best-practice).
+  - M17 command palette/analytics: **done.** CMDB lifecycle-validation + the 4 formal audits: **done.**
+  - **Experience architecture line M20–M23: done** (design system, theming, surface depth, hardening).
+
+## Road to 4.0 — Deterministic Governance (vision_deterministic_governance.md)
+
+Make Nexus an **absolute configuration-management control plane**: the CMDB becomes a schema-enforced
+contract, every change passes audience-tailored human review, config lives in Git, deterministic
+policy pins guarantee desired state, and all automation is idempotent + continuously re-runnable for
+compliance. Dependencies: M24→(M25,M26); (M24,M25)→M27; (M24,M27)→M28; M29 throughout; M30 last.
+
+| # | Milestone | Delivers | Status |
+| --- | --- | --- | --- |
+| M24 | **CMDB Schema & Lineage** | CI type schema registry + lineage spec + deterministic health checker; Schema Studio; CI health badges + Lineage Explorer; enriches the lifecycle gate. | planned |
+| M25 | **Idempotency & Compliance** | Idempotency class contract; DriftReport + `evaluate_compliance()`; compliance-mode runs; scheduled sweeps → posture dashboard; drift→incidents. | planned |
+| M26 | **Multi-Audience Review** | Change classification; plain-summary metadata; Change Review Packet (technical/non-technical/executive + flowchart); run-level approval gate; exec capability. | planned |
+| M27 | **Deterministic Pinning** | Pinning rules (selector→workflow+trigger+enforcement); reconciler; coverage/impact preview; Determinism/Guardrails management page. | planned |
+| M28 | **GitOps Backbone** | Canonical serialization; local-git versioning + commit-on-change/backup; optional pull/reconcile; per-artifact history/diff/restore; GitOps admin. | planned |
+| M29 | **Documentation & Repo Strategy** | `docs/` tree (concepts, personas, feature guides), infracode pillar-repo strategy, naming/tagging conventions, in-app `/docs` + generated reference. | planned |
+| M30 | **Admin/Integrator UAT** | End-to-end admin+integrator UAT; fix findings; verify in-browser. Cut **v4.0.0**. | planned |
+
+Planned ADRs: 0009 (CMDB schema/lineage context), 0010 (idempotency & drift model), 0011
+(multi-audience review + run approval), 0012 (deterministic pinning/reconcile), 0013 (GitOps backbone).
