@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M23 — RBAC matrix viewer** (J41, #102): a `GET /auth/rbac-matrix` endpoint exposes the role ×
+  capability baseline; Admin renders it as a grid. Read-only by design — the baseline is part of the
+  security model (refined per-resource by entitlements), not a runtime toggle. (Users list endpoint
+  also surfaced.)
 - **M23 — backup / export** (K45, #106): an admin-only `GET /platform/export` returns a portable
   JSON bundle (`nexus-export/v1`) of workflows + themes + schedules (no secrets), downloadable from
   Admin. (Restore/import is a deferred follow-up — it needs careful conflict handling.)

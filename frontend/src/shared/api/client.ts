@@ -210,10 +210,18 @@ export interface CanvasEdge {
   targetHandle?: string | null;
 }
 
+export interface RbacMatrix {
+  roles: string[];
+  capabilities: string[];
+  matrix: Record<string, Record<string, boolean>>;
+}
+
 export const Auth = {
   login: (username: string, password: string) =>
     api.post<LoginResponse>("/auth/login", { username, password }),
   me: () => api.get<User>("/auth/me"),
+  rbacMatrix: () => api.get<RbacMatrix>("/auth/rbac-matrix"),
+  users: () => api.get<User[]>("/auth/users"),
 };
 
 export const Catalog = {

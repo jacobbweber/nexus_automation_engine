@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Connectors, exportBundle, getHealth, getPlatformStatus, type Capabilities, type PlatformStatus } from "@/shared/api/client";
+import { Auth, Connectors, exportBundle, getHealth, getPlatformStatus, type Capabilities, type PlatformStatus, type RbacMatrix } from "@/shared/api/client";
 import { useAuth } from "@/app/auth";
 import { Button, Card, Page } from "@/shared/ui/primitives";
 
@@ -28,12 +28,14 @@ export function AdminPage() {
   const [connectors, setConnectors] = useState<Capabilities[]>([]);
   const [simulated, setSimulated] = useState<boolean | null>(null);
   const [status, setStatus] = useState<PlatformStatus | null>(null);
+  const [rbac, setRbac] = useState<RbacMatrix | null>(null);
   const [open, setOpen] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     Connectors.list().then(setConnectors).catch(() => setConnectors([]));
     getHealth().then((h) => setSimulated(h.simulation_mode)).catch(() => setSimulated(null));
     getPlatformStatus().then(setStatus).catch(() => setStatus(null));
+    Auth.rbacMatrix().then(setRbac).catch(() => setRbac(null));
   }, []);
 
   return (
@@ -64,6 +66,38 @@ export function AdminPage() {
             <Metric label="Environment" value={status.environment} />
             <Metric label="Version" value={status.version} />
           </div>
+        </Card>
+      )}
+
+      {rbac && (
+        <Card style={{ marginBottom: 14, overflow: "auto" }}>
+          <SectionTitle>Access control (role × capability)</SectionTitle>
+          <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", margin: "0 0 8px" }}>
+            Baseline matrix (refined per resource by entitlements). Read-only — the baseline is part
+            of the security model.
+          </p>
+          <table style={{ borderCollapse: "collapse", fontSize: "0.8rem", minWidth: 420 }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: "left", padding: "4px 10px 4px 0", color: "var(--text-muted)", fontWeight: 600 }}>Capability</th>
+                {rbac.roles.map((r) => (
+                  <th key={r} style={{ padding: "4px 10px", textTransform: "capitalize", color: "var(--text-muted)", fontWeight: 600 }}>{r}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rbac.capabilities.map((c) => (
+                <tr key={c} style={{ borderTop: "1px solid var(--border)" }}>
+                  <td style={{ padding: "6px 10px 6px 0" }}>{c.replace(/_/g, " ")}</td>
+                  {rbac.roles.map((r) => (
+                    <td key={r} style={{ padding: "6px 10px", textAlign: "center", color: rbac.matrix[r]?.[c] ? "var(--run-ok)" : "var(--text-subtle)" }}>
+                      {rbac.matrix[r]?.[c] ? "✓" : "·"}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </Card>
       )}
 
