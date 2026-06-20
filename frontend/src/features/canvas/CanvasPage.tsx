@@ -49,6 +49,7 @@ export function CanvasPage() {
   const [specs, setSpecs] = useState<NodeTypeSpec[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [running, setRunning] = useState(false);
+  const [runError, setRunError] = useState<string | null>(null);
 
   const dragRef = useRef<{ id: string; ox: number; oy: number } | null>(null);
   const panRef = useRef<{ x: number; y: number } | null>(null);
@@ -232,8 +233,16 @@ export function CanvasPage() {
     if (!currentId) await save();
     const id = currentId ?? (await Canvas.save({ name, graph: { nodes, edges, viewport: {} } })).id;
     setNodeStates({});
+    setRunError(null);
     setRunning(true);
-    const { run_id } = await Canvas.run(id, realInputs, isPlan);
+    let run_id: string;
+    try {
+      ({ run_id } = await Canvas.run(id, realInputs, isPlan));
+    } catch (e) {
+      setRunning(false);
+      setRunError(e instanceof Error ? e.message : "Run failed to dispatch.");
+      return;
+    }
     const ws = openSocket(`/canvas/runs/${run_id}/stream`);
     ws.onmessage = (ev) => {
       const d = JSON.parse(ev.data);
@@ -330,6 +339,13 @@ export function CanvasPage() {
               </button>
             ))}
             {lint.length > 4 && <span style={{ color: "var(--text-muted)" }}>+{lint.length - 4} more</span>}
+          </div>
+        )}
+        {runError && (
+          <div role="alert" style={{ display: "flex", gap: 12, alignItems: "center", padding: "6px 14px", borderBottom: "1px solid var(--border)", background: "var(--danger-soft)", fontSize: "0.78rem" }}>
+            <span style={{ fontWeight: 600, color: "var(--danger)" }}>Run rejected</span>
+            <span style={{ color: "var(--danger)" }}>{runError}</span>
+            <button onClick={() => setRunError(null)} style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "0.76rem" }}>✕ dismiss</button>
           </div>
         )}
         <div

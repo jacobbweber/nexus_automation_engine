@@ -34,12 +34,25 @@ export function AutomationDetail({ template, onClose }: { template: Template; on
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const [checkMode, setCheckMode] = useState(template.supports_check_mode);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const missing = template.survey
+    .filter((f) => f.required && !answers[f.name])
+    .map((f) => f.label);
 
   async function run() {
+    if (missing.length > 0) {
+      setTab("parameters");
+      setError(`Fill required parameter${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}`);
+      return;
+    }
     setBusy(true);
+    setError(null);
     try {
       const res = await Catalog.execute(template.id, answers, checkMode);
       navigate(`/console?job=${res.job_id}`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Run failed to dispatch.");
     } finally {
       setBusy(false);
     }
@@ -133,6 +146,15 @@ export function AutomationDetail({ template, onClose }: { template: Template; on
         </div>
 
         {/* Run bar */}
+        {error && (
+          <div role="alert" style={{
+            marginTop: 10, padding: "8px 12px", borderRadius: 8, fontSize: "0.8rem",
+            background: "color-mix(in srgb, var(--danger) 12%, transparent)",
+            border: "1px solid var(--danger)", color: "var(--danger)",
+          }}>
+            {error}
+          </div>
+        )}
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14, marginTop: 10, display: "flex", alignItems: "center", gap: 12 }}>
           {template.supports_check_mode && (
             <label style={{ display: "flex", gap: 6, alignItems: "center", fontSize: "0.82rem" }}>
