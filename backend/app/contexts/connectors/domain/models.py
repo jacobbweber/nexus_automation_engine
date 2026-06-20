@@ -107,6 +107,42 @@ class ExecutionRequest(BaseModel):
     run_id: str | None = None
 
 
+class ComplianceState(StrEnum):
+    COMPLIANT = "compliant"
+    DRIFTED = "drifted"
+    UNKNOWN = "unknown"
+
+
+class FieldDrift(BaseModel):
+    """One field's desired-vs-observed comparison."""
+
+    field: str
+    desired: str
+    observed: str
+    state: ComplianceState = ComplianceState.DRIFTED
+
+
+class ResourceDrift(BaseModel):
+    """One resource's compliance: its drifted fields + the action that would reconcile it."""
+
+    resource: str
+    state: ComplianceState
+    fields: list[FieldDrift] = Field(default_factory=list)
+    reconcile_action: str = ""
+
+
+class DriftReport(BaseModel):
+    """Desired-vs-observed for a request, evaluated WITHOUT mutating (compliance mode)."""
+
+    target: str
+    connector: str
+    action: str
+    status: ComplianceState  # aggregate
+    drift_count: int = 0
+    resources: list[ResourceDrift] = Field(default_factory=list)
+    summary: str = ""
+
+
 class LogEvent(BaseModel):
     timestamp: datetime = Field(default_factory=_utcnow)
     stream: StreamType = StreamType.STDOUT

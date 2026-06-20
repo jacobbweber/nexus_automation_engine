@@ -15,6 +15,7 @@ from app.contexts.connectors.domain.models import (
     ChangeValidation,
     CredentialLease,
     DiscoveryQuery,
+    DriftReport,
     ExecutionRequest,
     LogEvent,
     Resource,
@@ -68,6 +69,13 @@ class ApprovalPort(Protocol):
     async def validate(
         self, reference: str, required_state: str = "approved"
     ) -> ChangeValidation: ...
+
+
+@runtime_checkable
+class CompliancePort(Protocol):
+    """Evaluates desired-vs-observed state for a request WITHOUT mutating (compliance mode)."""
+
+    async def evaluate_compliance(self, request: ExecutionRequest) -> DriftReport: ...
 
 
 @runtime_checkable

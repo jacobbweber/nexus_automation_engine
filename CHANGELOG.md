@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M25.2 — drift / compliance model** (v4.0 Pillar B, ADR-0010): a first-class `DriftReport`
+  (per-resource + per-field desired-vs-observed: `compliant | drifted | unknown`, with the reconcile
+  action that would converge each, an aggregate status + drift count) and a `CompliancePort`
+  (`evaluate_compliance`). A deterministic simulated evaluator produces believable, *stable* drift
+  per request (seeded by target+action; check-only actions are inherently compliant) plus an
+  aggregation helper for rolling up across a workflow's steps. Never mutates.
 - **M25.1 — idempotency-class contract** (v4.0 Pillar B, ADR-0010): every connector action and
   catalog building block now declares an `IdempotencyClass` (`idempotent | check_only |
   non_idempotent`) — a shared-kernel primitive. Connector actions auto-classify from their name
