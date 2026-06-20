@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M28.1 — canonical config serializer** (v4.0 Pillar E): a deterministic snapshot of every config
+  artifact (workflows, CMDB schemas + lineage, pinning rules, catalog templates, validation policy,
+  schedules, change templates) → stable file paths + key-ordered JSON with volatile audit timestamps
+  stripped, so re-serializing unchanged config is **byte-identical**. The basis for committing config
+  to Git (history/diff/restore) without spurious diffs.
 - **M27.5/27.6 — Guardrails management page + ADR-0012** (v4.0 Pillar D): a **Determinism &
   Guardrails** page (`/determinism`, nav + palette) where admins author pinning rules with a
   schema-driven selector builder (CI type from the CMDB registry + tag/field predicates), a workflow
