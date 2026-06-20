@@ -105,6 +105,12 @@ export interface Capabilities {
   actions: ConnectorAction[];
 }
 
+export interface PlainSummary {
+  input: string;
+  action: string;
+  outcome: string;
+  rollback: string;
+}
 export interface Template {
   id: string;
   name: string;
@@ -115,6 +121,7 @@ export interface Template {
   supports_check_mode: boolean;
   supports_diff: boolean;
   idempotency: string; // idempotent | check_only | non_idempotent
+  plain_summary: PlainSummary | null;
   survey: SurveyField[];
   default_params: Record<string, unknown>;
   owner: string;

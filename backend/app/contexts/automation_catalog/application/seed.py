@@ -13,6 +13,7 @@ from app.contexts.automation_catalog.domain.models import (
     ApprovalState,
     SurveyField,
     Template,
+    default_plain_summary,
 )
 from app.contexts.automation_catalog.infrastructure.repository import TemplateRepository
 from app.contexts.connectors.domain.models import ConnectorKind
@@ -404,6 +405,13 @@ def seed_templates(repo: TemplateRepository | None = None) -> int:
                 in (A.ANSIBLE, A.TERRAFORM, A.VMWARE, A.PURESTORAGE, A.COHESITY),
                 supports_diff=connector in (A.ANSIBLE, A.TERRAFORM),
                 idempotency=infer_idempotency(action),
+                plain_summary=default_plain_summary(
+                    name=name,
+                    action=action,
+                    vendor=vendor,
+                    domain=domain,
+                    idempotent=infer_idempotency(action).value == "idempotent",
+                ),
                 survey=_survey_for(connector),
                 default_params={},
                 owner="engineer",
