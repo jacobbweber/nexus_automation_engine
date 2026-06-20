@@ -11,6 +11,7 @@ from app.contexts.automation_catalog.domain.models import (
     Template,
     TemplateDraft,
 )
+from app.contexts.connectors.domain.models import DriftReport
 from app.contexts.execution_engine.domain.models import JobStatus
 from app.contexts.identity_access.api.deps import get_current_user, require_role
 from app.contexts.identity_access.domain.models import GlobalRole, UserContext
@@ -90,3 +91,13 @@ async def execute_template(
         diff_mode=body.diff_mode,
     )
     return ExecuteTemplateResponse(job_id=job.id, status=job.status)
+
+
+@router.post("/templates/{template_id}/compliance", response_model=DriftReport)
+def template_compliance(
+    template_id: str,
+    body: ExecuteTemplateRequest,
+    _user: UserContext = Depends(get_current_user),
+) -> DriftReport:
+    """Evaluate a building block in compliance mode — drift report, no mutation."""
+    return CatalogService().compliance(template_id, body.survey_answers)

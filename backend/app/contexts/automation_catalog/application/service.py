@@ -149,3 +149,17 @@ class CatalogService:
             change_number=change_number,
         )
         return await self.execution.submit_and_run(submission)
+
+    def compliance(self, template_id: str, survey_answers: dict[str, object]):
+        """Evaluate this building block in compliance mode (drift, no mutation)."""
+        from app.contexts.connectors.application.services import evaluate_compliance
+        from app.contexts.connectors.domain.models import ExecutionRequest
+
+        template = self.get(template_id)
+        request = ExecutionRequest(
+            kind=template.connector,
+            action=template.action,
+            params={**template.default_params, **survey_answers},
+            check_mode=True,
+        )
+        return evaluate_compliance(request)

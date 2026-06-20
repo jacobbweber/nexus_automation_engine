@@ -7,6 +7,7 @@ import contextlib
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
+from app.contexts.connectors.domain.models import DriftReport
 from app.contexts.identity_access.api.deps import get_current_user, require_role
 from app.contexts.identity_access.domain.models import GlobalRole, UserContext
 from app.contexts.orchestration_canvas.application.broker import get_run_broker
@@ -91,6 +92,14 @@ async def run_workflow(
     # async so asyncio.create_task in start_run has a running event loop. Auth: security audit S1.
     run_id = CanvasService().start_run(workflow_id, body.inputs, plan=body.plan)
     return RunResponse(run_id=run_id)
+
+
+@router.post("/workflows/{workflow_id}/compliance", response_model=DriftReport)
+def workflow_compliance(
+    workflow_id: str, _user: UserContext = Depends(get_current_user)
+) -> DriftReport:
+    """Compliance-mode evaluation of a whole workflow — aggregated drift, no mutation."""
+    return CanvasService().compliance(workflow_id)
 
 
 @router.get("/workflows/{workflow_id}/runs", response_model=list[WorkflowRun])
