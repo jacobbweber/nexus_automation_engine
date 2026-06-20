@@ -481,4 +481,17 @@ export function openThemeStream(): EventSource {
   return new EventSource("/api/v1/themes/stream");
 }
 
+export interface PlatformStatus {
+  app: string;
+  version: string;
+  environment: string;
+  simulation_mode: boolean;
+  scheduler_enabled: boolean;
+  uptime_seconds: number;
+  db_ok: boolean;
+  workflows: number;
+  jobs: number;
+}
+
 export const getHealth = () => api.get<Health>("/health");
+export const getPlatformStatus = () => api.get<PlatformStatus>("/platform/status");

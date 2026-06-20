@@ -17,6 +17,16 @@ def test_health_endpoint():
     assert "simulation_mode" in body
 
 
+def test_platform_status_reports_runtime():
+    with TestClient(create_app()) as client:
+        resp = client.get("/api/v1/platform/status")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["db_ok"] is True
+    assert body["uptime_seconds"] >= 0
+    assert {"app", "version", "scheduler_enabled", "workflows", "jobs"} <= body.keys()
+
+
 def test_openapi_available():
     app = create_app()
     with TestClient(app) as client:

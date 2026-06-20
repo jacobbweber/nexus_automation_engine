@@ -1,18 +1,28 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Connectors, getHealth, type Capabilities } from "@/shared/api/client";
+import { Connectors, getHealth, getPlatformStatus, type Capabilities, type PlatformStatus } from "@/shared/api/client";
 import { useAuth } from "@/app/auth";
 import { Card, Page } from "@/shared/ui/primitives";
+
+function uptime(s: number): string {
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  return h < 24 ? `${h}h ${m % 60}m` : `${Math.floor(h / 24)}d ${h % 24}h`;
+}
 
 export function AdminPage() {
   const { user } = useAuth();
   const [connectors, setConnectors] = useState<Capabilities[]>([]);
   const [simulated, setSimulated] = useState<boolean | null>(null);
+  const [status, setStatus] = useState<PlatformStatus | null>(null);
   const [open, setOpen] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     Connectors.list().then(setConnectors).catch(() => setConnectors([]));
     getHealth().then((h) => setSimulated(h.simulation_mode)).catch(() => setSimulated(null));
+    getPlatformStatus().then(setStatus).catch(() => setStatus(null));
   }, []);
 
   return (
@@ -23,6 +33,21 @@ export function AdminPage() {
           {user?.username} — global role <strong style={{ color: "var(--area-accent)" }}>{user?.global_role}</strong>
         </div>
       </Card>
+
+      {status && (
+        <Card style={{ marginBottom: 14 }}>
+          <SectionTitle>Platform status</SectionTitle>
+          <div style={{ display: "flex", gap: 28, flexWrap: "wrap" }}>
+            <Metric label="Status" value={status.db_ok ? "Healthy" : "Degraded"} color={status.db_ok ? "var(--run-ok)" : "var(--run-failed)"} />
+            <Metric label="Uptime" value={uptime(status.uptime_seconds)} />
+            <Metric label="Workflows" value={String(status.workflows)} />
+            <Metric label="Jobs" value={String(status.jobs)} />
+            <Metric label="Scheduler" value={status.scheduler_enabled ? "on" : "off"} />
+            <Metric label="Environment" value={status.environment} />
+            <Metric label="Version" value={status.version} />
+          </div>
+        </Card>
+      )}
 
       <Card style={{ marginBottom: 14 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -87,6 +112,14 @@ export function AdminPage() {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h2 style={{ fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: 1, marginTop: 0 }}>{children}</h2>;
+}
+function Metric({ label, value, color }: { label: string; value: string; color?: string }) {
+  return (
+    <div>
+      <div style={{ fontSize: "1.3rem", fontWeight: 700, color: color ?? "var(--text)" }}>{value}</div>
+      <div style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>{label}</div>
+    </div>
+  );
 }
 function Dot({ color }: { color: string }) {
   return <span style={{ width: 8, height: 8, borderRadius: "50%", background: color, display: "inline-block" }} />;

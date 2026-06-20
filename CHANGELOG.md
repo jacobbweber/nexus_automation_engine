@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M23 — platform status** (K43, #104): a `GET /platform/status` endpoint (uptime, DB
+  reachability, workflow/job counts, scheduler + simulation state, version/env) surfaced as a
+  **Platform status** card in Admin. (Real container/orchestration metrics remain a deploy-time
+  follow-up — local/simulation runs a single in-process app.)
 - **M22 — run retry** (H35, #96): one-click **retry** on a run (re-runs the workflow with the
   original inputs via `POST /canvas/runs/{id}/retry`) from the Library run history — completes H35
   with the per-step timeline. (Side-by-side run compare + cooperative cancel noted as enhancements.)
