@@ -10,6 +10,7 @@ import { CatalogPage } from "@/features/catalog/CatalogPage";
 import { WorkflowLibraryPage } from "@/features/library/WorkflowLibraryPage";
 import { ThemeStudioPage } from "@/features/theme-studio/ThemeStudioPage";
 import { AccessibilityPage } from "@/features/accessibility/AccessibilityPage";
+import { CmdbSchemaPage } from "@/features/cmdb-schema/CmdbSchemaPage";
 import { ConsolePage } from "@/features/console/ConsolePage";
 import { AdminPage } from "@/features/admin/AdminPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
@@ -35,6 +36,7 @@ function Protected() {
         <Route path="/governance" element={<GovernancePage />} />
         <Route path="/incidents" element={<IncidentsPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/cmdb-schema" element={<CmdbSchemaPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>
