@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 
 from app.contexts.identity_access.api.deps import get_current_user
 from app.contexts.identity_access.domain.models import UserContext
 from app.contexts.review.application.service import ReviewService
+from app.contexts.review.domain.approval import ApprovalDecision, ApprovalRequest
 from app.contexts.review.domain.packet import ReviewPacket
 
 router = APIRouter(prefix="/review", tags=["review"])
@@ -18,3 +20,41 @@ def workflow_packet(
 ) -> ReviewPacket:
     """The technical / non-technical / executive review packet for a workflow."""
     return ReviewService().build_for_workflow(workflow_id)
+
+
+@router.get("/approvals", response_model=list[ApprovalRequest])
+def pending_approvals(_user: UserContext = Depends(get_current_user)) -> list[ApprovalRequest]:
+    return ReviewService().pending()
+
+
+@router.get("/approvals/{request_id}", response_model=ApprovalRequest)
+def get_approval(
+    request_id: str, _user: UserContext = Depends(get_current_user)
+) -> ApprovalRequest:
+    return ReviewService().get_request(request_id)
+
+
+class CreateApprovalRequest(BaseModel):
+    workflow_id: str
+    inputs: dict = {}
+
+
+@router.post("/approvals", response_model=ApprovalRequest)
+def create_approval(
+    body: CreateApprovalRequest, user: UserContext = Depends(get_current_user)
+) -> ApprovalRequest:
+    return ReviewService().request_approval(
+        body.workflow_id, body.inputs, requested_by=user.username
+    )
+
+
+class DecisionRequest(BaseModel):
+    decision: ApprovalDecision
+    comment: str = ""
+
+
+@router.post("/approvals/{request_id}/decision", response_model=ApprovalRequest)
+def decide_approval(
+    request_id: str, body: DecisionRequest, user: UserContext = Depends(get_current_user)
+) -> ApprovalRequest:
+    return ReviewService().decide(request_id, body.decision, user.username, body.comment)

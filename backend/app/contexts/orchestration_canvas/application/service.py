@@ -248,6 +248,12 @@ class CanvasService:
         so nothing mutates — a safe "plan" of the whole workflow.
         """
         self.get_workflow(workflow_id)  # validate existence eagerly
+        # Run-level human approval gate (M26.4): a non-plan run that the review policy says needs
+        # approval is blocked until an approval is granted. Plan/compliance runs are read-only.
+        if not plan:
+            from app.contexts.review.application.service import ReviewService
+
+            ReviewService().enforce_run_allowed(workflow_id)
         run_id = new_id("run")
 
         async def _runner() -> None:
