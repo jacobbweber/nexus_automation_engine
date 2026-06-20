@@ -5,6 +5,13 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Fixed
+- **SPA deep-link 404** (QA): when the API serves the built frontend (single-container deploy),
+  a hard refresh or deep link to a client-side route (e.g. `/catalog`, `/canvas`) returned
+  `{"detail":"Not Found"}` instead of the app. The static mount now falls back to `index.html`
+  for unknown non-API paths (unknown `/api/*` paths still return JSON 404s; real assets are
+  served verbatim).
+
 ### Added
 - **M23 — hardening: token regression + a11y tests** (L46/L47, #107/#108): a **theme-token
   regression matrix** snapshots every built-in theme's generated CSS (light + dark) so unintended
