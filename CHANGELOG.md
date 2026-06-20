@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M26.4 — run-level approval gate** (v4.0 Pillar C): a workflow run that the review policy says
+  needs approval is now **blocked until a human approves**. `ApprovalRequest` (with a packet
+  snapshot) is persisted; `request_approval` opens a pending request (de-duped), `decide`
+  approves/rejects/requests-changes. `start_run` enforces the gate (plan/compliance runs are exempt,
+  being read-only). API: `GET /review/approvals` (queue), `GET /review/approvals/{id}`,
+  `POST /review/approvals`, `POST /review/approvals/{id}/decision`.
 - **M26.3 — multi-audience Review Packet builder** (v4.0 Pillar C): a deterministic builder that
   renders exactly what a run will do for three audiences — **technical** (per-step connector/action/
   resolved params + idempotency), **non-technical/executive** (a plain-English narrative composed
