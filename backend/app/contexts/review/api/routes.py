@@ -56,8 +56,13 @@ class CiChangeRequest(BaseModel):
 def request_ci_change(
     body: CiChangeRequest, user: UserContext = Depends(get_current_user)
 ) -> ApprovalRequest:
-    """Propose a CI add/modify — health-checked (M24) and gated on approval per policy."""
-    return ReviewService().request_ci_change(body.ci, requested_by=user.username)
+    """Propose a CI add/modify — health-checked (M24), gated on approval, and pinning-reconciled."""
+    req = ReviewService().request_ci_change(body.ci, requested_by=user.username)
+    # Trigger hook (M27.4): on-change pinning rules may enforce a guaranteed workflow for this CI.
+    from app.contexts.determinism.application.service import DeterminismService
+
+    DeterminismService().on_ci_change(body.ci)
+    return req
 
 
 class DecisionRequest(BaseModel):
