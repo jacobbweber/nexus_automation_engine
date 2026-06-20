@@ -526,6 +526,57 @@ export interface CIHealthReport {
   remediation_hints: string[];
 }
 
+// --- deterministic pinning / guardrails (v4.0 Pillar D) ----
+export interface PinningSelector {
+  ci_type: string | null;
+  tag_predicates: Record<string, string>;
+  field_predicates: Record<string, string>;
+}
+export interface PinningRule {
+  id: string;
+  name: string;
+  enabled: boolean;
+  priority: number;
+  selector: PinningSelector;
+  workflow: string;
+  trigger: string; // on_create | on_change | on_schedule | on_demand
+  enforcement: string; // assert | enforce | gate
+  description: string;
+}
+export interface RuleCoverage {
+  rule_id: string;
+  rule_name: string;
+  enforcement: string;
+  workflow: string;
+  workflow_exists: boolean;
+  matched: number;
+  compliant: number;
+  drifted: number;
+  unknown: number;
+}
+export interface Coverage {
+  total_cis: number;
+  rules: RuleCoverage[];
+}
+export interface PinnedAction {
+  ci: string;
+  ci_type: string;
+  rule_id: string;
+  rule_name: string;
+  workflow: string;
+  enforcement: string;
+  trigger: string;
+  note: string;
+}
+
+export const Determinism = {
+  rules: () => api.get<PinningRule[]>("/determinism/rules"),
+  saveRule: (rule: PinningRule) => api.put<PinningRule>(`/determinism/rules/${rule.id}`, rule),
+  deleteRule: (id: string) => api.del<{ deleted: boolean }>(`/determinism/rules/${id}`),
+  coverage: () => api.get<Coverage>("/determinism/coverage"),
+  reconcile: () => api.post<PinnedAction[]>("/determinism/reconcile"),
+};
+
 // --- multi-audience review & approval (v4.0 Pillar C) ----
 export interface TechnicalStep {
   node_id: string;

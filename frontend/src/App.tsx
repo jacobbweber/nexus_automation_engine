@@ -14,6 +14,7 @@ import { CmdbSchemaPage } from "@/features/cmdb-schema/CmdbSchemaPage";
 import { CmdbExplorerPage } from "@/features/cmdb-explorer/CmdbExplorerPage";
 import { CompliancePage } from "@/features/compliance/CompliancePage";
 import { ApprovalsPage } from "@/features/approvals/ApprovalsPage";
+import { DeterminismPage } from "@/features/determinism/DeterminismPage";
 import { ConsolePage } from "@/features/console/ConsolePage";
 import { AdminPage } from "@/features/admin/AdminPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
@@ -43,6 +44,7 @@ function Protected() {
         <Route path="/cmdb-explorer" element={<CmdbExplorerPage />} />
         <Route path="/compliance" element={<CompliancePage />} />
         <Route path="/approvals" element={<ApprovalsPage />} />
+        <Route path="/determinism" element={<DeterminismPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>
