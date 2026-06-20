@@ -6,6 +6,13 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M27.5/27.6 — Guardrails management page + ADR-0012** (v4.0 Pillar D): a **Determinism &
+  Guardrails** page (`/determinism`, nav + palette) where admins author pinning rules with a
+  schema-driven selector builder (CI type from the CMDB registry + tag/field predicates), a workflow
+  picker, and trigger/enforcement selectors — and everyone sees **coverage** per rule (CIs
+  guaranteed, compliant vs drifted, missing-workflow warnings). Answers "what is guaranteed about my
+  estate, and where does reality differ?" Adds the `Determinism` API client. ADR-0012 records the
+  pinning/reconcile decision. Completes M27.
 - **M27.4 — pinning API + CI-change trigger** (v4.0 Pillar D): REST for pinning rules
   (`GET /determinism/rules[/{id}]`, admin `PUT`/`DELETE`), `GET /determinism/coverage`, and admin
   `POST /determinism/reconcile`. The CI-change path (M26.5) now also fires the **on-change trigger**:
