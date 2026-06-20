@@ -35,6 +35,19 @@ def test_cmdb_discovery_endpoint():
     assert rows and all(r["attributes"]["env"] == "Production" for r in rows)
 
 
+def test_servicenow_changes_endpoint():
+    with TestClient(create_app()) as client:
+        resp = client.get("/api/v1/connectors/servicenow/changes")
+    assert resp.status_code == 200
+    changes = resp.json()
+    assert len(changes) >= 5
+    c = changes[0]
+    assert {"number", "state", "start", "end", "assignment_group", "affected_cis"} <= c.keys()
+    # sorted chronologically by start
+    starts = [x["start"] for x in changes]
+    assert starts == sorted(starts)
+
+
 def test_unknown_connector_kind_is_422():
     with TestClient(create_app()) as client:
         resp = client.get("/api/v1/connectors/not-a-real-connector")

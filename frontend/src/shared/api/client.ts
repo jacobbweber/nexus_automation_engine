@@ -249,12 +249,24 @@ export interface CmdbFieldsResponse {
   fields: CmdbField[];
 }
 
+export interface ServiceNowChange {
+  number: string;
+  short_description: string;
+  state: string;
+  start: string;
+  end: string;
+  assignment_group: string;
+  risk: string;
+  affected_cis: string[];
+}
+
 export const Connectors = {
   list: () => api.get<Capabilities[]>("/connectors"),
   cmdbFields: (table?: string) =>
     api.get<CmdbFieldsResponse>(
       `/connectors/servicenow/fields${table ? `?table=${encodeURIComponent(table)}` : ""}`,
     ),
+  changes: () => api.get<ServiceNowChange[]>("/connectors/servicenow/changes"),
 };
 
 export interface NodeFieldSpec {
