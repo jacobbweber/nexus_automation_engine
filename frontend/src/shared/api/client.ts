@@ -495,3 +495,4 @@ export interface PlatformStatus {
 
 export const getHealth = () => api.get<Health>("/health");
 export const getPlatformStatus = () => api.get<PlatformStatus>("/platform/status");
+export const exportBundle = () => api.get<Record<string, unknown>>("/platform/export");

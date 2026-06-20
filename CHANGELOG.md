@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M23 — backup / export** (K45, #106): an admin-only `GET /platform/export` returns a portable
+  JSON bundle (`nexus-export/v1`) of workflows + themes + schedules (no secrets), downloadable from
+  Admin. (Restore/import is a deferred follow-up — it needs careful conflict handling.)
 - **M23 — platform status** (K43, #104): a `GET /platform/status` endpoint (uptime, DB
   reachability, workflow/job counts, scheduler + simulation state, version/env) surfaced as a
   **Platform status** card in Admin. (Real container/orchestration metrics remain a deploy-time

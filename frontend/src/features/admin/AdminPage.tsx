@@ -1,8 +1,19 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Connectors, getHealth, getPlatformStatus, type Capabilities, type PlatformStatus } from "@/shared/api/client";
+import { Connectors, exportBundle, getHealth, getPlatformStatus, type Capabilities, type PlatformStatus } from "@/shared/api/client";
 import { useAuth } from "@/app/auth";
-import { Card, Page } from "@/shared/ui/primitives";
+import { Button, Card, Page } from "@/shared/ui/primitives";
+
+async function downloadExport() {
+  const bundle = await exportBundle();
+  const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `nexus-export-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 function uptime(s: number): string {
   if (s < 60) return `${s}s`;
@@ -36,7 +47,14 @@ export function AdminPage() {
 
       {status && (
         <Card style={{ marginBottom: 14 }}>
-          <SectionTitle>Platform status</SectionTitle>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <SectionTitle>Platform status</SectionTitle>
+            {user?.global_role === "admin" && (
+              <Button size="sm" variant="ghost" onClick={() => void downloadExport()} title="Download a portable JSON backup">
+                Export data
+              </Button>
+            )}
+          </div>
           <div style={{ display: "flex", gap: 28, flexWrap: "wrap" }}>
             <Metric label="Status" value={status.db_ok ? "Healthy" : "Degraded"} color={status.db_ok ? "var(--run-ok)" : "var(--run-failed)"} />
             <Metric label="Uptime" value={uptime(status.uptime_seconds)} />

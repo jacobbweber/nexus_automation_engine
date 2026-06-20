@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import time
+from datetime import UTC, datetime
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
+from app.contexts.identity_access.api.deps import require_role
+from app.contexts.identity_access.domain.models import GlobalRole, UserContext
 from app.platform.config import get_settings
 
 router = APIRouter(tags=["platform"])
@@ -72,4 +75,31 @@ def platform_status() -> PlatformStatus:
         db_ok=db_ok,
         workflows=workflows,
         jobs=jobs,
+    )
+
+
+class ExportBundle(BaseModel):
+    bundle_schema: str = "nexus-export/v1"
+    exported_at: str
+    version: str
+    workflows: list[dict]
+    themes: list[dict]
+    schedules: list[dict]
+
+
+@router.get("/platform/export", response_model=ExportBundle)
+def export_bundle(_admin: UserContext = Depends(require_role(GlobalRole.ADMIN))) -> ExportBundle:
+    """Portable admin-only backup of user-authored content (no secrets) as a single JSON file."""
+    from app.contexts.orchestration_canvas.infrastructure.repository import CanvasRepository
+    from app.contexts.scheduling.application.service import ScheduleService
+    from app.platform.theming import service as theming
+
+    workflows = [w.model_dump(mode="json") for w in CanvasRepository().list_workflows()]
+    schedules = [s.model_dump(mode="json") for s in ScheduleService().list_all()]
+    return ExportBundle(
+        exported_at=datetime.now(UTC).isoformat(),
+        version=get_settings().version,
+        workflows=workflows,
+        themes=theming.list_themes(),
+        schedules=schedules,
     )

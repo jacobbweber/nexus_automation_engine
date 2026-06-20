@@ -27,6 +27,29 @@ def test_platform_status_reports_runtime():
     assert {"app", "version", "scheduler_enabled", "workflows", "jobs"} <= body.keys()
 
 
+def test_export_bundle_requires_admin():
+    with TestClient(create_app()) as client:
+        assert client.get("/api/v1/platform/export").status_code == 401
+        admin = client.post(
+            "/api/v1/auth/login", json={"username": "admin", "password": "admin123"}
+        ).json()["access_token"]
+        operator = client.post(
+            "/api/v1/auth/login", json={"username": "operator", "password": "operator123"}
+        ).json()["access_token"]
+        # non-admin is forbidden
+        assert (
+            client.get(
+                "/api/v1/platform/export", headers={"Authorization": f"Bearer {operator}"}
+            ).status_code
+            == 403
+        )
+        ok = client.get("/api/v1/platform/export", headers={"Authorization": f"Bearer {admin}"})
+        assert ok.status_code == 200
+        body = ok.json()
+        assert body["bundle_schema"] == "nexus-export/v1"
+        assert {"workflows", "themes", "schedules", "exported_at"} <= body.keys()
+
+
 def test_openapi_available():
     app = create_app()
     with TestClient(app) as client:
