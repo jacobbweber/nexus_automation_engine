@@ -20,5 +20,7 @@ class ValidationPolicyRow(Base):
     reject_retired: Mapped[bool] = mapped_column(Boolean, default=True)
     reject_unknown_ci: Mapped[bool] = mapped_column(Boolean, default=True)
     block_destructive_on_cluster: Mapped[bool] = mapped_column(Boolean, default=True)
+    require_healthy_ci: Mapped[bool] = mapped_column(Boolean, default=False)
+    min_health_score: Mapped[int] = mapped_column(Integer, default=70)
     updated_by: Mapped[str] = mapped_column(String, default="system")
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)

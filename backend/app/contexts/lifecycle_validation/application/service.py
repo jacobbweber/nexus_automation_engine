@@ -51,6 +51,26 @@ class ValidationService:
         )
         return dict(resources[0].attributes) if resources else None
 
+    def _health_reasons(self, ci: dict | None, policy: ValidationPolicy) -> list[str]:
+        """Gate on CMDB schema/lineage health when the policy requires it (M24.5)."""
+        if not policy.require_healthy_ci or not ci:
+            return []
+        from app.contexts.cmdb.application.service import CmdbHealthService
+        from app.contexts.cmdb.domain.health import HealthStatus
+        from app.shared_kernel.errors import NotFoundError
+
+        try:
+            report = CmdbHealthService().check(ci)
+        except NotFoundError:
+            return []  # no schema for this CI type — cannot assess, so don't block
+        if report.status == HealthStatus.UNHEALTHY or report.score < policy.min_health_score:
+            top = "; ".join(i.message for i in report.all_issues[:3])
+            return [
+                f"target CI '{report.ci_id}' health {report.score}/100 ({report.status}) is below "
+                f"the required {policy.min_health_score}: {top}"
+            ]
+        return []
+
     async def validate_for_execution(
         self, meta: AutomationMeta, target: str | None
     ) -> ValidationResult:
@@ -58,6 +78,7 @@ class ValidationService:
         reasons = check_metadata(meta, policy)
         ci = await self._resolve_ci(target)
         reasons += check_cmdb(meta, ci, policy)
+        reasons += self._health_reasons(ci, policy)
         return ValidationResult(ok=not reasons, stage="prelaunch", reasons=reasons)
 
     async def enforce_for_execution(self, meta: AutomationMeta, target: str | None) -> None:
@@ -71,8 +92,10 @@ class ValidationService:
         self, meta: AutomationMeta, target: str | None
     ) -> ValidationResult:
         """CMDB-consistency-only check (no metadata-completeness) for ad-hoc/direct execution."""
+        policy = self.repo.get()
         ci = await self._resolve_ci(target)
-        reasons = check_cmdb(meta, ci, self.repo.get())
+        reasons = check_cmdb(meta, ci, policy)
+        reasons += self._health_reasons(ci, policy)
         return ValidationResult(ok=not reasons, stage="prelaunch", reasons=reasons)
 
     async def enforce_cmdb_only(self, meta: AutomationMeta, target: str | None) -> None:
