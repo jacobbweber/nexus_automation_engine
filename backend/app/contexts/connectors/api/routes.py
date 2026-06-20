@@ -43,6 +43,25 @@ def cmdb_fields(table: str | None = None) -> CmdbFieldsResponse:
     )
 
 
+class ChangeRecord(BaseModel):
+    number: str
+    short_description: str
+    state: str
+    start: str
+    end: str
+    assignment_group: str
+    risk: str
+    affected_cis: list[str]
+
+
+@router.get("/servicenow/changes", response_model=list[ChangeRecord])
+def servicenow_changes() -> list[ChangeRecord]:
+    """The change calendar's source of truth: CHG records from the (simulated) ServiceNow CMDB."""
+    from app.contexts.connectors.infrastructure.simulation import servicenow as sn
+
+    return [ChangeRecord(**c) for c in sn.list_changes()]
+
+
 @router.get("/{kind}", response_model=Capabilities)
 def get_connector(kind: ConnectorKind) -> Capabilities:
     return services.get_capabilities(kind)

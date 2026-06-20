@@ -13,6 +13,7 @@ import {
 } from "@/shared/api/client";
 import { useAuth } from "@/app/auth";
 import { Button, Card, Page, StatusBadge } from "@/shared/ui/primitives";
+import { ChangeCalendar } from "./ChangeCalendar";
 
 export function GovernancePage() {
   const { user } = useAuth();
@@ -84,6 +85,10 @@ export function GovernancePage() {
           ))}
         </Card>
       )}
+      <div style={{ marginBottom: 14 }}>
+        <ChangeCalendar />
+      </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <Card>
           <SectionTitle>Change templates</SectionTitle>

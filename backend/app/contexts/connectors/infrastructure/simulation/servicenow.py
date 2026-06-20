@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
+
 from app.contexts.connectors.domain.models import (
     Capabilities,
     ChangeValidation,
@@ -73,6 +75,102 @@ _CMDB_FIELDS: list[dict[str, str]] = [
     {"name": "cluster", "label": "Cluster", "type": "string"},
     {"name": "os", "label": "Operating system", "type": "string"},
 ]
+
+
+# Simulated change (CHG) records — the system of record for the change calendar. Windows are
+# generated relative to "now" so the calendar always shows an upcoming schedule. (id, desc, state,
+# day-offset, hour, duration-hours, assignment_group, risk, affected CI names)
+_CHANGE_SEED: list[tuple] = [
+    (
+        "CHG0044820",
+        "Rolling ESXi cluster patch — wld-prod-01",
+        "scheduled",
+        1,
+        22,
+        4,
+        "Compute",
+        "high",
+        ["web-prod-01", "web-prod-02", "db-prod-01"],
+    ),  # noqa: E501
+    (
+        "CHG0044833",
+        "Pure FlashArray firmware upgrade",
+        "scheduled",
+        2,
+        1,
+        3,
+        "Storage",
+        "high",
+        ["ds-vvol-01", "ds-vvol-02"],
+    ),  # noqa: E501
+    (
+        "CHG0044851",
+        "Cohesity backup policy rollout",
+        "implement",
+        3,
+        20,
+        2,
+        "Backup",
+        "moderate",
+        ["db-prod-01"],
+    ),  # noqa: E501
+    ("CHG0044867", "ServiceNow MID server update", "scheduled", 5, 18, 1, "ITSM", "low", []),
+    (
+        "CHG0044872",
+        "NSX firewall ruleset change",
+        "scheduled",
+        1,
+        23,
+        1,
+        "Networking",
+        "moderate",
+        ["web-prod-01"],
+    ),  # noqa: E501
+    (
+        "CHG0044890",
+        "Datastore decommission — ds-scratch",
+        "assess",
+        7,
+        2,
+        2,
+        "Storage",
+        "high",
+        ["ds-scratch"],
+    ),  # noqa: E501
+    (
+        "CHG0044901",
+        "Quarterly credential rotation",
+        "scheduled",
+        9,
+        3,
+        2,
+        "Security",
+        "moderate",
+        [],
+    ),  # noqa: E501
+]
+
+
+def list_changes() -> list[dict[str, object]]:
+    """Return simulated CHG records (the change calendar's system of record)."""
+    now = datetime.now(UTC)
+    out: list[dict[str, object]] = []
+    for num, desc, state, day, hour, dur, group, risk, cis in _CHANGE_SEED:
+        start = (now + timedelta(days=day)).replace(hour=hour, minute=0, second=0, microsecond=0)
+        out.append(
+            {
+                "number": num,
+                "short_description": desc,
+                "state": state,
+                "start": start.isoformat(),
+                "end": (start + timedelta(hours=dur)).isoformat(),
+                "assignment_group": group,
+                "risk": risk,
+                "affected_cis": list(cis),
+            }
+        )
+    out.sort(key=lambda c: str(c["start"]))
+    return out
 
 
 def cmdb_tables() -> list[str]:

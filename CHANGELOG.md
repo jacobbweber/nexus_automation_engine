@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M23 — change calendar from ServiceNow CMDB** (J39, #100): the Governance page gains a change
+  calendar — **CHG records are pulled from the (simulated) ServiceNow CMDB connector** as the system
+  of record (`GET /connectors/servicenow/changes`), shown as a day-grouped agenda with window
+  times, state, assignment group, and affected CIs, plus **conflict detection** (changes whose
+  windows overlap on a shared CI are flagged). Pure `detectConflicts` is unit-tested.
 - **M22 — Library per-workflow drill-down** (G32, #93): a details drawer in the Workflow Library
   shows a workflow's usage summary (runs / success / failures) and **recent run history** (status,
   start, duration) via `/canvas/workflows/{id}/runs`, with quick links to the canvas and console.
