@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M25.4 — scheduled compliance sweeps → posture + incidents** (v4.0 Pillar B): a new `compliance`
+  context that evaluates every published workflow in compliance mode, snapshots the estate's
+  **posture** (evaluated / compliant / drifted / total drift / top-drifted), and **opens incidents**
+  for drifted workflows (de-duped per open source). Runs on the scheduler cadence (every N ticks via
+  the M11 loop) and on demand (`POST /compliance/sweep`, admin); `GET /compliance/posture[/history]`
+  expose snapshots. Drift is now a continuously-managed signal, not a surprise.
 - **M25.3 — compliance-mode runs** (v4.0 Pillar B): run any building block or workflow in
   *compliance mode* — a read-only evaluation that returns a `DriftReport` without mutating.
   `POST /catalog/templates/{id}/compliance` evaluates one block; `POST /canvas/workflows/{id}/
