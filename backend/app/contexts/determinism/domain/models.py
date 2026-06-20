@@ -60,6 +60,19 @@ def matches(rule: PinningRule, ci: dict[str, object]) -> bool:
     return True
 
 
+def validate_rule(rule: PinningRule) -> list[str]:
+    """Deterministically validate a pinning rule. Returns human-readable errors (empty = OK)."""
+    errors: list[str] = []
+    if not rule.name.strip():
+        errors.append("rule 'name' must be non-empty")
+    if not rule.workflow.strip():
+        errors.append("rule must reference a guaranteed 'workflow'")
+    sel = rule.selector
+    if not sel.ci_type and not sel.tag_predicates and not sel.field_predicates:
+        errors.append("selector must constrain at least one of ci_type / tags / fields")
+    return errors
+
+
 def match_rules(rules: list[PinningRule], ci: dict[str, object]) -> list[PinningRule]:
     """Enabled rules matching the CI, ordered by priority then name (deterministic)."""
     hits = [r for r in rules if r.enabled and matches(r, ci)]

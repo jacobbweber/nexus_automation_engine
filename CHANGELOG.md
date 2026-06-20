@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M27.2/27.3 — pinning reconciler + coverage** (v4.0 Pillar D): a deterministic reconciler turns
+  rules + live CMDB CIs into a **pinned-actions plan** (per CI × matching rule, with the enforcement
+  mode: assert / enforce / gate), optionally filtered by trigger; and a **coverage** computation
+  answers *"what is guaranteed about the estate, and where does reality not match?"* — per rule:
+  matched CIs, workflow-exists, and (for assert rules) compliant/drifted via M25. `DeterminismService`
+  runs both over the live CMDB.
 - **M27.1 — workflow pinning rules** (v4.0 Pillar D): a new `determinism` context — a `PinningRule`
   binds a **selector** (CI type + tag/field predicates) to a **guaranteed workflow**, a **trigger**
   (create/change/schedule/on-demand), and an **enforcement mode** (assert | enforce | gate), with a
