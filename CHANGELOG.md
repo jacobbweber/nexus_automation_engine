@@ -6,7 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
-- **M22 — Canvas graph lint** (F27, #87): an inline pre-run linter surfaces structural problems
+- **M22 — Canvas comprehension aids** (F26, #87): fit-to-view, zoom in/out/reset controls, and a
+  node search that centers + selects a node by name — overlaid on the canvas. (Minimap / auto-layout
+  / group-comment nodes remain as follow-ups under the same issue.)
+- **M22 — Canvas graph lint** (F27, #88): an inline pre-run linter surfaces structural problems
   (missing Start/End, dangling edges, unreachable nodes, cycles, and missing required parameters
   per the node schema) in a strip under the canvas toolbar; clicking an issue selects the offending
   node. Pure `lintGraph` is unit-tested.

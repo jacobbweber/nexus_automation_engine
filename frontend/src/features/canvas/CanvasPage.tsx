@@ -48,6 +48,8 @@ export function CanvasPage() {
 
   const dragRef = useRef<{ id: string; ox: number; oy: number } | null>(null);
   const panRef = useRef<{ x: number; y: number } | null>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const [nodeSearch, setNodeSearch] = useState("");
 
   useEffect(() => {
     Canvas.list().then(setWorkflows).catch(() => undefined);
@@ -205,6 +207,33 @@ export function CanvasPage() {
     setApproval(null);
   }
 
+  // --- comprehension aids (F26): fit-to-view, zoom controls, node search ---
+  function fitView() {
+    const box = canvasRef.current?.getBoundingClientRect();
+    if (!box || nodes.length === 0) return;
+    const xs = nodes.map((n) => n.position.x);
+    const ys = nodes.map((n) => n.position.y);
+    const minX = Math.min(...xs), maxX = Math.max(...xs) + NODE_W;
+    const minY = Math.min(...ys), maxY = Math.max(...ys) + NODE_H;
+    const pad = 60;
+    const z = Math.min(2.2, Math.max(0.4, Math.min((box.width - pad * 2) / (maxX - minX || 1), (box.height - pad * 2) / (maxY - minY || 1))));
+    setZoom(z);
+    setPan({ x: pad - minX * z, y: pad - minY * z });
+  }
+
+  function centerOn(node: CanvasNode) {
+    const box = canvasRef.current?.getBoundingClientRect();
+    if (!box) return;
+    setPan({ x: box.width / 2 - (node.position.x + NODE_W / 2) * zoom, y: box.height / 2 - (node.position.y + NODE_H / 2) * zoom });
+    setSelectedId(node.id);
+  }
+
+  const searchMatches = useMemo(() => {
+    const q = nodeSearch.trim().toLowerCase();
+    if (!q) return [];
+    return nodes.filter((n) => String(n.data?.name ?? n.type).toLowerCase().includes(q)).slice(0, 6);
+  }, [nodeSearch, nodes]);
+
   const selected = nodes.find((n) => n.id === selectedId) ?? null;
   const lint = useMemo(() => lintGraph(nodes, edges, specs), [nodes, edges, specs]);
   const lintErrors = lint.filter((i) => i.severity === "error").length;
@@ -248,6 +277,7 @@ export function CanvasPage() {
           </div>
         )}
         <div
+          ref={canvasRef}
           onWheel={(e) => setZoom((z) => Math.min(2.2, Math.max(0.4, z - e.deltaY * 0.001)))}
           onMouseDown={(e) => {
             panRef.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
@@ -278,6 +308,39 @@ export function CanvasPage() {
           <div style={{ position: "absolute", bottom: 10, left: 12, fontSize: "0.72rem", color: "var(--text-muted)" }}>
             {Math.round(zoom * 100)}% · {nodes.length} nodes · {edges.length} edges
             {connecting && " · click a target node to connect"}
+          </div>
+
+          {/* node search (top-right) */}
+          <div onMouseDown={(e) => e.stopPropagation()} style={{ position: "absolute", top: 10, right: 12, width: 200 }}>
+            <input
+              value={nodeSearch}
+              onChange={(e) => setNodeSearch(e.target.value)}
+              placeholder="Find node…"
+              aria-label="Find node"
+              style={{ width: "100%", padding: "6px 9px", borderRadius: "var(--radius-md)", border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text)", boxSizing: "border-box", fontSize: "0.78rem" }}
+            />
+            {searchMatches.length > 0 && (
+              <div style={{ marginTop: 4, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)", boxShadow: "var(--shadow-2)", overflow: "hidden" }}>
+                {searchMatches.map((n) => (
+                  <button
+                    key={n.id}
+                    onClick={() => { centerOn(n); setNodeSearch(""); }}
+                    style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 10px", border: "none", background: "transparent", color: "var(--text)", cursor: "pointer", fontSize: "0.8rem" }}
+                  >
+                    {String(n.data?.name ?? n.type)}
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.68rem" }}> · {n.type}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* zoom / fit controls (bottom-right) */}
+          <div onMouseDown={(e) => e.stopPropagation()} style={{ position: "absolute", bottom: 10, right: 12, display: "flex", gap: 4 }}>
+            <CanvasCtl label="−" title="Zoom out" onClick={() => setZoom((z) => Math.max(0.4, z - 0.15))} />
+            <CanvasCtl label="100%" title="Reset zoom" onClick={() => { setZoom(1); setPan({ x: 40, y: 40 }); }} />
+            <CanvasCtl label="+" title="Zoom in" onClick={() => setZoom((z) => Math.min(2.2, z + 0.15))} />
+            <CanvasCtl label="Fit" title="Fit to view" onClick={fitView} />
           </div>
         </div>
       </div>
@@ -338,6 +401,19 @@ export function CanvasPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function CanvasCtl({ label, title, onClick }: { label: string; title: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      aria-label={title}
+      style={{ minWidth: 30, height: 30, padding: "0 8px", borderRadius: "var(--radius-md)", border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text)", cursor: "pointer", fontSize: "0.78rem", boxShadow: "var(--shadow-1)" }}
+    >
+      {label}
+    </button>
   );
 }
 
