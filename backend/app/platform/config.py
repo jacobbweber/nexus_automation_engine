@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     http_allow_private: bool = False
     # Theming: directory of user/Studio-authored theme JSON (writable, mounted as a Docker volume).
     themes_dir: str = "./data/themes"
+    # GitOps config-as-code backbone: local git repo dir (no remote/paid; see ADR-0013).
+    config_repo_dir: str = "./data/config-repo"
+    gitops_sync_every: int = 30  # scheduler ticks between automatic config backups (0 disables)
 
 
 @lru_cache

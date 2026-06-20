@@ -27,10 +27,12 @@ class LocalGitRepo:
         return shutil.which("git")
 
     def _run(self, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
+        # core.autocrlf=false so \n content stays \n (no spurious "dirty" / non-idempotent commits).
         return subprocess.run(  # noqa: S603 - args are literal git subcommands, root is ours
-            [self._git_bin() or "git", "-C", str(self.root), *args],
+            [self._git_bin() or "git", "-c", "core.autocrlf=false", "-C", str(self.root), *args],
             capture_output=True,
             text=True,
+            encoding="utf-8",  # decode git output as UTF-8 (not the Windows locale codec)
             check=check,
         )
 
@@ -71,7 +73,9 @@ class LocalGitRepo:
         for rel, content in files.items():
             p = self.root / rel
             p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content, encoding="utf-8")
+            # newline="" so \n is written verbatim (no Windows \r\n translation), keeping committed
+            # content byte-identical to the canonical snapshot.
+            p.write_text(content, encoding="utf-8", newline="")
         desired = set(files)
         for tracked in self.list_paths():
             if tracked not in desired:
@@ -115,7 +119,8 @@ class LocalGitRepo:
         if not self.available():
             return None
         res = self._run("show", f"HEAD:{path}", check=False)
-        return res.stdout if res.returncode == 0 else None
+        # subprocess text mode normalizes \r\n→\n; keep it that way to match the canonical snapshot.
+        return res.stdout.replace("\r\n", "\n") if res.returncode == 0 else None
 
     def list_paths(self) -> list[str]:
         if not self.available() or not (self.root / ".git").exists():
