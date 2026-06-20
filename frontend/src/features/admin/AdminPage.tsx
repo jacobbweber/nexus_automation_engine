@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
 import { Auth, Connectors, exportBundle, getHealth, getPlatformStatus, type Capabilities, type PlatformStatus, type RbacMatrix } from "@/shared/api/client";
 import { useAuth } from "@/app/auth";
 import { Button, Card, Page } from "@/shared/ui/primitives";
@@ -44,6 +45,21 @@ export function AdminPage() {
         <SectionTitle>Your access</SectionTitle>
         <div style={{ fontSize: "0.9rem" }}>
           {user?.username} — global role <strong style={{ color: "var(--area-accent)" }}>{user?.global_role}</strong>
+        </div>
+      </Card>
+
+      <Card style={{ marginBottom: 14 }}>
+        <SectionTitle>CMDB governance</SectionTitle>
+        <div style={{ display: "flex", gap: 16, fontSize: "0.85rem" }}>
+          <NavLink to="/cmdb-schema" style={{ color: "var(--area-accent)" }}>
+            CMDB Schema Studio →
+          </NavLink>
+          <NavLink to="/cmdb-explorer" style={{ color: "var(--area-accent)" }}>
+            CMDB Lineage Explorer →
+          </NavLink>
+        </div>
+        <div style={{ fontSize: "0.76rem", color: "var(--text-muted)", marginTop: 4 }}>
+          Define CI type schemas + lineage, and check any CI's deterministic health.
         </div>
       </Card>
 
