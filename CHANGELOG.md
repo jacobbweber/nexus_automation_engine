@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M22 — run retry** (H35, #96): one-click **retry** on a run (re-runs the workflow with the
+  original inputs via `POST /canvas/runs/{id}/retry`) from the Library run history — completes H35
+  with the per-step timeline. (Side-by-side run compare + cooperative cancel noted as enhancements.)
 - **M22 — dry-run / plan** (F28, #89): a **Dry run** action on the canvas (and a `plan` flag on
   `POST /canvas/workflows/{id}/run`) executes the whole DAG with every automation task forced into
   **check mode** so nothing mutates — a safe plan of the workflow. Pure `_apply_plan` unit-tested.

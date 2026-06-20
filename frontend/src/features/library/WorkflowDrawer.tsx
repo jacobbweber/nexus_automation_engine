@@ -80,7 +80,14 @@ export function WorkflowDrawer({
           {runs && runs.length > 0 && (
             <div>
               {runs.slice(0, 25).map((r) => (
-                <RunRow key={r.run_id} run={r} onReplay={() => navigate(`/canvas?id=${report.id}&replay=${r.run_id}`)} />
+                <RunRow
+                  key={r.run_id}
+                  run={r}
+                  onReplay={() => navigate(`/canvas?id=${report.id}&replay=${r.run_id}`)}
+                  onRetry={() => {
+                    Canvas.retryRun(r.run_id).then(() => navigate("/console")).catch(() => undefined);
+                  }}
+                />
               ))}
             </div>
           )}
@@ -109,7 +116,7 @@ function spanLabel(start: string, end: string | null): string {
 }
 
 // A run row that expands to its per-step timeline (fetched on demand from /canvas/runs/{id}).
-function RunRow({ run, onReplay }: { run: WorkflowRun; onReplay: () => void }) {
+function RunRow({ run, onReplay, onRetry }: { run: WorkflowRun; onReplay: () => void; onRetry: () => void }) {
   const [open, setOpen] = useState(false);
   const [steps, setSteps] = useState<WorkflowStep[] | null>(null);
 
@@ -143,6 +150,16 @@ function RunRow({ run, onReplay }: { run: WorkflowRun; onReplay: () => void }) {
           style={{ color: "var(--accent)", fontSize: "0.72rem", cursor: "pointer" }}
         >
           ▶ replay
+        </span>
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={(e) => { e.stopPropagation(); onRetry(); }}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); onRetry(); } }}
+          title="Re-run this workflow with the same inputs"
+          style={{ color: "var(--accent)", fontSize: "0.72rem", cursor: "pointer" }}
+        >
+          ↻ retry
         </span>
       </button>
       {open && (

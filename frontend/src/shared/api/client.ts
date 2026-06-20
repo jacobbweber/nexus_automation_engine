@@ -325,6 +325,7 @@ export const Canvas = {
   report: () => api.get<WorkflowReport[]>("/canvas/workflows/report"),
   runs: (id: string) => api.get<WorkflowRun[]>(`/canvas/workflows/${id}/runs`),
   getRun: (runId: string) => api.get<WorkflowRun>(`/canvas/runs/${runId}`),
+  retryRun: (runId: string) => api.post<{ run_id: string }>(`/canvas/runs/${runId}/retry`),
   get: (id: string) => api.get<Workflow>(`/canvas/workflows/${id}`),
   save: (wf: {
     id?: string;

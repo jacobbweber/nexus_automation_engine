@@ -153,6 +153,11 @@ class CanvasService:
     def list_runs(self, workflow_id: str) -> list[WorkflowRun]:
         return self.repo.list_runs(workflow_id)
 
+    def retry_run(self, run_id: str) -> str:
+        """Re-run the same workflow with the original run's inputs. Returns the new run_id."""
+        run = self.get_run(run_id)
+        return self.start_run(run.workflow_id, run.inputs)
+
     async def run_workflow(self, workflow_id: str, inputs: dict[str, Any], ws=None) -> WorkflowRun:
         wf = self.get_workflow(workflow_id)
         run_id = new_id("run")

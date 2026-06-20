@@ -103,6 +103,12 @@ def get_run(run_id: str) -> WorkflowRun:
     return CanvasService().get_run(run_id)
 
 
+@router.post("/runs/{run_id}/retry", response_model=RunResponse)
+async def retry_run(run_id: str, _user: UserContext = Depends(get_current_user)) -> RunResponse:
+    # async so start_run's asyncio.create_task has a running loop. Re-runs with the original inputs.
+    return RunResponse(run_id=CanvasService().retry_run(run_id))
+
+
 @router.get("/workflows/{workflow_id}/versions", response_model=list[WorkflowVersion])
 def list_versions(workflow_id: str) -> list[WorkflowVersion]:
     return CanvasService().list_versions(workflow_id)
