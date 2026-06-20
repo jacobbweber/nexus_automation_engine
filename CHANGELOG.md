@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M26.3 — multi-audience Review Packet builder** (v4.0 Pillar C): a deterministic builder that
+  renders exactly what a run will do for three audiences — **technical** (per-step connector/action/
+  resolved params + idempotency), **non-technical/executive** (a plain-English narrative composed
+  from each block's authored plain summary, in execution order, with overall risk/outcome/rollback),
+  and a **flowchart** phase list — plus the change-classification headline. `GET /review/packet/{id}`
+  builds it for a workflow. No AI — composition only.
 - **M26.2 — change classification engine** (v4.0 Pillar C): a new `review` context with a pure,
   deterministic classifier — `standard | normal | emergency` from risk + blast radius + target
   environment (prod) + idempotency class — and a tunable `ReviewPolicy` mapping each class to a

@@ -26,6 +26,7 @@ from app.contexts.identity_access.api import routes as identity_routes
 from app.contexts.incident_management.api import routes as incident_routes
 from app.contexts.lifecycle_validation.api import routes as validation_routes
 from app.contexts.orchestration_canvas.api import routes as canvas_routes
+from app.contexts.review.api import routes as review_routes
 from app.contexts.scheduling.api import routes as scheduling_routes
 from app.platform import health
 from app.platform.config import get_settings
@@ -138,6 +139,7 @@ def create_app(static_dir: str | None = None) -> FastAPI:
     app.include_router(change_routes.router, prefix="/api/v1")
     app.include_router(cmdb_routes.router, prefix="/api/v1")
     app.include_router(compliance_routes.router, prefix="/api/v1")
+    app.include_router(review_routes.router, prefix="/api/v1")
     app.include_router(execution_routes.router, prefix="/api/v1")
     app.include_router(canvas_routes.router, prefix="/api/v1")
     app.include_router(scheduling_routes.router, prefix="/api/v1")
