@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M26.2 — change classification engine** (v4.0 Pillar C): a new `review` context with a pure,
+  deterministic classifier — `standard | normal | emergency` from risk + blast radius + target
+  environment (prod) + idempotency class — and a tunable `ReviewPolicy` mapping each class to a
+  required reviewer level (none / team-lead / executive), with escalation to executive on
+  high/critical risk or large blast radius. `assess()` also returns the human reasons.
 - **M26.1 — plain-language building-block summaries** (v4.0 Pillar C): every catalog building block
   now carries a `plain_summary` (`input → action → outcome` + rollback) — authored once, composed
   later into multi-audience review packets. Seeded deterministically across the catalog from each
