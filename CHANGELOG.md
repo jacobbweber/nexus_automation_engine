@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M22 — Canvas graph lint** (F27, #87): an inline pre-run linter surfaces structural problems
+  (missing Start/End, dangling edges, unreachable nodes, cycles, and missing required parameters
+  per the node schema) in a strip under the canvas toolbar; clicking an issue selects the offending
+  node. Pure `lintGraph` is unit-tested.
 - **M22 — Catalog comparison** (E23, #84): select 2–3 automations and compare them side-by-side
   (vendor, domain, risk, type, duration, version, check/diff support, tags, prerequisites) via a
   compare tray + modal. (Faceted discovery E22 #83 and the Logic-Flow tab E24 #85 were already
