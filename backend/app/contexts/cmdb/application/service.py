@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+from app.contexts.cmdb.domain.lineage import LineageSpec, validate_lineage
 from app.contexts.cmdb.domain.models import CITypeSchema, validate_schema
-from app.contexts.cmdb.infrastructure.repository import CITypeSchemaRepository
+from app.contexts.cmdb.infrastructure.repository import (
+    CITypeSchemaRepository,
+    LineageSpecRepository,
+)
 from app.shared_kernel.errors import NotFoundError, ValidationError
 
 
@@ -26,3 +30,30 @@ class CmdbSchemaService:
         if errors:
             raise ValidationError("; ".join(errors))
         return self.repo.upsert(schema)
+
+
+class CmdbLineageService:
+    def __init__(
+        self,
+        repository: LineageSpecRepository | None = None,
+        schema_repo: CITypeSchemaRepository | None = None,
+    ) -> None:
+        self.repo = repository or LineageSpecRepository()
+        self.schema_repo = schema_repo or CITypeSchemaRepository()
+
+    def list_lineage(self) -> list[LineageSpec]:
+        return self.repo.list_all()
+
+    def get_lineage(self, ci_type: str) -> LineageSpec:
+        spec = self.repo.get(ci_type)
+        if spec is None:
+            raise NotFoundError(f"No lineage spec for CI type '{ci_type}'")
+        return spec
+
+    def upsert_lineage(self, spec: LineageSpec) -> LineageSpec:
+        """Validate (relationship targets must be known CI types) then store."""
+        known = {s.type for s in self.schema_repo.list_all()}
+        errors = validate_lineage(spec, known)
+        if errors:
+            raise ValidationError("; ".join(errors))
+        return self.repo.upsert(spec)

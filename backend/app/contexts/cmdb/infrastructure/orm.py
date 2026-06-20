@@ -19,3 +19,11 @@ class CITypeSchemaRow(Base):
     document_json: Mapped[str] = mapped_column(Text, nullable=False)  # full CITypeSchema as JSON
     updated_by: Mapped[str] = mapped_column(String, default="system")
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class LineageSpecRow(Base):
+    __tablename__ = "cmdb_lineage_spec"
+
+    type: Mapped[str] = mapped_column(String, primary_key=True)
+    document_json: Mapped[str] = mapped_column(Text, nullable=False)  # full LineageSpec as JSON
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)

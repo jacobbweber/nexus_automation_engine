@@ -54,7 +54,7 @@ async def _lifespan(_app: FastAPI):
     if get_settings().seed_demo_data:
         from app.contexts.automation_catalog.application.seed import seed_templates
         from app.contexts.change_management.application.service import seed_change_management
-        from app.contexts.cmdb.application.seed import seed_cmdb_schemas
+        from app.contexts.cmdb.application.seed import seed_cmdb_lineage, seed_cmdb_schemas
         from app.contexts.execution_engine.application.seed import seed_history
         from app.contexts.incident_management.application.seed import seed_incidents
         from app.contexts.orchestration_canvas.application.seed import seed_workflow_library
@@ -62,6 +62,7 @@ async def _lifespan(_app: FastAPI):
         seed_templates()
         seed_change_management()
         seed_cmdb_schemas()  # CMDB-as-contract: CI type schemas
+        seed_cmdb_lineage()  # required relationships per CI type
         seed_history()
         seed_workflow_library()
         seed_incidents()  # open a triage board from the seeded failures

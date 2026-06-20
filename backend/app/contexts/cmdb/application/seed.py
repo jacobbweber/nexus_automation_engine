@@ -7,8 +7,17 @@ and the health checker (24.3) consume them. Field/tag choices mirror a believabl
 
 from __future__ import annotations
 
+from app.contexts.cmdb.domain.lineage import (
+    Cardinality,
+    Direction,
+    LineageRelationship,
+    LineageSpec,
+)
 from app.contexts.cmdb.domain.models import CITypeSchema, FieldDef, FieldType
-from app.contexts.cmdb.infrastructure.repository import CITypeSchemaRepository
+from app.contexts.cmdb.infrastructure.repository import (
+    CITypeSchemaRepository,
+    LineageSpecRepository,
+)
 
 _ENVS = ["Production", "Staging", "Development"]
 _LIFECYCLE = ["operational", "maintenance", "retired"]
@@ -194,5 +203,58 @@ def seed_cmdb_schemas(repo: CITypeSchemaRepository | None = None) -> int:
     created = 0
     for schema in _schemas():
         repo.upsert(schema)
+        created += 1
+    return created
+
+
+def _up(name: str, target: str, card: Cardinality = Cardinality.ONE, required: bool = True):
+    return LineageRelationship(
+        name=name, target_type=target, direction=Direction.UP, cardinality=card, required=required
+    )
+
+
+def _lineage() -> list[LineageSpec]:
+    """The required relationships that make each CI type 'whole' (only references seeded types).
+
+    Forms a DAG: application -> vm -> {host -> cluster, datastore -> volume -> backup_policy,
+    backup_policy}. No cycle in the required-up graph.
+    """
+    return [
+        LineageSpec(
+            type="vm",
+            relationships=[
+                _up("host", "host"),
+                _up("datastores", "datastore", Cardinality.MANY),
+                _up("backup_policy", "backup_policy"),
+            ],
+        ),
+        LineageSpec(type="host", relationships=[_up("cluster", "cluster")]),
+        LineageSpec(type="cluster", relationships=[]),  # top-level grouping
+        LineageSpec(type="datastore", relationships=[_up("volume", "volume")]),
+        LineageSpec(type="volume", relationships=[_up("backup_policy", "backup_policy")]),
+        LineageSpec(type="backup_policy", relationships=[]),
+        LineageSpec(
+            type="application",
+            relationships=[
+                LineageRelationship(
+                    name="members",
+                    target_type="vm",
+                    direction=Direction.DOWN,
+                    cardinality=Cardinality.MANY,
+                    required=True,
+                )
+            ],
+        ),
+    ]
+
+
+def seed_cmdb_lineage(repo: LineageSpecRepository | None = None) -> int:
+    """Seed default lineage specs. Returns the number created (0 if already populated)."""
+    repo = repo or LineageSpecRepository()
+    if repo.count() > 0:
+        return 0
+    created = 0
+    for spec in _lineage():
+        repo.upsert(spec)
         created += 1
     return created

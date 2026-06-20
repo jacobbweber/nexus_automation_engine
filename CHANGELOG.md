@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M24.2 — CMDB lineage specs** (v4.0 Pillar A): per CI type, the typed required relationships
+  (target type, direction up/down, cardinality, required) that make a CI "whole" — with a
+  deterministic validator (unknown-target + duplicate-name checks) and a **required-dependency cycle
+  detector** across the whole set. Seeded a consistent DAG (application→vm→{host→cluster,
+  datastore→volume→backup_policy}). Consumed next by the health checker (24.3).
 - **M24.1 — CMDB CI type schema registry** (v4.0 Pillar A, ADR-0009): a new `cmdb` bounded context
   that defines CIs as a contract — schema-as-data per CI type (fields with datatype/required/enum/
   regex/sensitivity, required tags, naming pattern), a deterministic schema validator, a versioned
