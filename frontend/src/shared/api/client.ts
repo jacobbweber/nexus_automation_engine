@@ -519,6 +519,52 @@ export interface CIHealthReport {
   remediation_hints: string[];
 }
 
+// --- compliance & drift (v4.0 Pillar B) ----
+export interface FieldDrift {
+  field: string;
+  desired: string;
+  observed: string;
+  state: string; // compliant | drifted | unknown
+}
+export interface ResourceDrift {
+  resource: string;
+  state: string;
+  fields: FieldDrift[];
+  reconcile_action: string;
+}
+export interface DriftReport {
+  target: string;
+  connector: string;
+  action: string;
+  status: string; // compliant | drifted | unknown
+  drift_count: number;
+  resources: ResourceDrift[];
+  summary: string;
+}
+export interface DriftedItem {
+  target: string;
+  drift_count: number;
+}
+export interface PostureSnapshot {
+  id: string;
+  created_at: string;
+  evaluated: number;
+  compliant: number;
+  drifted: number;
+  drift_count: number;
+  top_drifted: DriftedItem[];
+  compliant_pct?: number;
+}
+
+export const Compliance = {
+  posture: () => api.get<PostureSnapshot | null>("/compliance/posture"),
+  history: () => api.get<PostureSnapshot[]>("/compliance/posture/history"),
+  sweep: () => api.post<PostureSnapshot>("/compliance/sweep"),
+  template: (id: string, answers: Record<string, unknown> = {}) =>
+    api.post<DriftReport>(`/catalog/templates/${id}/compliance`, { survey_answers: answers }),
+  workflow: (id: string) => api.post<DriftReport>(`/canvas/workflows/${id}/compliance`),
+};
+
 export const Cmdb = {
   schemas: () => api.get<CITypeSchema[]>("/cmdb/schemas"),
   schema: (t: string) => api.get<CITypeSchema>(`/cmdb/schemas/${t}`),

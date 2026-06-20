@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M25.5 — compliance posture dashboard + drift viewer** (v4.0 Pillar B): a **Compliance** surface
+  (`/compliance`, in the nav rail + command palette) showing % compliant, evaluated/drifted counts,
+  top-drifted, a drift trend sparkline from snapshot history, and an admin "Run sweep now". A shared
+  `DriftReportView` (desired-vs-observed per field + reconcile action) + `ComplianceBadge`, reused on
+  the catalog detail via a **"Check compliance"** action. Adds the `Compliance` API client. Completes
+  M25 — the platform now continuously *asserts desired state* and shows the gap.
 - **M25.4 — scheduled compliance sweeps → posture + incidents** (v4.0 Pillar B): a new `compliance`
   context that evaluates every published workflow in compliance mode, snapshots the estate's
   **posture** (evaluated / compliant / drifted / total drift / top-drifted), and **opens incidents**
