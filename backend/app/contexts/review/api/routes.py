@@ -48,6 +48,18 @@ def create_approval(
     )
 
 
+class CiChangeRequest(BaseModel):
+    ci: dict
+
+
+@router.post("/ci-change", response_model=ApprovalRequest)
+def request_ci_change(
+    body: CiChangeRequest, user: UserContext = Depends(get_current_user)
+) -> ApprovalRequest:
+    """Propose a CI add/modify — health-checked (M24) and gated on approval per policy."""
+    return ReviewService().request_ci_change(body.ci, requested_by=user.username)
+
+
 class DecisionRequest(BaseModel):
     decision: ApprovalDecision
     comment: str = ""
