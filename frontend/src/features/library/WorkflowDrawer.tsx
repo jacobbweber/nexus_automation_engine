@@ -80,7 +80,7 @@ export function WorkflowDrawer({
           {runs && runs.length > 0 && (
             <div>
               {runs.slice(0, 25).map((r) => (
-                <RunRow key={r.run_id} run={r} />
+                <RunRow key={r.run_id} run={r} onReplay={() => navigate(`/canvas?id=${report.id}&replay=${r.run_id}`)} />
               ))}
             </div>
           )}
@@ -109,7 +109,7 @@ function spanLabel(start: string, end: string | null): string {
 }
 
 // A run row that expands to its per-step timeline (fetched on demand from /canvas/runs/{id}).
-function RunRow({ run }: { run: WorkflowRun }) {
+function RunRow({ run, onReplay }: { run: WorkflowRun; onReplay: () => void }) {
   const [open, setOpen] = useState(false);
   const [steps, setSteps] = useState<WorkflowStep[] | null>(null);
 
@@ -134,6 +134,16 @@ function RunRow({ run }: { run: WorkflowRun }) {
           {run.started_at ? new Date(run.started_at).toLocaleString() : ""}
         </span>
         <span style={{ marginLeft: "auto", color: "var(--text-muted)", fontSize: "0.76rem" }}>{durationLabel(run)}</span>
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={(e) => { e.stopPropagation(); onReplay(); }}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); onReplay(); } }}
+          title="Replay this run on the canvas"
+          style={{ color: "var(--accent)", fontSize: "0.72rem", cursor: "pointer" }}
+        >
+          ▶ replay
+        </span>
       </button>
       {open && (
         <div style={{ padding: "2px 4px 10px 26px" }}>
