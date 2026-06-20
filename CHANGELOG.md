@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M23 — connector registry view** (K42, #103): the Admin page's connector cards now show a
+  simulation/health indicator (from `/health`) and expand to list each connector's **actions**
+  (label, name, param count) alongside capability chips (check-mode / diff / streams-logs).
 - **M23 — validation policy editor** (J40, #101): admins can edit the single lifecycle
   `ValidationPolicy` (CMDB-consistency, reject-retired, reject-unknown-CI, block-destructive-on-
   cluster, max review age) in Governance via the existing admin-only `PUT /policy` — the one gate
