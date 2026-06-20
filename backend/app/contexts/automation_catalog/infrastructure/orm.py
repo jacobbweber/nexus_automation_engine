@@ -22,6 +22,7 @@ class TemplateRow(Base):
     supports_check_mode: Mapped[bool] = mapped_column(Boolean, default=False)
     supports_diff: Mapped[bool] = mapped_column(Boolean, default=False)
     idempotency: Mapped[str] = mapped_column(String, default="idempotent")
+    plain_summary_json: Mapped[str] = mapped_column(Text, default="")  # PlainSummary JSON or ""
     survey_json: Mapped[str] = mapped_column(Text, default="[]")
     default_params_json: Mapped[str] = mapped_column(Text, default="{}")
     owner: Mapped[str] = mapped_column(String, default="engineer")

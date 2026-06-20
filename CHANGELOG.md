@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M26.1 — plain-language building-block summaries** (v4.0 Pillar C): every catalog building block
+  now carries a `plain_summary` (`input → action → outcome` + rollback) — authored once, composed
+  later into multi-audience review packets. Seeded deterministically across the catalog from each
+  block's metadata, persisted, and shown as an "In plain language" block on the catalog detail.
 - **M25.5 — compliance posture dashboard + drift viewer** (v4.0 Pillar B): a **Compliance** surface
   (`/compliance`, in the nav rail + command palette) showing % compliant, evaluated/drifted counts,
   top-drifted, a drift trend sparkline from snapshot history, and an admin "Run sweep now". A shared

@@ -107,6 +107,35 @@ export function AutomationDetail({ template, onClose }: { template: Template; on
         <div style={{ flex: 1, overflow: "auto", minHeight: 200 }}>
           {tab === "overview" && (
             <>
+              {template.plain_summary && (
+                <div
+                  style={{
+                    marginBottom: 14,
+                    padding: 12,
+                    borderRadius: 8,
+                    background: "var(--surface-2)",
+                    fontSize: "0.85rem",
+                  }}
+                >
+                  <div style={{ fontSize: "0.7rem", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                    In plain language
+                  </div>
+                  <div style={{ marginTop: 4 }}>
+                    <strong>Input:</strong> {template.plain_summary.input}
+                  </div>
+                  <div>
+                    <strong>Action:</strong> {template.plain_summary.action}
+                  </div>
+                  <div>
+                    <strong>Outcome:</strong> {template.plain_summary.outcome}
+                  </div>
+                  {template.plain_summary.rollback && (
+                    <div>
+                      <strong>Rollback:</strong> {template.plain_summary.rollback}
+                    </div>
+                  )}
+                </div>
+              )}
               <Markdown source={template.markdown_documentation || template.description} />
               {template.prerequisites && (
                 <div style={{ marginTop: 14, padding: 12, borderRadius: 8, background: "var(--surface-2)" }}>

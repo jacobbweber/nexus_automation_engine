@@ -9,6 +9,7 @@ from sqlalchemy import func, select
 
 from app.contexts.automation_catalog.domain.models import (
     ApprovalState,
+    PlainSummary,
     RiskTier,
     SurveyField,
     Template,
@@ -30,6 +31,11 @@ def _to_template(row: TemplateRow) -> Template:
         supports_check_mode=row.supports_check_mode,
         supports_diff=row.supports_diff,
         idempotency=IdempotencyClass(row.idempotency or "idempotent"),
+        plain_summary=(
+            PlainSummary.model_validate_json(row.plain_summary_json)
+            if row.plain_summary_json
+            else None
+        ),
         survey=[SurveyField(**f) for f in json.loads(row.survey_json or "[]")],
         default_params=json.loads(row.default_params_json or "{}"),
         owner=row.owner,
@@ -66,6 +72,9 @@ class TemplateRepository:
             row.supports_check_mode = template.supports_check_mode
             row.supports_diff = template.supports_diff
             row.idempotency = str(template.idempotency)
+            row.plain_summary_json = (
+                template.plain_summary.model_dump_json() if template.plain_summary else ""
+            )
             row.survey_json = json.dumps([f.model_dump() for f in template.survey])
             row.default_params_json = json.dumps(template.default_params)
             row.owner = template.owner
