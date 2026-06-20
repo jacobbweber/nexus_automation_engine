@@ -16,13 +16,33 @@ function durationLabel(r: WorkflowRun): string {
   return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
 }
 
-export function WorkflowDrawer({ report, onClose }: { report: WorkflowReport; onClose: () => void }) {
+export function WorkflowDrawer({
+  report,
+  onClose,
+  onChanged,
+}: {
+  report: WorkflowReport;
+  onClose: () => void;
+  onChanged?: () => void;
+}) {
   const navigate = useNavigate();
   const [runs, setRuns] = useState<WorkflowRun[] | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     Canvas.runs(report.id).then(setRuns).catch(() => setRuns([]));
   }, [report.id]);
+
+  async function submitForReview() {
+    setBusy(true);
+    try {
+      await Canvas.submitForReview(report.id);
+      onChanged?.();
+      onClose();
+    } catch {
+      setBusy(false);
+    }
+  }
 
   const u = report.usage;
   return (
@@ -74,9 +94,14 @@ export function WorkflowDrawer({ report, onClose }: { report: WorkflowReport; on
           )}
         </div>
 
-        <div style={{ padding: "0 16px 18px", display: "flex", gap: 8 }}>
+        <div style={{ padding: "0 16px 18px", display: "flex", gap: 8, flexWrap: "wrap" }}>
           <Button size="sm" onClick={() => navigate(`/canvas?id=${report.id}`)}>Open in canvas</Button>
           <Button size="sm" variant="ghost" onClick={() => navigate("/console")}>View runs in console</Button>
+          {report.review_state === "draft" && (
+            <Button size="sm" variant="soft" onClick={submitForReview} disabled={busy}>
+              {busy ? "Submitting…" : "Submit for review"}
+            </Button>
+          )}
         </div>
       </div>
     </div>
