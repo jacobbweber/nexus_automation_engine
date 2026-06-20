@@ -445,6 +445,7 @@ export interface ReviewStatus {
 
 export const Validation = {
   policy: () => api.get<ValidationPolicy>("/governance/validation/policy"),
+  updatePolicy: (p: ValidationPolicy) => api.put<ValidationPolicy>("/governance/validation/policy", p),
   reviewStatus: () => api.get<ReviewStatus>("/governance/validation/review-status"),
 };
 

@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M23 — validation policy editor** (J40, #101): admins can edit the single lifecycle
+  `ValidationPolicy` (CMDB-consistency, reject-retired, reject-unknown-CI, block-destructive-on-
+  cluster, max review age) in Governance via the existing admin-only `PUT /policy` — the one gate
+  every execution consults (ADR-0006). (The pruning/review-status dashboard half shipped in M18.)
 - **M22 — run step timeline** (H35 partial, #96): run-history rows (in the Library drill-down)
   expand to a **per-step timeline** — each step's status, node, type, retry count, and duration —
   fetched on demand from `/canvas/runs/{id}`. (Run compare + retry/cancel controls deferred — they

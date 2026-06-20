@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/app/auth";
 import { Button, Card, Page, StatusBadge } from "@/shared/ui/primitives";
 import { ChangeCalendar } from "./ChangeCalendar";
+import { ValidationPolicyEditor } from "./ValidationPolicyEditor";
 
 export function GovernancePage() {
   const { user } = useAuth();
@@ -88,6 +89,12 @@ export function GovernancePage() {
       <div style={{ marginBottom: 14 }}>
         <ChangeCalendar />
       </div>
+
+      {user?.global_role === "admin" && policy && (
+        <div style={{ marginBottom: 14 }}>
+          <ValidationPolicyEditor policy={policy} onSaved={setPolicy} />
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <Card>
