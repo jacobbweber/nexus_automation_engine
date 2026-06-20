@@ -10,6 +10,8 @@ from app.contexts.orchestration_canvas.application.broker import RunBroker, get_
 from app.contexts.orchestration_canvas.application.engine import execute_graph
 from app.contexts.orchestration_canvas.application.node_actions import resolve_approval
 from app.contexts.orchestration_canvas.domain.models import (
+    Node,
+    NodeType,
     ReviewRecord,
     ReviewState,
     RunStatus,
@@ -28,6 +30,17 @@ from app.shared_kernel.variable_pool import VariablePool
 
 def _now() -> datetime:
     return datetime.now(UTC)
+
+
+def _apply_plan(nodes: list[Node]) -> list[Node]:
+    """Return a copy of the graph with every automation task forced into check/dry-run mode, so a
+    plan run exercises the whole DAG (conditions, gates, lookups) without mutating anything."""
+    return [
+        node.model_copy(update={"data": {**node.data, "check_mode": True}})
+        if node.type == NodeType.AUTOMATION_TASK
+        else node
+        for node in nodes
+    ]
 
 
 def _capture_workflow_failure(workflow_id: str, name: str, error: str) -> None:
@@ -192,18 +205,19 @@ class CanvasService:
         finally:
             self.repo.prune_runs(workflow_id)
 
-    def start_run(self, workflow_id: str, inputs: dict[str, Any]) -> str:
+    def start_run(self, workflow_id: str, inputs: dict[str, Any], plan: bool = False) -> str:
         """Create a run and execute it in the background, streaming to the broker. Returns run_id.
 
         The run_id is allocated up front so a client can subscribe to the WebSocket before the
-        first event is published.
+        first event is published. ``plan=True`` forces every automation task into check/dry-run mode
+        so nothing mutates — a safe "plan" of the whole workflow.
         """
         self.get_workflow(workflow_id)  # validate existence eagerly
         run_id = new_id("run")
 
         async def _runner() -> None:
             try:
-                await self._run_with_fixed_id(workflow_id, inputs, run_id)
+                await self._run_with_fixed_id(workflow_id, inputs, run_id, plan=plan)
             finally:
                 await self.broker.close(run_id)
 
@@ -211,9 +225,10 @@ class CanvasService:
         return run_id
 
     async def _run_with_fixed_id(
-        self, workflow_id: str, inputs: dict[str, Any], run_id: str
+        self, workflow_id: str, inputs: dict[str, Any], run_id: str, plan: bool = False
     ) -> WorkflowRun:
         wf = self.get_workflow(workflow_id)
+        nodes = _apply_plan(wf.graph.nodes) if plan else wf.graph.nodes
         started = _now()
         self.repo.save_run(
             WorkflowRun(
@@ -229,12 +244,12 @@ class CanvasService:
             event.setdefault("run_id", run_id)
             await self.broker.publish(run_id, event)
 
-        await _ws({"type": "run_started", "workflow_id": workflow_id})
+        await _ws({"type": "run_started", "workflow_id": workflow_id, "plan": plan})
         pool = VariablePool()
         pool.set("start", inputs)
         try:
             outputs = await execute_graph(
-                wf.graph.nodes, wf.graph.edges, pool, run_id, ws=_ws, repo=self.repo
+                nodes, wf.graph.edges, pool, run_id, ws=_ws, repo=self.repo
             )
             self.repo.save_run(
                 WorkflowRun(

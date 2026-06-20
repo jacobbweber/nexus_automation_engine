@@ -212,24 +212,26 @@ export function CanvasPage() {
     return raw.filter((i) => i && i.name);
   }
 
-  function runClicked() {
+  function runClicked(plan = false) {
     const inputs = startInputs();
     if (inputs.length > 0) {
       const seed: Record<string, unknown> = {};
       for (const i of inputs) seed[i.name] = i.default ?? "";
-      setRunForm(seed);
+      setRunForm({ __plan: plan, ...seed });
     } else {
-      void doRun({});
+      void doRun({}, plan);
     }
   }
 
-  async function doRun(inputs: Record<string, unknown>) {
+  async function doRun(inputs: Record<string, unknown>, plan = false) {
+    const { __plan, ...realInputs } = inputs as Record<string, unknown> & { __plan?: boolean };
+    const isPlan = plan || __plan === true;
     setRunForm(null);
     if (!currentId) await save();
     const id = currentId ?? (await Canvas.save({ name, graph: { nodes, edges, viewport: {} } })).id;
     setNodeStates({});
     setRunning(true);
-    const { run_id } = await Canvas.run(id, inputs);
+    const { run_id } = await Canvas.run(id, realInputs, isPlan);
     const ws = openSocket(`/canvas/runs/${run_id}/stream`);
     ws.onmessage = (ev) => {
       const d = JSON.parse(ev.data);
@@ -299,7 +301,8 @@ export function CanvasPage() {
           onLoad={load}
           onNew={newWorkflow}
           onSave={save}
-          onRun={runClicked}
+          onRun={() => runClicked(false)}
+          onDryRun={() => runClicked(true)}
           onSubmit={submitForReview}
           running={running}
         />
@@ -532,6 +535,7 @@ function Toolbar(props: {
   onNew: () => void;
   onSave: () => void;
   onRun: () => void;
+  onDryRun: () => void;
   onSubmit: () => void;
   running: boolean;
 }) {
@@ -551,7 +555,8 @@ function Toolbar(props: {
       <Button variant="ghost" onClick={props.onNew}>New</Button>
       <Button variant="ghost" onClick={props.onSave}>Save</Button>
       <Button variant="ghost" onClick={props.onSubmit}>Submit for review</Button>
-      <div style={{ marginLeft: "auto" }}>
+      <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+        <Button variant="ghost" onClick={props.onDryRun} disabled={props.running} title="Run with all tasks in check mode — nothing mutates">Dry run</Button>
         <Button onClick={props.onRun} disabled={props.running}>{props.running ? "Running…" : "▶ Run"}</Button>
       </div>
     </div>
