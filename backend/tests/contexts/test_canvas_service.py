@@ -88,6 +88,20 @@ async def test_run_workflow_persists_run_and_steps():
     assert {s.node_id for s in persisted.steps} == {"start", "tf", "end"}
 
 
+async def test_retry_run_reruns_with_same_inputs():
+    import asyncio
+
+    svc = CanvasService()
+    wf = svc.save_workflow(name="Retry", graph=_graph())
+    run = await svc.run_workflow(wf.id, {"k": "v"})
+    new_id = svc.retry_run(run.run_id)
+    assert new_id.startswith("run_") and new_id != run.run_id
+    await asyncio.sleep(0.05)  # let the background re-run persist
+    retried = svc.get_run(new_id)
+    assert retried.workflow_id == wf.id
+    assert retried.inputs == {"k": "v"}
+
+
 async def test_failed_run_is_recorded():
     svc = CanvasService()
     graph = WorkflowGraph(
