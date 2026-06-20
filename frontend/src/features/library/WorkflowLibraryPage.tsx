@@ -19,8 +19,9 @@ export function WorkflowLibraryPage() {
   const [tag, setTag] = useState("");
   const [search, setSearch] = useState("");
 
+  const refresh = () => Canvas.report().then(setReports).catch(() => undefined);
   useEffect(() => {
-    Canvas.report().then(setReports).catch(() => undefined);
+    refresh();
   }, []);
 
   const teams = useMemo(
@@ -166,7 +167,7 @@ export function WorkflowLibraryPage() {
           </tbody>
         </table>
       </Card>
-      {drawer && <WorkflowDrawer report={drawer} onClose={() => setDrawer(null)} />}
+      {drawer && <WorkflowDrawer report={drawer} onClose={() => setDrawer(null)} onChanged={refresh} />}
     </Page>
   );
 }

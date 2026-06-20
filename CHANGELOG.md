@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M22 — Library lifecycle quick-action** (G33, #94): the per-workflow drill-down drawer can
+  **submit a draft workflow for review** in one click (then refreshes the library). (Bulk
+  tag/own/archive operations deferred — they need new backend endpoints.)
 - **M22 — Console log search + download** (H34, #95): the Execution Console (already live-streaming
   with ANSI handling) gains an in-run **filter** (with match count, auto-scroll paused while
   filtering), a **download log** action, and an `aria-live` log region for screen readers.
