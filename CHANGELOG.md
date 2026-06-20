@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M26.5 — CI-change approval path** (v4.0 Pillar C): proposing a CI add/modify
+  (`POST /review/ci-change`) runs the CMDB health check (M24) and opens an approval request
+  (`source_type=ci_change`) carrying the health score + remediation hints — so a human approves the
+  change, gated on its health, before it applies.
 - **M26.4 — run-level approval gate** (v4.0 Pillar C): a workflow run that the review policy says
   needs approval is now **blocked until a human approves**. `ApprovalRequest` (with a packet
   snapshot) is persisted; `request_approval` opens a pending request (de-duped), `decide`

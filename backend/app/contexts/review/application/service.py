@@ -84,6 +84,36 @@ class ReviewService:
         )
         return self.approvals.save(req)
 
+    def request_ci_change(self, ci: dict[str, Any], requested_by: str = "") -> ApprovalRequest:
+        """Adding/modifying a CI runs the CMDB health check (M24); per policy it needs approval.
+
+        The health report becomes the review summary; the change is gated behind a human decision.
+        """
+        from app.contexts.cmdb.application.service import CmdbHealthService
+        from app.contexts.review.domain.classification import (
+            ChangeContext,
+            ReviewerLevel,
+            required_level,
+        )
+
+        report = CmdbHealthService().check(ci)
+        # an unhealthy/degraded CI change is treated as higher-risk → at least team-lead review
+        risk = "high" if report.status != "healthy" else "low"
+        level = required_level(ChangeContext(risk=risk, prod=True))
+        name = str(ci.get("name") or ci.get("id") or "CI")
+        req = ApprovalRequest(
+            id=new_id("appr"),
+            source_type="ci_change",
+            source_id=name,
+            title=f"CI change: {name} ({report.ci_type})",
+            change_class="normal" if level != ReviewerLevel.NONE else "standard",
+            required_level=str(level),
+            comment=f"CI health {report.score}/100 ({report.status}). "
+            + "; ".join(report.remediation_hints[:3]),
+            requested_by=requested_by,
+        )
+        return self.approvals.save(req)
+
     def decide(
         self, request_id: str, decision: ApprovalDecision, decided_by: str, comment: str = ""
     ) -> ApprovalRequest:
