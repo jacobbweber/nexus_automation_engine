@@ -10,6 +10,7 @@ import {
   type CmdbField,
   type NodeFieldSpec,
   type NodeTypeSpec,
+  type Template,
   type Workflow,
 } from "@/shared/api/client";
 import { BlastRadius } from "./BlastRadius";
@@ -35,12 +36,26 @@ export function SchemaProperties(props: {
   spec: NodeTypeSpec | undefined;
   caps: Capabilities[];
   workflows: Workflow[];
+  templates: Template[];
   onChange: (data: Record<string, unknown>) => void;
   onDelete: () => void;
 }) {
-  const { node, spec, caps, workflows, onChange, onDelete } = props;
+  const { node, spec, caps, workflows, templates, onChange, onDelete } = props;
   const data = node.data;
   const set = (k: string, v: unknown) => onChange({ ...data, [k]: v });
+
+  // Pre-fill an automation task from a vetted catalog item (connector + action + default params).
+  function applyTemplate(id: string) {
+    const t = templates.find((x) => x.id === id);
+    if (!t) return;
+    onChange({
+      ...data,
+      name: data.name || t.name,
+      connector: t.connector,
+      action: t.action,
+      params: { ...(t.default_params ?? {}) },
+    });
+  }
 
   // CMDB field catalogue — refetched when the chosen table changes (drives the field picker).
   const [cmdbTables, setCmdbTables] = useState<string[]>([]);
@@ -72,7 +87,8 @@ export function SchemaProperties(props: {
       case "cmdb_fields":
         return cmdbFields.map((f) => ({ value: f.name, label: `${f.label} (${f.name})` }));
       case "workflows":
-        return workflows.map((w) => ({ value: w.id, label: w.name }));
+        // Saved + approved workflows are all pickable as sub-workflows; show governance state.
+        return workflows.map((w) => ({ value: w.id, label: `${w.name} · ${w.review_state}` }));
       case "roles":
         return ROLES.map((r) => ({ value: r, label: r }));
       default:
@@ -93,6 +109,26 @@ export function SchemaProperties(props: {
         <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>Name</span>
         <input value={String(data.name ?? "")} onChange={(e) => set("name", e.target.value)} style={ctl} />
       </label>
+
+      {node.type === "automation_task" && templates.length > 0 && (
+        <label style={{ display: "block", margin: "10px 0" }}>
+          <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
+            Start from catalog item
+          </span>
+          <select value="" onChange={(e) => e.target.value && applyTemplate(e.target.value)} style={ctl}>
+            <option value="">— pick a vetted automation —</option>
+            {templates.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name} ({t.vendor || t.connector})
+              </option>
+            ))}
+          </select>
+          <span style={{ display: "block", fontSize: "0.68rem", color: "var(--text-muted)", marginTop: 2 }}>
+            Fills connector, action &amp; default parameters from the catalog.
+          </span>
+        </label>
+      )}
+
       {spec.fields.map((f) => (
         <FieldControl
           key={f.name}

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Canvas, Connectors, openSocket, type Capabilities, type CanvasEdge, type CanvasNode, type NodeTypeSpec, type Workflow } from "@/shared/api/client";
+import { Canvas, Catalog, Connectors, openSocket, type Capabilities, type CanvasEdge, type CanvasNode, type NodeTypeSpec, type Template, type Workflow } from "@/shared/api/client";
 import { useAuth } from "@/app/auth";
 import { Button } from "@/shared/ui/primitives";
 import { ACCENT_BY_TYPE, NODE_CATEGORIES, defaultData } from "./nodeTypes";
@@ -47,6 +47,7 @@ export function CanvasPage() {
   const [blocks, setBlocks] = useState<SubgraphBlock[]>(() => loadBlocks());
   const [caps, setCaps] = useState<Capabilities[]>([]);
   const [specs, setSpecs] = useState<NodeTypeSpec[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
   const [running, setRunning] = useState(false);
 
   const dragRef = useRef<{ id: string; ox: number; oy: number } | null>(null);
@@ -58,6 +59,7 @@ export function CanvasPage() {
     Canvas.list().then(setWorkflows).catch(() => undefined);
     Connectors.list().then(setCaps).catch(() => undefined);
     Canvas.nodeTypes().then(setSpecs).catch(() => undefined);
+    Catalog.list().then(setTemplates).catch(() => undefined);
   }, []);
 
   const specFor = (type: string) => specs.find((s) => s.type === type);
@@ -409,6 +411,7 @@ export function CanvasPage() {
               spec={specFor(selected.type)}
               caps={caps}
               workflows={workflows}
+              templates={templates}
               onChange={(data) => setNodes((ns) => ns.map((n) => (n.id === selectedId ? { ...n, data } : n)))}
               onDelete={() => { setNodes((ns) => ns.filter((n) => n.id !== selectedId)); setEdges((es) => es.filter((e) => e.source !== selectedId && e.target !== selectedId)); setSelectedId(null); }}
             />
