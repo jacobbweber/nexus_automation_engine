@@ -6,6 +6,7 @@ import { Button } from "@/shared/ui/primitives";
 import { ACCENT_BY_TYPE, NODE_CATEGORIES, defaultData } from "./nodeTypes";
 import { SchemaProperties } from "./SchemaForm";
 import { lintGraph } from "./lint";
+import { cloneBlock, loadBlocks, removeBlock, saveBlock, type SubgraphBlock } from "./subgraphs";
 
 // Builds a node's initial data from its schema defaults so new nodes start fully populated.
 function defaultFromSpec(spec: NodeTypeSpec | undefined, type: string): Record<string, unknown> {
@@ -43,6 +44,7 @@ export function CanvasPage() {
   const [approval, setApproval] = useState<{ run_id: string; node_id: string; message: string } | null>(null);
   const [runForm, setRunForm] = useState<Record<string, unknown> | null>(null);
   const [replayRunId, setReplayRunId] = useState<string | null>(null);
+  const [blocks, setBlocks] = useState<SubgraphBlock[]>(() => loadBlocks());
   const [caps, setCaps] = useState<Capabilities[]>([]);
   const [specs, setSpecs] = useState<NodeTypeSpec[]>([]);
   const [running, setRunning] = useState(false);
@@ -86,6 +88,23 @@ export function CanvasPage() {
       window.removeEventListener("mouseup", onMouseUp);
     };
   }, [onMouseMove, onMouseUp]);
+
+  function saveAsBlock() {
+    if (nodes.length === 0) return;
+    const blockName = window.prompt("Name this reusable block:", "Block");
+    if (!blockName) return;
+    setBlocks(saveBlock({ id: `blk_${Date.now().toString(36)}`, name: blockName, nodes, edges }));
+  }
+
+  function insertBlock(block: SubgraphBlock) {
+    const cloned = cloneBlock(block, 60);
+    setNodes((ns) => [...ns, ...cloned.nodes]);
+    setEdges((es) => [...es, ...cloned.edges]);
+  }
+
+  function deleteBlock(id: string) {
+    setBlocks(removeBlock(id));
+  }
 
   function addNode(type: string) {
     const id = `${type}_${Math.random().toString(36).slice(2, 7)}`;
@@ -265,7 +284,7 @@ export function CanvasPage() {
 
   return (
     <div style={{ display: "flex", height: "100%" }}>
-      <Palette onAdd={addNode} />
+      <Palette onAdd={addNode} blocks={blocks} onInsertBlock={insertBlock} onDeleteBlock={deleteBlock} onSaveBlock={saveAsBlock} />
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
         <Toolbar
           name={name}
@@ -449,7 +468,13 @@ function CanvasCtl({ label, title, onClick }: { label: string; title: string; on
   );
 }
 
-function Palette({ onAdd }: { onAdd: (t: string) => void }) {
+function Palette({ onAdd, blocks, onInsertBlock, onDeleteBlock, onSaveBlock }: {
+  onAdd: (t: string) => void;
+  blocks: SubgraphBlock[];
+  onInsertBlock: (b: SubgraphBlock) => void;
+  onDeleteBlock: (id: string) => void;
+  onSaveBlock: () => void;
+}) {
   return (
     <div style={{ width: 200, borderRight: "1px solid var(--border)", background: "var(--surface)", padding: 12, overflow: "auto" }}>
       {NODE_CATEGORIES.map((cat) => (
@@ -467,6 +492,28 @@ function Palette({ onAdd }: { onAdd: (t: string) => void }) {
           ))}
         </div>
       ))}
+
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: "0.68rem", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>Blocks</div>
+        {blocks.map((b) => (
+          <div key={b.id} style={{ display: "flex", gap: 4, marginBottom: 4 }}>
+            <button
+              title={`Insert ${b.nodes.length} nodes`}
+              onClick={() => onInsertBlock(b)}
+              style={{ flex: 1, textAlign: "left", padding: "7px 9px", borderRadius: 7, border: "1px dashed var(--border)", background: "var(--bg)", color: "var(--text)", cursor: "pointer", fontSize: "0.8rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+            >
+              {b.name} <span style={{ color: "var(--text-muted)", fontSize: "0.68rem" }}>·{b.nodes.length}</span>
+            </button>
+            <button onClick={() => onDeleteBlock(b.id)} aria-label={`Delete block ${b.name}`} title="Delete block" style={{ flex: "0 0 26px", borderRadius: 7, border: "1px solid var(--border)", background: "transparent", color: "var(--text-muted)", cursor: "pointer" }}>×</button>
+          </div>
+        ))}
+        <button
+          onClick={onSaveBlock}
+          style={{ width: "100%", padding: "6px 8px", borderRadius: 7, border: "1px dashed var(--border)", background: "transparent", color: "var(--text-muted)", cursor: "pointer", fontSize: "0.74rem" }}
+        >
+          + Save graph as block
+        </button>
+      </div>
     </div>
   );
 }

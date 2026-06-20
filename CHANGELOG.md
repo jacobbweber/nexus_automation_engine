@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M22 — canvas subgraph blocks** (F31, #92): save the current graph as a named, reusable **block**
+  (persisted locally) and insert clones of it (fresh node ids, remapped edges, offset position) from
+  a Blocks section in the palette. Pure `cloneBlock` is unit-tested.
 - **M22 — canvas run replay** (F30, #91): a completed run's recorded step trace can be replayed onto
   the graph — `/canvas?id=<wf>&replay=<run>` (or the ▶ replay link in the Library run history)
   animates each node's status in step order (instant under reduced-motion), with a replay banner
