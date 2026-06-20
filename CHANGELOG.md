@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Fixed
+- **Run-status colour distinguishability** (QA): dark `--run-skipped` was a warm taupe that sat too
+  close in hue to amber `--run-warn` (the theme validator's distinguishability check flagged it
+  across 8 built-ins), and Terminal's `--run-running` was the same green as `--run-ok`. Skipped is
+  now a desaturated cool gray and Terminal's running is a classic-terminal cyan, so all 10 built-ins
+  validate with zero warnings — locked in by a new test asserting `validateTheme` is warning-free.
 - **Light mode stuck dark** (QA): selecting Light (or any light-resolving mode) left the app dark.
   `index.html` ships `<html class="dark">` for anti-FOUC, and the mode engine updated `data-mode`
   but never cleared that legacy class, so the `:where(.dark)` token rule pinned every surface to

@@ -132,7 +132,8 @@
     --success: var(--ok-300); --warn: var(--warn-300);
     --danger: var(--danger-300); --info: var(--info-300);
     --run-running: var(--a-400); --run-ok: var(--ok-300); --run-warn: var(--warn-300);
-    --run-failed: var(--danger-300); --run-skipped: var(--n-400);
+    /* cool-gray skipped so it never reads as amber beside --run-warn (status distinguishability) */
+    --run-failed: var(--danger-300); --run-skipped: #8f949c;
     --ring-hi: rgba(255,255,255,.06);
   }
   /* default to the OS preference when no explicit mode is set (A4 will make this user-driven) */
