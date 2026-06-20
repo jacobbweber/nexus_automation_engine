@@ -78,6 +78,7 @@ export function CommandPalette() {
       { id: "act:theme-studio", label: "Open Theme Studio", group: "Actions", keywords: "theme appearance", run: go("/theme-studio") },
       { id: "act:accessibility", label: "Open Accessibility Center", group: "Actions", keywords: "a11y mode dark light density contrast dyslexia text size", run: go("/accessibility") },
       { id: "act:cmdb-schema", label: "Open CMDB Schema Studio", group: "Actions", keywords: "cmdb ci type schema lineage health configuration item", run: go("/cmdb-schema") },
+      { id: "act:cmdb-explorer", label: "Open CMDB Lineage Explorer", group: "Actions", keywords: "cmdb ci health lineage explorer score gaps configuration item", run: go("/cmdb-explorer") },
     ];
     const wf: Command[] = workflows.map((w) => ({
       id: `wf:${w.id}`,

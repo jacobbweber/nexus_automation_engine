@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M24.7 — CI health badges + Lineage Explorer** (v4.0 Pillar A): a reusable `HealthBadge`
+  (status + score, colour + text) and a **CMDB Lineage Explorer** (`/cmdb-explorer`) — look up any CI
+  to see its deterministic health (badge/score), its required relationships with **gaps highlighted**
+  (satisfied vs missing), and field/tag/lineage issues + remediation hints. Linked from the command
+  palette and a new **CMDB governance** card on Admin (also links Schema Studio). Completes M24.
 - **M24.6 — CMDB Schema Studio** (v4.0 Pillar A): an admin surface (`/cmdb-schema`, linked from the
   command palette) to define/edit CI type **schemas** (fields with datatype/required/enum/regex,
   required tags, naming pattern) and **lineage** (typed required relationships), saved through the
