@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M28.2 — local-git versioning adapter** (v4.0 Pillar E): a `VersioningPort` + `LocalGitRepo`
+  (official git via subprocess in a local dir) — init, commit-on-change with an audit message
+  (idempotent: no commit when nothing changed; mirrors the desired file set, deleting dropped
+  artifacts), history, diff, restore-a-path@commit, and HEAD reads. Local-only, no secrets in
+  messages, and degrades gracefully when git is absent. Config-repo dir is gitignored.
 - **M28.1 — canonical config serializer** (v4.0 Pillar E): a deterministic snapshot of every config
   artifact (workflows, CMDB schemas + lineage, pinning rules, catalog templates, validation policy,
   schedules, change templates) → stable file paths + key-ordered JSON with volatile audit timestamps
