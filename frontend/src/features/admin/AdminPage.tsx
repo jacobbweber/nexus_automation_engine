@@ -57,6 +57,12 @@ export function AdminPage() {
           <NavLink to="/cmdb-explorer" style={{ color: "var(--area-accent)" }}>
             CMDB Lineage Explorer →
           </NavLink>
+          <NavLink to="/determinism" style={{ color: "var(--area-accent)" }}>
+            Determinism & Guardrails →
+          </NavLink>
+          <NavLink to="/gitops" style={{ color: "var(--area-accent)" }}>
+            GitOps (config as code) →
+          </NavLink>
         </div>
         <div style={{ fontSize: "0.76rem", color: "var(--text-muted)", marginTop: 4 }}>
           Define CI type schemas + lineage, and check any CI's deterministic health.

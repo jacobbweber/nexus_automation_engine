@@ -526,6 +526,39 @@ export interface CIHealthReport {
   remediation_hints: string[];
 }
 
+// --- GitOps config-as-code (v4.0 Pillar E) ----
+export interface GitCommit {
+  sha: string;
+  message: string;
+  date: string;
+  author: string;
+}
+export interface RepoStatus {
+  available: boolean;
+  path: string;
+  head: string | null;
+  dirty: boolean;
+  commits: number;
+}
+export interface PullDiffItem {
+  path: string;
+  change: string;
+}
+export interface PullPreview {
+  differences: PullDiffItem[];
+  in_sync: boolean;
+}
+
+export const GitOps = {
+  status: () => api.get<RepoStatus>("/gitops/status"),
+  sync: () => api.post<RepoStatus>("/gitops/sync"),
+  history: (path?: string) =>
+    api.get<GitCommit[]>(`/gitops/history${path ? `?path=${encodeURIComponent(path)}` : ""}`),
+  diff: (path: string, a: string, b = "HEAD") =>
+    api.get<{ diff: string }>(`/gitops/diff?path=${encodeURIComponent(path)}&a=${a}&b=${b}`),
+  pullPreview: () => api.get<PullPreview>("/gitops/pull-preview"),
+};
+
 // --- deterministic pinning / guardrails (v4.0 Pillar D) ----
 export interface PinningSelector {
   ci_type: string | null;
