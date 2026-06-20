@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M22 — Console log search + download** (H34, #95): the Execution Console (already live-streaming
+  with ANSI handling) gains an in-run **filter** (with match count, auto-scroll paused while
+  filtering), a **download log** action, and an `aria-live` log region for screen readers.
 - **M23 — Accessibility Center** (K44, #105): a dedicated `/accessibility` page consolidating color
   mode + **auto-sundown schedule** + **per-area mode overrides** (e.g. keep the Console dark),
   density, dyslexia font, text-scale, and theme — surfacing the sundown/per-area controls the mode
