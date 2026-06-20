@@ -99,6 +99,18 @@ def _login(client, username, password):
     return client.post("/api/v1/auth/login", json={"username": username, "password": password})
 
 
+def test_rbac_matrix_endpoint(client):
+    token = _login(client, "operator", "operator123").json()["access_token"]
+    resp = client.get("/api/v1/auth/rbac-matrix", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    body = resp.json()
+    assert "admin" in body["roles"] and "view_jobs" in body["capabilities"]
+    # admin has every capability; consumer cannot execute live
+    assert all(body["matrix"]["admin"].values())
+    assert body["matrix"]["consumer"]["execute_live"] is False
+    assert body["matrix"]["engineer"]["create_templates"] is True
+
+
 def test_login_success_and_me(client):
     resp = _login(client, "engineer", "engineer123")
     assert resp.status_code == 200
