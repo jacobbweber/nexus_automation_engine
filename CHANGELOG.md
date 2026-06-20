@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M22 — blast-radius preview** (E25, #86): a `POST /connectors/servicenow/impact` endpoint
+  computes which CMDB CIs an action on a target would touch (the target + **cluster siblings**);
+  the canvas surfaces it on automation-task / CMDB-lookup nodes that target a literal CI, so an
+  operator sees the impact before running. (Run-from-template wizard + saved presets remain follow-
+  ups.)
 - **M23 — incident RCA assist** (I36, #97): each incident card shows a **failure-mode tag**
   (timeout/permission/connection/validation/approval/capacity, from keywords), a **similar-past-
   failures** count (same title), and a **"remediation available"** hint when a similar incident

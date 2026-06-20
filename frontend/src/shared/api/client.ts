@@ -267,7 +267,16 @@ export const Connectors = {
       `/connectors/servicenow/fields${table ? `?table=${encodeURIComponent(table)}` : ""}`,
     ),
   changes: () => api.get<ServiceNowChange[]>("/connectors/servicenow/changes"),
+  impact: (targets: string[]) =>
+    api.post<ImpactItem[]>("/connectors/servicenow/impact", { targets }),
 };
+
+export interface ImpactItem {
+  name: string;
+  ci_type: string | null;
+  cluster: string | null;
+  reason: string;
+}
 
 export interface NodeFieldSpec {
   name: string;

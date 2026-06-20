@@ -48,6 +48,22 @@ def test_servicenow_changes_endpoint():
     assert starts == sorted(starts)
 
 
+def test_servicenow_impact_includes_cluster_siblings():
+    with TestClient(create_app()) as client:
+        # ds-vvol-01 is a member of cluster wld-prod-01; impact should pull in its sibling.
+        resp = client.post("/api/v1/connectors/servicenow/impact", json={"targets": ["ds-vvol-01"]})
+    assert resp.status_code == 200
+    names = {i["name"] for i in resp.json()}
+    assert "ds-vvol-01" in names and "ds-vvol-02" in names
+
+
+def test_servicenow_impact_standalone_ci_has_no_siblings():
+    with TestClient(create_app()) as client:
+        resp = client.post("/api/v1/connectors/servicenow/impact", json={"targets": ["ds-scratch"]})
+    items = resp.json()
+    assert [i["name"] for i in items] == ["ds-scratch"]
+
+
 def test_unknown_connector_kind_is_422():
     with TestClient(create_app()) as client:
         resp = client.get("/api/v1/connectors/not-a-real-connector")
