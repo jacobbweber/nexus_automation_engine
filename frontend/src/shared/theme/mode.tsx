@@ -39,14 +39,20 @@ export function ModeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
+    // Keep the legacy `.dark` class (set in index.html for anti-FOUC) in sync with the resolved
+    // mode — otherwise its `:where(.dark)` rule pins the app to dark even after switching to light.
+    const applyMode = () => {
+      root.dataset.mode = effective;
+      root.classList.toggle("dark", effective === "dark");
+    };
     const reduce = matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (!reduce) {
       root.classList.add("mode-anim");
       const t = setTimeout(() => root.classList.remove("mode-anim"), 260);
-      root.dataset.mode = effective;
+      applyMode();
       return () => clearTimeout(t);
     }
-    root.dataset.mode = effective;
+    applyMode();
   }, [effective]);
 
   useEffect(() => {

@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Fixed
+- **Light mode stuck dark** (QA): selecting Light (or any light-resolving mode) left the app dark.
+  `index.html` ships `<html class="dark">` for anti-FOUC, and the mode engine updated `data-mode`
+  but never cleared that legacy class, so the `:where(.dark)` token rule pinned every surface to
+  dark. The mode engine now keeps `.dark` in sync with the resolved mode. Regression-tested.
 - **SPA deep-link 404** (QA): when the API serves the built frontend (single-container deploy),
   a hard refresh or deep link to a client-side route (e.g. `/catalog`, `/canvas`) returned
   `{"detail":"Not Found"}` instead of the app. The static mount now falls back to `index.html`
