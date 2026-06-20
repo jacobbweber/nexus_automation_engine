@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Incidents, type Incident } from "@/shared/api/client";
-import { Button, Page } from "@/shared/ui/primitives";
+import { Button, Card, Page } from "@/shared/ui/primitives";
+import { formatMttr, incidentTrends } from "./trends";
 
 const COLUMNS: { key: string; label: string }[] = [
   { key: "new", label: "New" },
@@ -39,10 +40,33 @@ export function IncidentsPage() {
     Incidents.remediate(inc.id).then(() => navigate("/canvas"));
   }
 
-  const total = COLUMNS.reduce((n, c) => n + (board[c.key]?.length ?? 0), 0);
+  const all = useMemo(() => COLUMNS.flatMap((c) => board[c.key] ?? []), [board]);
+  const total = all.length;
+  const trends = useMemo(() => incidentTrends(all), [all]);
 
   return (
     <Page title="Incidents" subtitle={`${total} captured · failures auto-open here for triage`}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 16 }}>
+        <Card>
+          <Lbl>Open / resolved</Lbl>
+          <Big>{trends.open}<span style={{ fontSize: "1rem", color: "var(--text-muted)" }}> / {trends.resolved}</span></Big>
+        </Card>
+        <Card>
+          <Lbl>Mean time to resolution</Lbl>
+          <Big>{formatMttr(trends.mttrMs)}</Big>
+        </Card>
+        <Card>
+          <Lbl>Top failing automations</Lbl>
+          {trends.topFailing.length === 0 && <div style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>—</div>}
+          {trends.topFailing.map((t) => (
+            <div key={t.label} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", padding: "1px 0" }}>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "80%" }}>{t.label}</span>
+              <span style={{ color: "var(--text-muted)" }}>{t.count}</span>
+            </div>
+          ))}
+        </Card>
+      </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
         {COLUMNS.map((col) => (
           <div key={col.key} style={{ background: "var(--surface-2)", borderRadius: 10, padding: 10, minHeight: 200 }}>
@@ -85,4 +109,11 @@ export function IncidentsPage() {
       </div>
     </Page>
   );
+}
+
+function Lbl({ children }: { children: React.ReactNode }) {
+  return <div style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>{children}</div>;
+}
+function Big({ children }: { children: React.ReactNode }) {
+  return <div style={{ fontSize: "1.6rem", fontWeight: 700 }}>{children}</div>;
 }
