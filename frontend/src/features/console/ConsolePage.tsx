@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Jobs, openSocket, type Job } from "@/shared/api/client";
-import { Card, Page, StatusBadge } from "@/shared/ui/primitives";
+import { Button, Card, Page, StatusBadge } from "@/shared/ui/primitives";
 
 interface LogLine {
   message: string;
@@ -17,8 +17,25 @@ export function ConsolePage() {
   const [active, setActive] = useState<string | null>(params.get("job"));
   const [lines, setLines] = useState<LogLine[]>([]);
   const [status, setStatus] = useState<string>("");
+  const [filter, setFilter] = useState("");
   const socketRef = useRef<WebSocket | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const cleanLines = useMemo(() => lines.map((l) => ({ ...l, message: l.message.replace(ANSI, "") })), [lines]);
+  const visible = useMemo(() => {
+    const q = filter.trim().toLowerCase();
+    return q ? cleanLines.filter((l) => l.message.toLowerCase().includes(q)) : cleanLines;
+  }, [cleanLines, filter]);
+
+  function downloadLog() {
+    const blob = new Blob([cleanLines.map((l) => l.message).join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `run-${active}.log`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   useEffect(() => {
     Jobs.list().then(setJobs).catch(() => setJobs([]));
@@ -44,8 +61,8 @@ export function ConsolePage() {
   }, [active]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [lines]);
+    if (!filter) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [lines, filter]);
 
   return (
     <Page title="Execution Console" subtitle="Live, streamed run output">
@@ -75,21 +92,35 @@ export function ConsolePage() {
             </button>
           ))}
         </Card>
-        <Card style={{ background: "#0b0e12", fontFamily: "ui-monospace, monospace", fontSize: "0.8rem", height: "70vh", overflow: "auto" }}>
+        <Card style={{ background: "#0b0e12", padding: 0, height: "70vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
           {active ? (
             <>
-              <div style={{ color: "var(--text-muted)", marginBottom: 8 }}>
-                run {active} · <StatusBadge status={status || "…"} />
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                <span style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>
+                  run {active} · <StatusBadge status={status || "…"} />
+                </span>
+                <input
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  placeholder="Filter log…"
+                  aria-label="Filter log"
+                  style={{ marginLeft: "auto", width: 200, padding: "5px 9px", borderRadius: "var(--radius-md)", border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.06)", color: "#e6eaef", fontSize: "0.76rem" }}
+                />
+                {filter && <span style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>{visible.length}/{cleanLines.length}</span>}
+                <Button size="sm" variant="ghost" onClick={downloadLog}>Download</Button>
               </div>
-              {lines.map((l, i) => (
-                <div key={i} style={{ color: l.stream === "stderr" ? "#e08b7f" : "#cdd6e0", whiteSpace: "pre-wrap" }}>
-                  {l.message.replace(ANSI, "")}
-                </div>
-              ))}
-              <div ref={bottomRef} />
+              <div aria-live="polite" style={{ flex: 1, overflow: "auto", padding: "12px 14px", fontFamily: "ui-monospace, monospace", fontSize: "0.8rem" }}>
+                {visible.map((l, i) => (
+                  <div key={i} style={{ color: l.stream === "stderr" ? "#e08b7f" : "#cdd6e0", whiteSpace: "pre-wrap" }}>
+                    {l.message}
+                  </div>
+                ))}
+                {filter && visible.length === 0 && <span style={{ color: "var(--text-muted)" }}>No lines match “{filter}”.</span>}
+                <div ref={bottomRef} />
+              </div>
             </>
           ) : (
-            <span style={{ color: "var(--text-muted)" }}>Select a run to stream its logs.</span>
+            <span style={{ color: "var(--text-muted)", padding: 16 }}>Select a run to stream its logs.</span>
           )}
         </Card>
       </div>
