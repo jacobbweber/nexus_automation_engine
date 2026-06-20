@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M22 — canvas run replay** (F30, #91): a completed run's recorded step trace can be replayed onto
+  the graph — `/canvas?id=<wf>&replay=<run>` (or the ▶ replay link in the Library run history)
+  animates each node's status in step order (instant under reduced-motion), with a replay banner
+  (↻ again / exit). Live per-node status overlay during a run (F29) was already in place.
 - **M23 — incident trends** (I37, #98): the Incidents board gains a trends row — open/resolved
   counts, **mean time to resolution**, and **top failing automations** — all computed client-side
   from the board data (pure `incidentTrends`, unit-tested).

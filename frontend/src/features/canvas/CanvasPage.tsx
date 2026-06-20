@@ -42,6 +42,7 @@ export function CanvasPage() {
   const [nodeStates, setNodeStates] = useState<Record<string, StepStatus>>({});
   const [approval, setApproval] = useState<{ run_id: string; node_id: string; message: string } | null>(null);
   const [runForm, setRunForm] = useState<Record<string, unknown> | null>(null);
+  const [replayRunId, setReplayRunId] = useState<string | null>(null);
   const [caps, setCaps] = useState<Capabilities[]>([]);
   const [specs, setSpecs] = useState<NodeTypeSpec[]>([]);
   const [running, setRunning] = useState(false);
@@ -134,12 +135,36 @@ export function CanvasPage() {
     setNodeStates({});
   }, []);
 
-  // Deep-link from the Workflow Library: /canvas?id=<wf> auto-loads that workflow.
+  // Deep-link from the Workflow Library: /canvas?id=<wf> auto-loads that workflow; ?replay=<run>
+  // plays that run's recorded step trace back onto the graph.
   useEffect(() => {
     const id = params.get("id");
-    if (id && id !== currentId) load(id);
+    const replay = params.get("replay");
+    if (id && id !== currentId) {
+      load(id).then(() => {
+        if (replay) void playReplay(replay);
+      });
+    } else if (replay && replay !== replayRunId) {
+      void playReplay(replay);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params, load]);
+
+  async function playReplay(runId: string) {
+    setReplayRunId(runId);
+    setNodeStates({});
+    const run = await Canvas.getRun(runId).catch(() => null);
+    if (!run?.steps) {
+      setReplayRunId(null);
+      return;
+    }
+    const reduce = matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const steps = [...run.steps].sort((a, b) => (a.started_at ?? "").localeCompare(b.started_at ?? ""));
+    for (const st of steps) {
+      setNodeStates((s) => ({ ...s, [st.node_id]: st.status as StepStatus }));
+      if (!reduce) await new Promise((r) => setTimeout(r, 500));
+    }
+  }
 
   function newWorkflow() {
     setCurrentId(undefined);
@@ -259,6 +284,13 @@ export function CanvasPage() {
           onSubmit={submitForReview}
           running={running}
         />
+        {replayRunId && (
+          <div style={{ display: "flex", gap: 10, alignItems: "center", padding: "6px 14px", borderBottom: "1px solid var(--border)", background: "var(--accent-soft)", fontSize: "0.78rem" }}>
+            <span style={{ fontWeight: 600, color: "var(--accent)" }}>Replaying run {replayRunId.slice(0, 12)}…</span>
+            <button onClick={() => playReplay(replayRunId)} style={{ background: "none", border: "none", color: "var(--accent)", cursor: "pointer", fontSize: "0.76rem" }}>↻ again</button>
+            <button onClick={() => { setReplayRunId(null); setNodeStates({}); setParams({ ...(currentId ? { id: currentId } : {}) }, { replace: true }); }} style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "0.76rem" }}>✕ exit replay</button>
+          </div>
+        )}
         {lint.length > 0 && (
           <div style={{ display: "flex", gap: 12, alignItems: "center", padding: "6px 14px", borderBottom: "1px solid var(--border)", background: lintErrors ? "var(--danger-soft)" : "var(--warn-soft)", fontSize: "0.78rem", flexWrap: "wrap" }}>
             <span style={{ fontWeight: 600 }}>
