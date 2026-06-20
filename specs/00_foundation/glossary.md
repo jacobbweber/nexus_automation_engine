@@ -158,3 +158,62 @@ validator is the sole gate, so a theme is safe by construction.
 **Density** — `cozy | comfortable | compact`, a multiplier over the spacing/type scale (clamped so
 interactive targets stay ≥44px). Lets the same locked layout serve a relaxed novice view and a
 dense expert/enterprise view.
+
+## Deterministic governance (v4.0 — see `vision_deterministic_governance.md`)
+
+**CI Type Schema** — *schema-as-data for the CMDB.* The definition of what a CI of a given type
+(VM, Datastore, Cluster, Volume, …) must look like: its fields (name, datatype, required, allowed
+values/regex, sensitivity) and required tags/naming patterns. Authored/maintained in the CMDB Schema
+Studio, validated deterministically. Mental model: the same idea as `nexus-theme/v1` or `node_specs`,
+applied to configuration items — a contract the platform enforces, not free-form records.
+
+**Lineage (CI lineage)** — *what makes a CI whole.* The typed graph of required relationships for a
+CI type, with cardinality (a VM resolves `host→cluster→datacenter`, a datastore, a backup policy, an
+owner/team, an environment). Lineage is about a CI's *relationships*, distinct from its own fields.
+
+**CI Health Report** — the deterministic output of checking a CI against its type schema **and**
+lineage: missing/invalid fields, broken/missing/orphaned relationships, tag/naming non-compliance,
+a health score, and remediation hints. The enriched basis for the lifecycle-validation gate.
+
+**Idempotency class** — a building block / connector action's declared re-run safety: `idempotent`
+(converges to desired state, safe to re-run), `check_only` (read/plan), or `non_idempotent` (must be
+guarded — flagged). The mandate "all automation is idempotent" expressed *in the contract*.
+
+**Compliance mode / DriftReport** — *assert, don't change.* Running a template/workflow in compliance
+mode performs a dry-run that yields a **DriftReport** (desired vs observed, per resource & field:
+`compliant | drifted | unknown`, plus the reconcile action that would converge it) without mutating.
+Mental model: GitOps reconcile applied to the estate — run anything anytime to see the gap.
+
+**Change classification** — deterministic label for a run — `standard` (pre-approved low-risk),
+`normal` (needs review/approval), `emergency` (expedited) — derived from building-block risk, blast
+radius, targets, and idempotency class. Policy maps classification → required reviewer levels.
+
+**Plain summary** — authored, human-language metadata on a building block: `input → action →
+outcome` slots. Composed in execution order (with resolved variables) to generate review narratives.
+Authored once by the automation team; every workflow built from the block inherits exec-ready prose.
+
+**Change Review Packet** — the deterministic, multi-representation rendering of exactly what a run
+will do: **Technical** (graph, params, plan/diff, blast radius), **Non-technical/Executive** (plain
+narrative from plain summaries), and **Flowchart** (human-labelled `LogicFlow`). An audience toggle
+(Technical / Non-technical / Executive) switches the view. No AI — composed from authored templates.
+
+**Pinning Rule** — *a guaranteed binding of a workflow to matching CIs.* `selector (CI type + tags +
+fields) → guaranteed workflow + trigger (create/change/schedule/on-demand) + enforcement mode
+(assert | enforce | gate) + priority`. Mental model: management-by-invariant — admins declare what
+must be true of the estate ("every DR-Tier-0 VM has a Zerto VPG"); the reconciler continuously
+asserts it, enforces through review, and surfaces coverage and gaps.
+
+**Reconciler (pinning)** — the engine that, per trigger, evaluates pinning rules against CMDB CIs and
+produces a pinned-actions plan: `assert` launches compliance runs, `enforce` routes review-gated
+reconcile runs, `gate` blocks the triggering change until the pinned check passes.
+
+**GitOps backbone / config-as-code** — Nexus serializes all config artifacts (workflows, CI schemas,
+pinning rules, themes, policies, change templates, schedules) to a **canonical, deterministic** Git
+layout, commits on change (audit message) and on schedule as backup/system-of-record, and can
+optionally **pull/reconcile** a repo as desired state. Default repo is local (guardrail: official git,
+no paid/remote services). Enables per-artifact history/diff/restore and environment promotion.
+
+**infracode pillar repos** — the org/repo strategy for the *automation content* (separate from the
+Nexus platform-config repo): one mono/pillar repo per integration — `infracode_ansible`,
+`infracode_terraform`, `infracode_snow`, `infracode_pure`, `infracode_cisco`. Nexus references/syncs
+them; deterministic naming/tagging conventions live here. Documented, not a runtime dependency.
