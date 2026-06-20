@@ -119,6 +119,34 @@ async def test_enforce_raises():
         await ValidationService().enforce_for_execution(_valid_meta(), "does-not-exist")
 
 
+async def test_health_gate_blocks_degraded_ci_when_required():
+    from app.contexts.cmdb.application.seed import seed_cmdb_lineage, seed_cmdb_schemas
+
+    seed_cmdb_schemas()
+    seed_cmdb_lineage()
+    svc = ValidationService()
+    pol = svc.get_policy()
+    pol.require_healthy_ci = True
+    pol.min_health_score = 70
+    svc.update_policy(pol)
+    # app-stg-01 is an incomplete VM (missing relationships/tags) → blocked on health grounds
+    bad = await svc.validate_for_execution(_valid_meta(ci_type="vm"), "app-stg-01")
+    assert not bad.ok and any("health" in r for r in bad.reasons)
+    # web-prod-01 is a fully-populated VM → passes
+    good = await svc.validate_for_execution(_valid_meta(ci_type="vm"), "web-prod-01")
+    assert good.ok, good.reasons
+
+
+async def test_health_gate_off_by_default():
+    from app.contexts.cmdb.application.seed import seed_cmdb_lineage, seed_cmdb_schemas
+
+    seed_cmdb_schemas()
+    seed_cmdb_lineage()
+    # default policy does not require CI health → a degraded CI is not blocked on health grounds
+    res = await ValidationService().validate_for_execution(_valid_meta(ci_type="vm"), "app-stg-01")
+    assert res.ok, res.reasons
+
+
 def test_build_validation_flags_incomplete():
     result = ValidationService().validate_for_build(AutomationMeta(name="bare"))
     assert not result.ok and result.stage == "build"

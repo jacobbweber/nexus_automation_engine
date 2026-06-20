@@ -23,6 +23,10 @@ class ValidationPolicy(BaseModel):
     reject_retired: bool = True
     reject_unknown_ci: bool = True
     block_destructive_on_cluster: bool = True
+    # CMDB schema/lineage health gating (M24.5): when enabled, a target CI must score at least
+    # min_health_score against its CI type schema + lineage (see the `cmdb` context).
+    require_healthy_ci: bool = False
+    min_health_score: int = 70
     updated_by: str = "system"
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 

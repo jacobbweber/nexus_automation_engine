@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M24.5 — lifecycle gate consults CMDB health** (v4.0 Pillar A): the execution lifecycle-validation
+  gate now optionally requires the target CI to be healthy against its schema + lineage. Two new
+  `ValidationPolicy` flags (`require_healthy_ci`, `min_health_score`, default off) — when enabled, a
+  run targeting a degraded/unhealthy CI is rejected with the top issues; missing-schema CI types are
+  skipped (can't assess). Off by default, so existing behavior is unchanged.
 - **M24.4 — CMDB API + standardized CMDB data** (v4.0 Pillar A): REST surface for the `cmdb`
   context — `GET /cmdb/schemas[/{type}]` + admin `PUT`, `GET /cmdb/lineage[/{type}]` + admin `PUT`,
   `POST /cmdb/validate-ci` (ad-hoc record → health report), and `GET /cmdb/ci/{name}/health`

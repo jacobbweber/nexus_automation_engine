@@ -26,6 +26,8 @@ class ValidationPolicyRepository:
                 reject_retired=row.reject_retired,
                 reject_unknown_ci=row.reject_unknown_ci,
                 block_destructive_on_cluster=row.block_destructive_on_cluster,
+                require_healthy_ci=row.require_healthy_ci,
+                min_health_score=row.min_health_score,
                 updated_by=row.updated_by,
                 updated_at=row.updated_at
                 if row.updated_at.tzinfo
@@ -41,6 +43,8 @@ class ValidationPolicyRepository:
             row.reject_retired = policy.reject_retired
             row.reject_unknown_ci = policy.reject_unknown_ci
             row.block_destructive_on_cluster = policy.block_destructive_on_cluster
+            row.require_healthy_ci = policy.require_healthy_ci
+            row.min_health_score = policy.min_health_score
             row.updated_by = policy.updated_by
             row.updated_at = datetime.now(UTC)
             s.add(row)
