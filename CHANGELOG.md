@@ -5,6 +5,12 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Fixed
+- **Light mode stuck dark** (QA): selecting Light (or any light-resolving mode) left the app dark.
+  `index.html` ships `<html class="dark">` for anti-FOUC, and the mode engine updated `data-mode`
+  but never cleared that legacy class, so the `:where(.dark)` token rule pinned every surface to
+  dark. The mode engine now keeps `.dark` in sync with the resolved mode. Regression-tested.
+
 ### Added
 - **M23 — hardening: token regression + a11y tests** (L46/L47, #107/#108): a **theme-token
   regression matrix** snapshots every built-in theme's generated CSS (light + dark) so unintended
