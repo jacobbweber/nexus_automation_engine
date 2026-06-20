@@ -6,6 +6,13 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M25.1 — idempotency-class contract** (v4.0 Pillar B, ADR-0010): every connector action and
+  catalog building block now declares an `IdempotencyClass` (`idempotent | check_only |
+  non_idempotent`) — a shared-kernel primitive. Connector actions auto-classify from their name
+  (destructive verbs → non-idempotent, read/plan → check-only) with explicit override; templates are
+  seeded via the same inference; the catalog detail shows an idempotency chip. Makes "all automation
+  is idempotent" an enforceable contract, not a hope. Also aligned template `ci_type` defaults to the
+  standardized `vm` vocabulary.
 - **M24.7 — CI health badges + Lineage Explorer** (v4.0 Pillar A): a reusable `HealthBadge`
   (status + score, colour + text) and a **CMDB Lineage Explorer** (`/cmdb-explorer`) — look up any CI
   to see its deterministic health (badge/score), its required relationships with **gaps highlighted**

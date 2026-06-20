@@ -114,6 +114,7 @@ export interface Template {
   markdown_documentation: string;
   supports_check_mode: boolean;
   supports_diff: boolean;
+  idempotency: string; // idempotent | check_only | non_idempotent
   survey: SurveyField[];
   default_params: Record<string, unknown>;
   owner: string;

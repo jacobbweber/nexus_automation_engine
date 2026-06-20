@@ -16,6 +16,7 @@ from app.contexts.automation_catalog.domain.models import (
 )
 from app.contexts.automation_catalog.infrastructure.repository import TemplateRepository
 from app.contexts.connectors.domain.models import ConnectorKind
+from app.shared_kernel.idempotency import infer_idempotency
 from app.shared_kernel.ids import new_id
 
 A = ConnectorKind  # shorthand
@@ -402,6 +403,7 @@ def seed_templates(repo: TemplateRepository | None = None) -> int:
                 supports_check_mode=connector
                 in (A.ANSIBLE, A.TERRAFORM, A.VMWARE, A.PURESTORAGE, A.COHESITY),
                 supports_diff=connector in (A.ANSIBLE, A.TERRAFORM),
+                idempotency=infer_idempotency(action),
                 survey=_survey_for(connector),
                 default_params={},
                 owner="engineer",
@@ -414,7 +416,7 @@ def seed_templates(repo: TemplateRepository | None = None) -> int:
                 prerequisites=f"Access to {vendor} target; appropriate RBAC entitlement.",
                 version="1.0.0",
                 atomic=atomic,
-                ci_type="datastore" if ("datastore" in tags or "datastore" in action) else "server",
+                ci_type="datastore" if ("datastore" in tags or "datastore" in action) else "vm",
                 ci_heritage=vendor,
                 approved_date=now,
                 last_reviewed=now,

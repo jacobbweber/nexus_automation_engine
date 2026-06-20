@@ -72,6 +72,9 @@ export function AutomationDetail({ template, onClose }: { template: Template; on
               risk <strong style={{ color: "var(--text)" }}>{template.risk}</strong> ·{" "}
               {template.atomic ? "atomic" : "orchestrated"}
             </div>
+            <div style={{ marginTop: 6 }}>
+              <IdempotencyChip value={template.idempotency} />
+            </div>
           </div>
           <Button variant="ghost" onClick={onClose}>✕</Button>
         </div>
@@ -169,6 +172,33 @@ export function AutomationDetail({ template, onClose }: { template: Template; on
         </div>
       </div>
     </div>
+  );
+}
+
+// Idempotency contract chip — re-run safety surfaced on the building block (v4.0 §3).
+const IDEMPOTENCY_META: Record<string, { label: string; color: string }> = {
+  idempotent: { label: "idempotent · safe to re-run", color: "var(--success)" },
+  check_only: { label: "check-only · never mutates", color: "var(--info)" },
+  non_idempotent: { label: "non-idempotent · guard re-runs", color: "var(--warn)" },
+};
+
+function IdempotencyChip({ value }: { value: string }) {
+  const meta = IDEMPOTENCY_META[value] ?? { label: value, color: "var(--text-muted)" };
+  return (
+    <span
+      title="Idempotency class — whether this automation is safe to re-run for compliance"
+      style={{
+        fontSize: "0.7rem",
+        fontWeight: 600,
+        padding: "2px 9px",
+        borderRadius: 999,
+        color: meta.color,
+        border: `1px solid ${meta.color}`,
+        background: `color-mix(in srgb, ${meta.color} 12%, transparent)`,
+      }}
+    >
+      {meta.label}
+    </span>
   );
 }
 

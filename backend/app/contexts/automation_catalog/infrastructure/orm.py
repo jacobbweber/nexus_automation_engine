@@ -21,6 +21,7 @@ class TemplateRow(Base):
     markdown_documentation: Mapped[str] = mapped_column(Text, default="")
     supports_check_mode: Mapped[bool] = mapped_column(Boolean, default=False)
     supports_diff: Mapped[bool] = mapped_column(Boolean, default=False)
+    idempotency: Mapped[str] = mapped_column(String, default="idempotent")
     survey_json: Mapped[str] = mapped_column(Text, default="[]")
     default_params_json: Mapped[str] = mapped_column(Text, default="{}")
     owner: Mapped[str] = mapped_column(String, default="engineer")
