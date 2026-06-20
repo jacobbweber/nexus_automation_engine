@@ -49,7 +49,7 @@ def _valid_meta(**over) -> AutomationMeta:
         approved_date=datetime.now(UTC),
         last_updated=datetime.now(UTC),
         last_reviewed=datetime.now(UTC),
-        ci_type="server",
+        ci_type="vm",
         ci_heritage="Ansible",
     )
     base.update(over)
@@ -78,7 +78,7 @@ def test_cmdb_unknown_retired_mismatch_cluster():
     assert check_cmdb(_valid_meta(), None, policy)  # unknown CI
     assert check_cmdb(_valid_meta(), {"lifecycle_state": "retired", "name": "x"}, policy)
     assert check_cmdb(
-        _valid_meta(ci_type="server"), {"ci_type": "datastore", "name": "x"}, policy
+        _valid_meta(ci_type="vm"), {"ci_type": "datastore", "name": "x"}, policy
     )  # type mismatch
     assert check_cmdb(
         _valid_meta(action="delete_datastore", ci_type="datastore"),
@@ -86,7 +86,7 @@ def test_cmdb_unknown_retired_mismatch_cluster():
         policy,
     )  # destructive on cluster
     assert not check_cmdb(
-        _valid_meta(), {"ci_type": "server", "lifecycle_state": "operational", "name": "ok"}, policy
+        _valid_meta(), {"ci_type": "vm", "lifecycle_state": "operational", "name": "ok"}, policy
     )
 
 
@@ -95,13 +95,13 @@ def test_cmdb_unknown_retired_mismatch_cluster():
 
 async def test_execution_validation_passes_for_clean_target():
     svc = ValidationService()
-    result = await svc.validate_for_execution(_valid_meta(ci_type="server"), "web-prod-01")
+    result = await svc.validate_for_execution(_valid_meta(ci_type="vm"), "web-prod-01")
     assert result.ok, result.reasons
 
 
 async def test_execution_validation_rejects_retired_ci():
     svc = ValidationService()
-    result = await svc.validate_for_execution(_valid_meta(ci_type="server"), "legacy-app-02")
+    result = await svc.validate_for_execution(_valid_meta(ci_type="vm"), "legacy-app-02")
     assert not result.ok and any("retired" in r for r in result.reasons)
 
 

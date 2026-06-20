@@ -6,6 +6,13 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M24.4 — CMDB API + standardized CMDB data** (v4.0 Pillar A): REST surface for the `cmdb`
+  context — `GET /cmdb/schemas[/{type}]` + admin `PUT`, `GET /cmdb/lineage[/{type}]` + admin `PUT`,
+  `POST /cmdb/validate-ci` (ad-hoc record → health report), and `GET /cmdb/ci/{name}/health`
+  (resolves the CI via the ServiceNow ACL connector and runs the checker). The simulated CMDB was
+  enriched to the **standardized CI vocabulary** (vm/host/cluster/datastore/volume/backup_policy)
+  with tags + typed relationships, so health checks have real signal end-to-end (web-prod-01 reads
+  healthy; app-stg-01 reads degraded).
 - **M24.3 — CMDB health checker** (v4.0 Pillar A): the deterministic payoff of the `cmdb` context —
   `check_ci(record, schema, lineage)` → a **CI Health Report** (field/lineage/tag issues with
   severity, a stable explainable **health score**, status healthy/degraded/unhealthy, and
@@ -22,6 +29,11 @@ All notable changes to this project are documented here. Format follows
   regex/sensitivity, required tags, naming pattern), a deterministic schema validator, a versioned
   registry (list/get/upsert), and seeded schemas for vm/host/cluster/datastore/volume/backup_policy/
   application. Foundation for lineage, the health checker, deterministic pinning, and review impact.
+
+### Changed
+- **CMDB CI type vocabulary**: the simulated ServiceNow CMDB now uses `vm` (was `server`) and adds
+  host/cluster/volume/backup_policy CIs with tags + relationships (lifecycle-validation tests updated
+  accordingly) — resolving the v4.0 open question and aligning the CMDB with the seeded schemas.
 
 ### Fixed
 - **Run-status colour distinguishability** (QA): dark `--run-skipped` was a warm taupe that sat too
