@@ -173,6 +173,34 @@ def list_changes() -> list[dict[str, object]]:
     return out
 
 
+def impact(targets: list[str]) -> list[dict[str, object]]:
+    """Blast-radius: the CIs an action on these targets would touch — each target CI plus, when it
+    is a cluster member, its cluster siblings (a change to one ripples across the cluster)."""
+    seen: dict[str, dict[str, object]] = {}
+    for name in targets:
+        ci = get_ci(name)
+        if not ci:
+            continue
+        seen[name] = {
+            "name": name,
+            "ci_type": ci.get("ci_type"),
+            "cluster": ci.get("cluster"),
+            "reason": "direct target",
+        }
+        cluster = ci.get("cluster")
+        if ci.get("cluster_member") and cluster:
+            for row in _CMDB:
+                rn = str(row["name"])
+                if row.get("cluster") == cluster and rn not in seen:
+                    seen[rn] = {
+                        "name": rn,
+                        "ci_type": row.get("ci_type"),
+                        "cluster": cluster,
+                        "reason": f"cluster sibling of {name}",
+                    }
+    return list(seen.values())
+
+
 def cmdb_tables() -> list[str]:
     return list(CMDB_TABLES)
 

@@ -62,6 +62,25 @@ def servicenow_changes() -> list[ChangeRecord]:
     return [ChangeRecord(**c) for c in sn.list_changes()]
 
 
+class ImpactRequest(BaseModel):
+    targets: list[str] = Field(default_factory=list)
+
+
+class ImpactItem(BaseModel):
+    name: str
+    ci_type: str | None = None
+    cluster: str | None = None
+    reason: str
+
+
+@router.post("/servicenow/impact", response_model=list[ImpactItem])
+def servicenow_impact(body: ImpactRequest) -> list[ImpactItem]:
+    """Blast-radius preview: which CMDB CIs an action on the given targets would touch."""
+    from app.contexts.connectors.infrastructure.simulation import servicenow as sn
+
+    return [ImpactItem(**i) for i in sn.impact(body.targets)]
+
+
 @router.get("/{kind}", response_model=Capabilities)
 def get_connector(kind: ConnectorKind) -> Capabilities:
     return services.get_capabilities(kind)

@@ -12,6 +12,16 @@ import {
   type NodeTypeSpec,
   type Workflow,
 } from "@/shared/api/client";
+import { BlastRadius } from "./BlastRadius";
+
+// A literal (non-templated) target CI on a backend node, used for the blast-radius preview.
+function literalTargets(node: CanvasNode): string[] {
+  const data = node.data as Record<string, unknown>;
+  const params = (data.params ?? {}) as Record<string, unknown>;
+  const filters = (data.filters ?? {}) as Record<string, unknown>;
+  const candidates = [params.target, data.target, filters.name];
+  return candidates.filter((v): v is string => typeof v === "string" && v.length > 0 && !v.includes("{{"));
+}
 
 const ROLES = ["admin", "engineer", "operator", "consumer"];
 
@@ -92,6 +102,9 @@ export function SchemaProperties(props: {
           onChange={(v) => set(f.name, v)}
         />
       ))}
+      {["automation_task", "cmdb_lookup"].includes(node.type) && (
+        <BlastRadius targets={literalTargets(node)} />
+      )}
       <div style={{ marginTop: 16, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
         <button
           onClick={onDelete}
