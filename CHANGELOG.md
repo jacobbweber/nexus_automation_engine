@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M24.3 — CMDB health checker** (v4.0 Pillar A): the deterministic payoff of the `cmdb` context —
+  `check_ci(record, schema, lineage)` → a **CI Health Report** (field/lineage/tag issues with
+  severity, a stable explainable **health score**, status healthy/degraded/unhealthy, and
+  remediation hints). Detects missing/invalid fields, naming violations, missing/orphaned/
+  cardinality-wrong relationships, and missing required tags. `CmdbHealthService` resolves a CI's
+  schema + lineage and runs it. Pure, no AI — the basis for the lifecycle gate, pickers, and pinning.
 - **M24.2 — CMDB lineage specs** (v4.0 Pillar A): per CI type, the typed required relationships
   (target type, direction up/down, cardinality, required) that make a CI "whole" — with a
   deterministic validator (unknown-target + duplicate-name checks) and a **required-dependency cycle
