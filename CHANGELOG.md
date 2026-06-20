@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M23 — Accessibility Center** (K44, #105): a dedicated `/accessibility` page consolidating color
+  mode + **auto-sundown schedule** + **per-area mode overrides** (e.g. keep the Console dark),
+  density, dyslexia font, text-scale, and theme — surfacing the sundown/per-area controls the mode
+  engine already supported but had no UI for. Linked from the shell.
 - **M23 — change calendar from ServiceNow CMDB** (J39, #100): the Governance page gains a change
   calendar — **CHG records are pulled from the (simulated) ServiceNow CMDB connector** as the system
   of record (`GET /connectors/servicenow/changes`), shown as a day-grouped agenda with window
