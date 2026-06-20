@@ -76,6 +76,7 @@ export function CommandPalette() {
     const actions: Command[] = [
       { id: "act:new-workflow", label: "New workflow", group: "Actions", keywords: "create canvas", run: go("/canvas") },
       { id: "act:theme-studio", label: "Open Theme Studio", group: "Actions", keywords: "theme appearance", run: go("/theme-studio") },
+      { id: "act:accessibility", label: "Open Accessibility Center", group: "Actions", keywords: "a11y mode dark light density contrast dyslexia text size", run: go("/accessibility") },
     ];
     const wf: Command[] = workflows.map((w) => ({
       id: `wf:${w.id}`,
