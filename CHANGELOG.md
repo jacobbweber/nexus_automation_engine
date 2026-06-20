@@ -5,6 +5,13 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Added
+- **M24.1 — CMDB CI type schema registry** (v4.0 Pillar A, ADR-0009): a new `cmdb` bounded context
+  that defines CIs as a contract — schema-as-data per CI type (fields with datatype/required/enum/
+  regex/sensitivity, required tags, naming pattern), a deterministic schema validator, a versioned
+  registry (list/get/upsert), and seeded schemas for vm/host/cluster/datastore/volume/backup_policy/
+  application. Foundation for lineage, the health checker, deterministic pinning, and review impact.
+
 ### Fixed
 - **Run-status colour distinguishability** (QA): dark `--run-skipped` was a warm taupe that sat too
   close in hue to amber `--run-warn` (the theme validator's distinguishability check flagged it
