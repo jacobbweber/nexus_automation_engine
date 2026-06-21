@@ -20,7 +20,7 @@ from app.contexts.review.domain.classification import (
     ReviewPolicy,
     assess,
 )
-from app.shared_kernel.idempotency import IdempotencyClass
+from app.shared_kernel.idempotency import IdempotencyClass, infer_idempotency
 
 _RISK_ORDER = {"low": 0, "medium": 1, "high": 2, "critical": 3}
 _TARGET_KEYS = ("target", "inventory", "object", "name", "workspace")
@@ -120,7 +120,18 @@ def build_packet(
             params = {}
         if not connector or not action:
             continue
-        info = block_lookup.get((connector, action), BlockInfo())
+        # Prefer the authored catalog metadata; otherwise infer safely from the action name so a
+        # workflow whose node doesn't 1:1 match a catalog block is still classified honestly (a
+        # destructive step must not look low-risk just because there's no exact catalog match).
+        info = block_lookup.get((connector, action))
+        if info is None:
+            inferred = infer_idempotency(action)
+            destructive = inferred == IdempotencyClass.NON_IDEMPOTENT
+            info = BlockInfo(
+                idempotency=inferred,
+                risk="high" if destructive else "low",
+                rollback="restore from snapshot/backup." if destructive else "",
+            )
         step_no += 1
 
         technical.append(

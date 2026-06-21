@@ -5,6 +5,14 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Fixed
+- **M30 UAT findings** (v4.0 Pillar G): (1) the Review Packet builder now **infers idempotency + risk
+  from the action name** when a workflow node has no exact catalog match — so a destructive step
+  (e.g. `destroy_volume`) is classified as review-worthy instead of `standard/no-review`; (2)
+  `PostureSnapshot.compliant_pct` is now serialized (computed field) in the compliance API; (3) seeded
+  a published **"Zerto DR VPG"** workflow so the DR-Tier-0 pinning guarantee resolves (coverage no
+  longer flags a missing workflow).
+
 ### Added
 - **M29.4/29.5 — in-app docs + generated reference** (v4.0 Pillar F): a backend docs API serves the
   authored `docs/` tree (so it stays the single source of truth) and a **generated reference** built
