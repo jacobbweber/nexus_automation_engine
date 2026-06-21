@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M29.1–29.3 — platform documentation** (v4.0 Pillar F): a `docs/` tree — **concepts** (atomic
+  automation → governed composition, the determinism & idempotency mandate), **personas** (automation
+  engineer / operator / reviewer-exec / admin), **feature guides** for every surface (incl. the new
+  M24–M28 ones), and the **infracode pillar-repo strategy** (ansible/terraform/snow/pure/cisco +
+  naming/tagging conventions, separated from the platform-config repo).
 - **M28.5/28.6 — GitOps API + admin UI + ADR-0013** (v4.0 Pillar E): REST for the config backbone
   (`GET /gitops/status`, admin `POST /gitops/sync` "back up now", `GET /gitops/history|diff`, admin
   `POST /gitops/restore`, `GET /gitops/pull-preview`) and a **GitOps admin page** (`/gitops`, nav +
