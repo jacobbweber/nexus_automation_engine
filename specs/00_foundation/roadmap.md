@@ -88,13 +88,18 @@ compliance. Dependencies: M24→(M25,M26); (M24,M25)→M27; (M24,M27)→M28; M29
 
 | # | Milestone | Delivers | Status |
 | --- | --- | --- | --- |
-| M24 | **CMDB Schema & Lineage** | CI type schema registry + lineage spec + deterministic health checker; Schema Studio; CI health badges + Lineage Explorer; enriches the lifecycle gate. | planned |
-| M25 | **Idempotency & Compliance** | Idempotency class contract; DriftReport + `evaluate_compliance()`; compliance-mode runs; scheduled sweeps → posture dashboard; drift→incidents. | planned |
-| M26 | **Multi-Audience Review** | Change classification; plain-summary metadata; Change Review Packet (technical/non-technical/executive + flowchart); run-level approval gate; exec capability. | planned |
-| M27 | **Deterministic Pinning** | Pinning rules (selector→workflow+trigger+enforcement); reconciler; coverage/impact preview; Determinism/Guardrails management page. | planned |
-| M28 | **GitOps Backbone** | Canonical serialization; local-git versioning + commit-on-change/backup; optional pull/reconcile; per-artifact history/diff/restore; GitOps admin. | planned |
-| M29 | **Documentation & Repo Strategy** | `docs/` tree (concepts, personas, feature guides), infracode pillar-repo strategy, naming/tagging conventions, in-app `/docs` + generated reference. | planned |
-| M30 | **Admin/Integrator UAT** | End-to-end admin+integrator UAT; fix findings; verify in-browser. Cut **v4.0.0**. | planned |
+| M24 | **CMDB Schema & Lineage** | CI type schema registry + lineage spec + deterministic health checker; Schema Studio; CI health badges + Lineage Explorer; enriches the lifecycle gate. | done |
+| M25 | **Idempotency & Compliance** | Idempotency class contract; DriftReport + `evaluate_compliance()`; compliance-mode runs; scheduled sweeps → posture dashboard; drift→incidents. | done |
+| M26 | **Multi-Audience Review** | Change classification; plain-summary metadata; Change Review Packet (technical/non-technical/executive + flowchart); run-level approval gate; exec capability. | done |
+| M27 | **Deterministic Pinning** | Pinning rules (selector→workflow+trigger+enforcement); reconciler; coverage/impact preview; Determinism/Guardrails management page. | done |
+| M28 | **GitOps Backbone** | Canonical serialization; local-git versioning + commit-on-change/backup; optional pull/reconcile; per-artifact history/diff/restore; GitOps admin. | done |
+| M29 | **Documentation & Repo Strategy** | `docs/` tree (concepts, personas, feature guides), infracode pillar-repo strategy, naming/tagging conventions, in-app `/docs` + generated reference. | done |
+| M30 | **Admin/Integrator UAT** | End-to-end admin+integrator UAT; fix findings; verify in-browser. Cut **v4.0.0**. | done |
 
-Planned ADRs: 0009 (CMDB schema/lineage context), 0010 (idempotency & drift model), 0011
-(multi-audience review + run approval), 0012 (deterministic pinning/reconcile), 0013 (GitOps backbone).
+ADRs: 0009 (CMDB schema/lineage context), 0010 (idempotency & drift model), 0011 (multi-audience
+review + run approval), 0012 (deterministic pinning/reconcile), 0013 (GitOps backbone) — all accepted.
+
+**4.0 reached.** Released **v4.0.0** (2026-06-20) — Deterministic Governance. All seven milestones
+M24–M30 done; the CMDB is a schema-enforced contract, automation is idempotent + compliance-asserted,
+changes pass audience-tailored review + approval, pinning rules guarantee desired state, config is
+versioned in Git, and the platform is fully documented. ~45 PRs on this line, all green CI.

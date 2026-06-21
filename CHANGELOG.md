@@ -5,6 +5,17 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-06-20
+
+**Deterministic Governance.** Nexus becomes an absolute configuration-management control plane: the
+CMDB is a schema-enforced contract with deterministic health/lineage; all automation declares an
+idempotency class and is continuously re-runnable for compliance (drift → posture → incidents);
+every change passes audience-tailored human review (technical / non-technical / executive) and a
+run-level approval gate; deterministic pinning rules guarantee a workflow per class of CI; all config
+is versioned as code in local Git (history / diff / restore / backup); and the platform is fully
+documented (concepts, personas, feature guides, infracode repo strategy + in-app `/docs`). Seven
+milestones M24–M30. No in-product AI (ADR-0008..0013); local-git only; simulation-only; no secrets.
+
 ### Fixed
 - **M30 UAT findings** (v4.0 Pillar G): (1) the Review Packet builder now **infers idempotency + risk
   from the action name** when a workflow node has no exact catalog match — so a destructive step
