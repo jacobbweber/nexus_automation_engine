@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M29.4/29.5 — in-app docs + generated reference** (v4.0 Pillar F): a backend docs API serves the
+  authored `docs/` tree (so it stays the single source of truth) and a **generated reference** built
+  from live metadata (catalog plain summaries, CMDB schemas + lineage, pinning rules) so it can't
+  drift; a frontend **`/docs`** surface renders the tree with a searchable sidebar + the reference
+  (nav + command palette). Completes M29.
 - **M29.1–29.3 — platform documentation** (v4.0 Pillar F): a `docs/` tree — **concepts** (atomic
   automation → governed composition, the determinism & idempotency mandate), **personas** (automation
   engineer / operator / reviewer-exec / admin), **feature guides** for every surface (incl. the new

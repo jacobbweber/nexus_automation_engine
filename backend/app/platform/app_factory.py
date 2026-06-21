@@ -30,6 +30,7 @@ from app.contexts.lifecycle_validation.api import routes as validation_routes
 from app.contexts.orchestration_canvas.api import routes as canvas_routes
 from app.contexts.review.api import routes as review_routes
 from app.contexts.scheduling.api import routes as scheduling_routes
+from app.platform import docs as docs_site
 from app.platform import health
 from app.platform.config import get_settings
 from app.platform.database import dispose_db, init_db
@@ -138,6 +139,7 @@ def create_app(static_dir: str | None = None) -> FastAPI:
 
     # Platform routes + context routers under /api/v1.
     app.include_router(health.router, prefix="/api/v1")
+    app.include_router(docs_site.router, prefix="/api/v1")
     app.include_router(identity_routes.router, prefix="/api/v1")
     app.include_router(connectors_routes.router, prefix="/api/v1")
     app.include_router(catalog_routes.router, prefix="/api/v1")

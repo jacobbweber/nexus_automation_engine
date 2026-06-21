@@ -526,6 +526,18 @@ export interface CIHealthReport {
   remediation_hints: string[];
 }
 
+// --- in-app docs (v4.0 Pillar F) ----
+export interface DocPage {
+  path: string;
+  title: string;
+}
+export const Docs = {
+  pages: () => api.get<DocPage[]>("/docs-site/pages"),
+  page: (path: string) =>
+    api.get<{ path: string; content: string }>(`/docs-site/page?path=${encodeURIComponent(path)}`),
+  reference: () => api.get<Record<string, unknown>>("/docs-site/reference"),
+};
+
 // --- GitOps config-as-code (v4.0 Pillar E) ----
 export interface GitCommit {
   sha: string;

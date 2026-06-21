@@ -16,6 +16,7 @@ import { CompliancePage } from "@/features/compliance/CompliancePage";
 import { ApprovalsPage } from "@/features/approvals/ApprovalsPage";
 import { DeterminismPage } from "@/features/determinism/DeterminismPage";
 import { GitOpsPage } from "@/features/gitops/GitOpsPage";
+import { DocsPage } from "@/features/docs/DocsPage";
 import { ConsolePage } from "@/features/console/ConsolePage";
 import { AdminPage } from "@/features/admin/AdminPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
@@ -47,6 +48,7 @@ function Protected() {
         <Route path="/approvals" element={<ApprovalsPage />} />
         <Route path="/determinism" element={<DeterminismPage />} />
         <Route path="/gitops" element={<GitOpsPage />} />
+        <Route path="/docs" element={<DocsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>
