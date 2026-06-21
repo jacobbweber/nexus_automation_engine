@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "nexus",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd backend && set NEXUS_STATIC_DIR=../frontend/dist&& .venv\\Scripts\\python.exe -m uvicorn app.platform.app_factory:create_app --factory --host 127.0.0.1 --port 8137"
+      ],
+      "port": 8137
+    }
+  ]
+}

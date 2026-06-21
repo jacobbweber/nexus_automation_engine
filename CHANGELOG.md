@@ -5,6 +5,22 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Added
+- **`SHOWCASE.md`** — a screenshot-driven tour of every major surface (what it's for / how it helps,
+  3–4 bullets each), linked prominently from the README; screenshots under `docs/showcase/img/`.
+
+### Changed
+- **README** rewritten: status → `v4.0.0`, refreshed highlights, and a complete documentation index
+  (docs, foundation/domain specs, all ADRs, audits) with the Showcase featured at the top.
+- **Architecture spec** context map now lists the 2.0–4.0 bounded contexts (change, scheduling,
+  incidents, cmdb, compliance, review, determinism, gitops).
+- In-product version string bumped `0.1.0` → `4.0.0` (platform status / Admin now report the release).
+
+### Fixed
+- Interactive API docs (Swagger/ReDoc) relocated to `/api-docs` / `/api-redoc` so they no longer
+  shadow the SPA's own `/docs` route — a hard-load/deep-link to `/docs` now serves the app (it
+  previously served Swagger UI, which CSP then blanked). Regression test added.
+
 ## [4.0.0] - 2026-06-20
 
 **Deterministic Governance.** Nexus becomes an absolute configuration-management control plane: the
