@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 
 class DriftedItem(BaseModel):
@@ -23,6 +23,7 @@ class PostureSnapshot(BaseModel):
     drift_count: int = 0  # total drifted fields across all
     top_drifted: list[DriftedItem] = Field(default_factory=list)
 
+    @computed_field  # type: ignore[prop-decorator]  # serialized in API responses
     @property
     def compliant_pct(self) -> int:
         return round(100 * self.compliant / self.evaluated) if self.evaluated else 100

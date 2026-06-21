@@ -970,6 +970,57 @@ def _library() -> list[WorkflowSpec]:
         )
     )
 
+    # ---- DR (guaranteed by the DR-Tier-0 pinning rule, M27) ---------------------------------
+    lib.append(
+        (
+            "Zerto DR VPG",
+            "Platform",
+            "a.khan",
+            ["dr", "zerto", "replication", "governed"],
+            PUB,
+            "Ensure a Zerto Virtual Protection Group exists for a DR-Tier-0 VM: create/verify the "
+            "VPG and confirm the protection state in the CMDB.",
+            [
+                (
+                    "start",
+                    "start",
+                    {
+                        "name": "Start",
+                        "inputs": [{"name": "vm", "type": "string", "default": "db-prod-01"}],
+                    },
+                ),
+                (
+                    "vpg",
+                    "automation_task",
+                    {
+                        "name": "Ensure Zerto VPG",
+                        "connector": "script",
+                        "action": "ensure_zerto_vpg",
+                        "params": {"target": "{{start.vm}}"},
+                    },
+                ),
+                (
+                    "verify",
+                    "cmdb_lookup",
+                    {
+                        "name": "Verify protection",
+                        "table": "cmdb_ci_server",
+                        "fields": ["name", "env"],
+                        "filters": {"env": "Production"},
+                    },
+                ),
+                ("end", "end", {"name": "End", "outputs": {"vpg": "{{vpg.tail}}"}}),
+            ],
+            [
+                ("start", "vpg", None),
+                ("vpg", "verify", None),
+                ("verify", "end", None),
+            ],
+            5,
+            0,
+        )
+    )
+
     return lib
 
 
