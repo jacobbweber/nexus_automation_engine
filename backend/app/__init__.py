@@ -8,4 +8,4 @@ Organized by Domain-Driven Design bounded contexts implemented as vertical slice
 - ``contexts``      — one package per bounded context (each a full vertical slice).
 """
 
-__version__ = "0.1.0"
+__version__ = "4.0.0"

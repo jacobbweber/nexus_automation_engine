@@ -57,6 +57,19 @@ Instead we use **bounded contexts, each implemented as a vertical slice**:
 | **connectors** | Vendor-agnostic ports + concrete adapters to each backend/system of record. | Connector, Adapter, Port, Inventory, Credential lease, Request validation |
 | **observability** | Audit trail, run history, correlation of execution with platform events. | AuditEvent, RunHistory, Metric, Correlation |
 
+Contexts added in later milestones (2.0 → 4.0), each a vertical slice on the same principles:
+
+| Context | Responsibility (its "Why") | Ubiquitous language it owns | Since |
+| --- | --- | --- | --- |
+| **change** | Change management: templates, policies, records; CAB-style gating ([ADR-0005](../adr/ADR-0005-change-management.md)). | ChangeTemplate, ChangePolicy, ChangeRecord, Window, Conflict | 2.0 |
+| **scheduling** | Interval/daily schedules + maintenance windows; the background ticker that dispatches due work. | Schedule, Trigger, MaintenanceWindow, Tick | 2.0 |
+| **incidents** | Failures + drift auto-open incident cards; triage board, failure-mode tags, remediation conversion. | Incident, Triage, FailureMode, Remediation, MTTR | 3.0 |
+| **cmdb** | CI-type schema registry + lineage spec + deterministic health checker ([ADR-0009](../adr/ADR-0009-cmdb-schema-and-lineage-context.md)). | CITypeSchema, FieldDef, LineageSpec, CIHealthReport | 4.0 |
+| **compliance** | Continuous drift assessment; scheduled sweeps → posture snapshots; drift → incidents ([ADR-0010](../adr/ADR-0010-idempotency-and-compliance-model.md)). | DriftReport, PostureSnapshot, ComplianceSweep, IdempotencyClass | 4.0 |
+| **review** | Change classification + multi-audience review packet + run-level approval gate ([ADR-0011](../adr/ADR-0011-multi-audience-review-and-run-approval.md)). | ChangeClass, ReviewPacket, ReviewerLevel, ApprovalRequest | 4.0 |
+| **determinism** | Pinning rules (selector → guaranteed workflow) + reconciler + coverage ([ADR-0012](../adr/ADR-0012-deterministic-pinning-reconcile.md)). | PinningRule, Selector, Enforcement, Coverage | 4.0 |
+| **gitops** | Config-as-code backbone: canonical serialization + local-git versioning/backup/restore ([ADR-0013](../adr/ADR-0013-gitops-config-backbone.md)). | ConfigSnapshot, Commit, Diff, PullPreview, VersioningPort | 4.0 |
+
 `shared_kernel` holds only what is genuinely cross-context and stable: identifiers, base value
 objects, error types, and the **`VariablePool`** primitive (used by the canvas to resolve typed,
 dot-notation references and expressions — see canvas spec). Nothing vendor-specific ever lives

@@ -53,5 +53,21 @@ def test_export_bundle_requires_admin():
 def test_openapi_available():
     app = create_app()
     with TestClient(app) as client:
-        resp = client.get("/openapi.json")
+        resp = client.get("/api-openapi.json")
     assert resp.status_code == 200
+
+
+def test_interactive_docs_do_not_shadow_spa_docs_route():
+    """FastAPI's Swagger UI must not own /docs — that path belongs to the SPA surface.
+
+    Regression: a hard-load/deep-link to /docs used to serve Swagger UI (then blanked by
+    CSP) instead of the app. The interactive API docs now live under /api-docs.
+    """
+    app = create_app()
+    with TestClient(app) as client:
+        # No static dir is configured in tests, so /docs has no handler at all (404),
+        # leaving it free for the SPA's index.html fallback in production.
+        assert client.get("/docs").status_code == 404
+        # The interactive docs are reachable at their relocated paths.
+        assert client.get("/api-docs").status_code == 200
+        assert client.get("/api-redoc").status_code == 200

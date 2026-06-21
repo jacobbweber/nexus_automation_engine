@@ -124,6 +124,12 @@ def create_app(static_dir: str | None = None) -> FastAPI:
         title=settings.app_name,
         version=settings.version,
         lifespan=_lifespan,
+        # Relocate the interactive API docs so they don't collide with the SPA's own
+        # user-facing "/docs" route (a hard-load/deep-link to /docs must serve the app,
+        # not FastAPI's Swagger UI). See the SPA fallback in SpaStaticFiles.
+        docs_url="/api-docs",
+        redoc_url="/api-redoc",
+        openapi_url="/api-openapi.json",
     )
 
     app.add_middleware(

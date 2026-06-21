@@ -16,7 +16,7 @@ class Settings(BaseSettings):
 
     app_name: str = "Nexus Automation Engine"
     environment: str = "local"
-    version: str = "0.1.0"
+    version: str = "4.0.0"
 
     # Synchronous SQLite by default; WAL mode is applied on connect (see database.py / ADR-0004).
     database_url: str = "sqlite:///./nexus.db"
