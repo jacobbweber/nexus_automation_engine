@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Added
+- **M28.5/28.6 — GitOps API + admin UI + ADR-0013** (v4.0 Pillar E): REST for the config backbone
+  (`GET /gitops/status`, admin `POST /gitops/sync` "back up now", `GET /gitops/history|diff`, admin
+  `POST /gitops/restore`, `GET /gitops/pull-preview`) and a **GitOps admin page** (`/gitops`, nav +
+  palette + Admin) showing repo status, a back-up-now button, commit history with a diff view, and
+  the pull-preview. ADR-0013 records the local-git config-backbone decision. Completes M28 — the
+  platform now versions and backs up its own configuration as code.
 - **M28.3/28.4 — config sync + pull-preview** (v4.0 Pillar E): `GitOpsService.sync(actor)` serializes
   the live config and commits it to the local git repo only when it changed (idempotent backup, audit
   message); it runs on the scheduler cadence (`gitops_sync_every`) and on demand. `pull_preview()`

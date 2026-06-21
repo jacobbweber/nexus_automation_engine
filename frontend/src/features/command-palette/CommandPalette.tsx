@@ -82,6 +82,7 @@ export function CommandPalette() {
       { id: "act:compliance", label: "Open Compliance posture", group: "Actions", keywords: "compliance drift posture desired observed reconcile sweep", run: go("/compliance") },
       { id: "act:approvals", label: "Open Approvals queue", group: "Actions", keywords: "review approval packet executive technical approve reject pending", run: go("/approvals") },
       { id: "act:determinism", label: "Open Determinism & Guardrails", group: "Actions", keywords: "pinning rules guarantee coverage drift enforce assert gate guardrails determinism", run: go("/determinism") },
+      { id: "act:gitops", label: "Open GitOps (config as code)", group: "Actions", keywords: "gitops git config backup version history diff restore commit", run: go("/gitops") },
     ];
     const wf: Command[] = workflows.map((w) => ({
       id: `wf:${w.id}`,
