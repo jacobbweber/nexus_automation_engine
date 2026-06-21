@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  BookOpen,
   Boxes,
   ClipboardCheck,
   GaugeCircle,
@@ -37,6 +38,7 @@ const NAV = [
   { to: "/determinism", area: "governance", label: "Guardrails", icon: <Lock size={18} /> },
   { to: "/governance", area: "governance", label: "Governance", icon: <ShieldCheck size={18} /> },
   { to: "/admin", area: "admin", label: "Admin", icon: <Settings size={18} /> },
+  { to: "/docs", area: "dashboard", label: "Docs", icon: <BookOpen size={18} /> },
 ];
 
 function areaForPath(pathname: string): string {
